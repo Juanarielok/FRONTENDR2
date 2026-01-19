@@ -190,4 +190,11 @@ export const api = {
       method: "GET",
     });
   },
+
+  // Obtener todos los remitos (para monitoreo)
+  getAllRemitos() {
+    return request<{ count: number; remitos: Remito[] }>("/remitos/me", {
+      method: "GET",
+    }).catch(() => ({ count: 0, remitos: [] })); // Fallback si no hay acceso
+  },
 };

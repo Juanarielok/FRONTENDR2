@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
-import type { Cliente } from "../api";
+import type { Cliente, Remito } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 
 type ChoferActivo = {
@@ -47,7 +47,8 @@ type ChoferHistorial = {
   jornadas: HistorialJornada[];
 };
 
-// Icons
+// ============ ICONS ============
+
 function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -120,6 +121,15 @@ function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function IconMail({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+      <polyline points="22,6 12,13 2,6" />
+    </svg>
+  );
+}
+
 function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -168,6 +178,77 @@ function IconChevronDown({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function IconFileText({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+    </svg>
+  );
+}
+
+function IconPackage({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
+      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  );
+}
+
+function IconDollarSign({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+    </svg>
+  );
+}
+
+function IconTrendingUp({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+      <polyline points="17 6 23 6 23 12" />
+    </svg>
+  );
+}
+
+function IconAlertCircle({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+  );
+}
+
+function IconTarget({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+}
+
+function IconEye({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+// ============ HELPERS ============
+
 function formatDateTime(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString("es-AR", {
@@ -187,39 +268,120 @@ function formatTime(dateString: string) {
   });
 }
 
-// Stat Card Component
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "short",
+  });
+}
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+  }).format(amount);
+}
+
+function getRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 1) return "Ahora";
+  if (diffMins < 60) return `Hace ${diffMins}m`;
+  if (diffHours < 24) return `Hace ${diffHours}h`;
+  if (diffDays < 7) return `Hace ${diffDays}d`;
+  return formatDate(dateString);
+}
+
+// ============ COMPONENTS ============
+
 function StatCard({
   icon: Icon,
   label,
   value,
+  subValue,
   color,
+  trend,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string | number;
-  color: "amber" | "emerald" | "blue" | "purple";
+  subValue?: string;
+  color: "amber" | "emerald" | "blue" | "purple" | "red" | "cyan";
+  trend?: "up" | "down" | "neutral";
 }) {
   const colorClasses = {
     amber: "bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400",
     emerald: "bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
     blue: "bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400",
     purple: "bg-purple-100 dark:bg-purple-500/20 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400",
+    red: "bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400",
+    cyan: "bg-cyan-100 dark:bg-cyan-500/20 border-cyan-200 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400",
   };
 
   return (
     <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-4">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between">
         <div className={`w-10 h-10 border flex items-center justify-center ${colorClasses[color]}`}>
           <Icon className="w-5 h-5" />
         </div>
-        <div>
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">{label}</p>
-        </div>
+        {trend && (
+          <div className={`text-xs font-medium ${
+            trend === "up" ? "text-emerald-600 dark:text-emerald-400" :
+            trend === "down" ? "text-red-600 dark:text-red-400" :
+            "text-zinc-500"
+          }`}>
+            {trend === "up" && "↑"}
+            {trend === "down" && "↓"}
+          </div>
+        )}
+      </div>
+      <div className="mt-3">
+        <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
+        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-1">{label}</p>
+        {subValue && (
+          <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{subValue}</p>
+        )}
       </div>
     </div>
   );
 }
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  subtitle,
+  color,
+  action,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  subtitle?: string;
+  color: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className={`w-8 h-8 border flex items-center justify-center ${color}`}>
+          <Icon className="w-4 h-4" />
+        </div>
+        <div>
+          <h2 className="font-semibold">{title}</h2>
+          {subtitle && <p className="text-xs text-zinc-500">{subtitle}</p>}
+        </div>
+      </div>
+      {action}
+    </div>
+  );
+}
+
+// ============ MAIN COMPONENT ============
 
 export default function Monitoreo() {
   const nav = useNavigate();
@@ -229,11 +391,15 @@ export default function Monitoreo() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
+
   // Para ver historial de un chofer
   const [selectedChofer, setSelectedChofer] = useState<string | null>(null);
   const [historial, setHistorial] = useState<ChoferHistorial | null>(null);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
+
+  // Tab activa
+  const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes">("overview");
 
   async function loadData() {
     try {
@@ -245,13 +411,14 @@ export default function Monitoreo() {
 
       setChoferesActivos(activosRes.choferesActivos || []);
       setTodosChoferes(choferesRes.users || []);
-      
+
       const clientesList = Array.isArray(clientesRes)
         ? clientesRes
         : Array.isArray((clientesRes as any)?.users)
         ? (clientesRes as any).users
         : [];
       setClientes(clientesList);
+      setLastUpdate(new Date());
     } catch (e) {
       console.error(e);
     } finally {
@@ -262,7 +429,7 @@ export default function Monitoreo() {
 
   useEffect(() => {
     loadData();
-    
+
     // Auto-refresh cada 30 segundos
     const interval = setInterval(() => {
       loadData();
@@ -287,7 +454,7 @@ export default function Monitoreo() {
     setLoadingHistorial(true);
 
     try {
-      const res = await api.getHistorialChofer(choferId, 10);
+      const res = await api.getHistorialChofer(choferId, 20);
       setHistorial(res);
     } catch (e) {
       console.error(e);
@@ -301,10 +468,60 @@ export default function Monitoreo() {
     nav("/login", { replace: true });
   }
 
-  // Calcular estadísticas
-  const clientesAsignados = clientes.filter((c) => c.status === "asignado").length;
-  const clientesVisitados = clientes.filter((c) => c.status === "visitado").length;
-  const clientesDisponibles = clientes.filter((c) => c.status === "disponible" || !c.status).length;
+  // ============ COMPUTED VALUES ============
+
+  const stats = useMemo(() => {
+    const clientesAsignados = clientes.filter((c) => c.status === "asignado").length;
+    const clientesVisitados = clientes.filter((c) => c.status === "visitado").length;
+    const clientesDisponibles = clientes.filter((c) => c.status === "disponible" || !c.status).length;
+
+    const choferesInactivos = todosChoferes.length - choferesActivos.length;
+    const tasaActividad = todosChoferes.length > 0
+      ? Math.round((choferesActivos.length / todosChoferes.length) * 100)
+      : 0;
+
+    const tasaCobertura = clientes.length > 0
+      ? Math.round(((clientesVisitados + clientesAsignados) / clientes.length) * 100)
+      : 0;
+
+    const tasaVisitas = clientes.length > 0
+      ? Math.round((clientesVisitados / clientes.length) * 100)
+      : 0;
+
+    // Tiempo promedio activo
+    const tiempoTotalActivo = choferesActivos.reduce((sum, a) => sum + a.tiempoTranscurrido.minutos, 0);
+    const tiempoPromedioActivo = choferesActivos.length > 0
+      ? Math.round(tiempoTotalActivo / choferesActivos.length)
+      : 0;
+
+    return {
+      clientesAsignados,
+      clientesVisitados,
+      clientesDisponibles,
+      choferesInactivos,
+      tasaActividad,
+      tasaCobertura,
+      tasaVisitas,
+      tiempoPromedioActivo,
+      tiempoTotalActivo,
+    };
+  }, [clientes, todosChoferes, choferesActivos]);
+
+  // Agrupar clientes por status
+  const clientesPorStatus = useMemo(() => {
+    return {
+      disponibles: clientes.filter((c) => c.status === "disponible" || !c.status),
+      asignados: clientes.filter((c) => c.status === "asignado"),
+      visitados: clientes.filter((c) => c.status === "visitado"),
+    };
+  }, [clientes]);
+
+  // Choferes con más tiempo activo hoy
+  const choferesRanking = useMemo(() => {
+    return [...choferesActivos].sort((a, b) => 
+      b.tiempoTranscurrido.minutos - a.tiempoTranscurrido.minutos
+    );
+  }, [choferesActivos]);
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
@@ -350,10 +567,10 @@ export default function Monitoreo() {
                 </div>
                 <div>
                   <h1 className="text-lg font-semibold tracking-tight">
-                    Monitoreo
+                    Centro de Monitoreo
                   </h1>
                   <p className="text-xs text-zinc-500">
-                    Estado en tiempo real
+                    Última actualización: {formatTime(lastUpdate.toISOString())}
                   </p>
                 </div>
               </div>
@@ -379,14 +596,35 @@ export default function Monitoreo() {
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
                          bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 
                          text-zinc-700 dark:text-zinc-300
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white 
-                         hover:border-zinc-400 dark:hover:border-zinc-600
+                         hover:bg-zinc-200 dark:hover:bg-zinc-800 
                          transition-all duration-200"
               >
                 <IconLogout className="w-4 h-4" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex items-center gap-1 mt-4 -mb-4 border-b border-transparent">
+            {[
+              { id: "overview", label: "Resumen", icon: IconActivity },
+              { id: "choferes", label: "Choferes", icon: IconTruck },
+              { id: "clientes", label: "Clientes", icon: IconUsers },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? "border-amber-500 text-amber-600 dark:text-amber-400"
+                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -400,363 +638,646 @@ export default function Monitoreo() {
               viewBox="0 0 24 24"
               fill="none"
             >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
             </svg>
           </div>
         ) : (
           <>
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <StatCard
-                icon={IconTruck}
-                label="Choferes Activos"
-                value={choferesActivos.length}
-                color="emerald"
-              />
-              <StatCard
-                icon={IconUsers}
-                label="Total Choferes"
-                value={todosChoferes.length}
-                color="blue"
-              />
-              <StatCard
-                icon={IconUser}
-                label="Clientes Asignados"
-                value={clientesAsignados}
-                color="amber"
-              />
-              <StatCard
-                icon={IconCheckCircle}
-                label="Clientes Visitados"
-                value={clientesVisitados}
-                color="purple"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Choferes Activos */}
-              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
-                      <IconActivity className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <h2 className="font-semibold">Choferes Activos</h2>
-                      <p className="text-xs text-zinc-500">Con jornada en curso</p>
-                    </div>
-                  </div>
+            {/* ============ OVERVIEW TAB ============ */}
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+                {/* Stats Grid - Row 1 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatCard
+                    icon={IconTruck}
+                    label="Choferes Activos"
+                    value={choferesActivos.length}
+                    subValue={`de ${todosChoferes.length} totales`}
+                    color="emerald"
+                  />
+                  <StatCard
+                    icon={IconTarget}
+                    label="Tasa de Actividad"
+                    value={`${stats.tasaActividad}%`}
+                    subValue="choferes trabajando"
+                    color="blue"
+                  />
+                  <StatCard
+                    icon={IconCheckCircle}
+                    label="Clientes Visitados"
+                    value={stats.clientesVisitados}
+                    subValue={`${stats.tasaVisitas}% del total`}
+                    color="purple"
+                  />
+                  <StatCard
+                    icon={IconClock}
+                    label="Tiempo Promedio"
+                    value={`${Math.floor(stats.tiempoPromedioActivo / 60)}h ${stats.tiempoPromedioActivo % 60}m`}
+                    subValue="por chofer activo"
+                    color="cyan"
+                  />
                 </div>
 
-                <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
-                  {choferesActivos.length === 0 ? (
-                    <div className="px-6 py-12 text-center">
-                      <div className="w-12 h-12 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
-                        <IconTruck className="w-6 h-6 text-zinc-400" />
-                      </div>
-                      <p className="text-zinc-600 dark:text-zinc-400 font-medium">
-                        No hay choferes activos
-                      </p>
-                      <p className="text-sm text-zinc-500 mt-1">
-                        Ningún chofer ha iniciado jornada
-                      </p>
-                    </div>
-                  ) : (
-                    choferesActivos.map((activo) => (
-                      <div key={activo.id} className="px-6 py-4">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center flex-shrink-0">
-                              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-                                {activo.chofer.nombre
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()}
-                              </span>
-                            </div>
-                            <div>
-                              <h3 className="font-medium text-zinc-900 dark:text-white">
-                                {activo.chofer.nombre}
-                              </h3>
-                              <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
-                                <div className="flex items-center gap-1">
-                                  <IconClock className="w-3 h-3" />
-                                  <span>Check-in: {formatTime(activo.checkIn)}</span>
-                                </div>
-                                {activo.chofer.telefono && (
-                                  <div className="flex items-center gap-1">
-                                    <IconPhone className="w-3 h-3" />
-                                    <span>{activo.chofer.telefono}</span>
-                                  </div>
-                                )}
-                              </div>
-                              {activo.ubicacionCheckIn && (
-                                <div className="flex items-center gap-1 mt-1 text-xs text-zinc-500">
-                                  <IconMapPin className="w-3 h-3" />
-                                  <span>{activo.ubicacionCheckIn}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
-                              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                              {activo.tiempoTranscurrido.formato}
-                            </div>
-                          </div>
+                {/* Stats Grid - Row 2 */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <StatCard
+                    icon={IconUser}
+                    label="Clientes Asignados"
+                    value={stats.clientesAsignados}
+                    subValue="pendientes de visita"
+                    color="amber"
+                  />
+                  <StatCard
+                    icon={IconUsers}
+                    label="Clientes Disponibles"
+                    value={stats.clientesDisponibles}
+                    subValue="sin asignar"
+                    color="red"
+                  />
+                  <StatCard
+                    icon={IconTrendingUp}
+                    label="Cobertura Total"
+                    value={`${stats.tasaCobertura}%`}
+                    subValue="asignados + visitados"
+                    color="emerald"
+                  />
+                  <StatCard
+                    icon={IconActivity}
+                    label="Tiempo Total Hoy"
+                    value={`${Math.floor(stats.tiempoTotalActivo / 60)}h ${stats.tiempoTotalActivo % 60}m`}
+                    subValue="todos los choferes"
+                    color="blue"
+                  />
+                </div>
+
+                {/* Main Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Choferes Activos - Live */}
+                  <div className="lg:col-span-2 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                    <SectionHeader
+                      icon={IconActivity}
+                      title="Actividad en Tiempo Real"
+                      subtitle={`${choferesActivos.length} choferes trabajando ahora`}
+                      color="bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                      action={
+                        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+                          <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                          En vivo
                         </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
+                      }
+                    />
 
-              {/* Todos los Choferes */}
-              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center">
-                      <IconUsers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <h2 className="font-semibold">Todos los Choferes</h2>
-                      <p className="text-xs text-zinc-500">Click para ver historial</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
-                  {todosChoferes.length === 0 ? (
-                    <div className="px-6 py-12 text-center">
-                      <div className="w-12 h-12 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
-                        <IconUser className="w-6 h-6 text-zinc-400" />
-                      </div>
-                      <p className="text-zinc-600 dark:text-zinc-400 font-medium">
-                        No hay choferes registrados
-                      </p>
-                    </div>
-                  ) : (
-                    todosChoferes.map((chofer) => {
-                      const isActive = choferesActivos.some((a) => a.chofer.id === chofer.id);
-                      const isExpanded = selectedChofer === chofer.id;
-
-                      return (
-                        <div key={chofer.id}>
-                          <button
-                            onClick={() => loadHistorial(chofer.id)}
-                            className="w-full px-6 py-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
-                          >
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 border flex items-center justify-center flex-shrink-0 ${
-                                  isActive
-                                    ? "bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30"
-                                    : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
-                                }`}>
-                                  <span className={`text-sm font-semibold ${
-                                    isActive ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500"
-                                  }`}>
-                                    {chofer.nombre
-                                      .split(" ")
-                                      .map((n) => n[0])
-                                      .join("")
-                                      .slice(0, 2)
-                                      .toUpperCase()}
+                    <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-80 overflow-y-auto">
+                      {choferesActivos.length === 0 ? (
+                        <div className="px-6 py-12 text-center">
+                          <div className="w-12 h-12 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-3">
+                            <IconTruck className="w-6 h-6 text-zinc-400" />
+                          </div>
+                          <p className="text-zinc-600 dark:text-zinc-400 font-medium">
+                            No hay choferes activos
+                          </p>
+                          <p className="text-sm text-zinc-500 mt-1">
+                            Ningún chofer ha iniciado jornada hoy
+                          </p>
+                        </div>
+                      ) : (
+                        choferesActivos.map((activo, index) => (
+                          <div key={activo.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex items-start gap-3">
+                                <div className="relative">
+                                  <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
+                                    <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                      {activo.chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-zinc-950 text-xs font-bold flex items-center justify-center">
+                                    {index + 1}
                                   </span>
                                 </div>
                                 <div>
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-medium text-zinc-900 dark:text-white">
-                                      {chofer.nombre}
-                                    </h3>
-                                    {isActive && (
-                                      <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                                  <h3 className="font-medium text-zinc-900 dark:text-white">
+                                    {activo.chofer.nombre}
+                                  </h3>
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500">
+                                    <div className="flex items-center gap-1">
+                                      <IconClock className="w-3 h-3" />
+                                      <span>Check-in: {formatTime(activo.checkIn)}</span>
+                                    </div>
+                                    {activo.chofer.telefono && (
+                                      <div className="flex items-center gap-1">
+                                        <IconPhone className="w-3 h-3" />
+                                        <span>{activo.chofer.telefono}</span>
+                                      </div>
+                                    )}
+                                    {activo.ubicacionCheckIn && (
+                                      <div className="flex items-center gap-1">
+                                        <IconMapPin className="w-3 h-3" />
+                                        <span>{activo.ubicacionCheckIn}</span>
+                                      </div>
                                     )}
                                   </div>
-                                  <p className="text-xs text-zinc-500">{chofer.email}</p>
                                 </div>
                               </div>
-                              <IconChevronDown
-                                className={`w-5 h-5 text-zinc-400 transition-transform ${
-                                  isExpanded ? "rotate-180" : ""
-                                }`}
-                              />
-                            </div>
-                          </button>
-
-                          {/* Historial expandido */}
-                          {isExpanded && (
-                            <div className="px-6 pb-4 bg-zinc-50 dark:bg-zinc-800/20">
-                              {loadingHistorial ? (
-                                <div className="py-4 text-center">
-                                  <svg
-                                    className="animate-spin h-6 w-6 mx-auto text-amber-500"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    />
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                  </svg>
+                              <div className="text-right">
+                                <div className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-semibold">
+                                  <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                  {activo.tiempoTranscurrido.formato}
                                 </div>
-                              ) : historial ? (
-                                <div className="space-y-3">
-                                  {/* Resumen */}
-                                  <div className="grid grid-cols-3 gap-2 text-center py-3 border-b border-zinc-200 dark:border-zinc-700">
-                                    <div>
-                                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                        {historial.resumen.totalJornadas}
-                                      </p>
-                                      <p className="text-xs text-zinc-500">Total</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                        {historial.resumen.jornadasCompletadas}
-                                      </p>
-                                      <p className="text-xs text-zinc-500">Completadas</p>
-                                    </div>
-                                    <div>
-                                      <p className="text-lg font-bold text-zinc-900 dark:text-white">
-                                        {historial.resumen.tiempoTotal.formato}
-                                      </p>
-                                      <p className="text-xs text-zinc-500">Tiempo total</p>
-                                    </div>
-                                  </div>
+                                <p className="text-xs text-zinc-500 mt-1">
+                                  {activo.tiempoTranscurrido.minutos} min
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
 
-                                  {/* Últimas jornadas */}
-                                  <div className="space-y-2">
-                                    <p className="text-xs text-zinc-500 uppercase tracking-wider">
-                                      Últimas jornadas
-                                    </p>
-                                    {historial.jornadas.length === 0 ? (
-                                      <p className="text-sm text-zinc-500 py-2">
-                                        Sin jornadas registradas
+                  {/* Estado de Clientes */}
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                    <SectionHeader
+                      icon={IconUsers}
+                      title="Estado de Clientes"
+                      subtitle={`${clientes.length} totales`}
+                      color="bg-purple-100 dark:bg-purple-500/20 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400"
+                    />
+
+                    <div className="p-6 space-y-6">
+                      {/* Donut-like visualization */}
+                      <div className="flex items-center justify-center">
+                        <div className="relative w-40 h-40">
+                          <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
+                            {/* Background circle */}
+                            <circle cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" strokeWidth="3" className="text-zinc-200 dark:text-zinc-800" />
+                            
+                            {/* Visitados (green) */}
+                            <circle
+                              cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" strokeWidth="3"
+                              strokeDasharray={`${stats.tasaVisitas} ${100 - stats.tasaVisitas}`}
+                              className="text-emerald-500"
+                            />
+                            
+                            {/* Asignados (amber) - offset by visitados */}
+                            <circle
+                              cx="18" cy="18" r="15.9" fill="none" stroke="currentColor" strokeWidth="3"
+                              strokeDasharray={`${(stats.clientesAsignados / clientes.length) * 100} ${100 - (stats.clientesAsignados / clientes.length) * 100}`}
+                              strokeDashoffset={`-${stats.tasaVisitas}`}
+                              className="text-amber-500"
+                            />
+                          </svg>
+                          <div className="absolute inset-0 flex flex-col items-center justify-center">
+                            <p className="text-3xl font-bold text-zinc-900 dark:text-white">{stats.tasaCobertura}%</p>
+                            <p className="text-xs text-zinc-500">cobertura</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Legend with details */}
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-emerald-500" />
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">Visitados</span>
+                          </div>
+                          <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.clientesVisitados}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-amber-500" />
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">Asignados</span>
+                          </div>
+                          <span className="font-semibold text-amber-600 dark:text-amber-400">{stats.clientesAsignados}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-zinc-400 dark:bg-zinc-600" />
+                            <span className="text-sm text-zinc-700 dark:text-zinc-300">Disponibles</span>
+                          </div>
+                          <span className="font-semibold text-zinc-600 dark:text-zinc-400">{stats.clientesDisponibles}</span>
+                        </div>
+                      </div>
+
+                      {/* Alert if too many disponibles */}
+                      {stats.clientesDisponibles > stats.clientesAsignados + stats.clientesVisitados && (
+                        <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
+                          <IconAlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                          <p className="text-xs text-red-600 dark:text-red-400">
+                            Hay muchos clientes sin asignar. Considera asignar más clientes a los choferes activos.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Progress bar full width */}
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold">Progreso del Día</h3>
+                    <span className="text-sm text-zinc-500">
+                      {stats.clientesVisitados} de {clientes.length} clientes atendidos
+                    </span>
+                  </div>
+                  <div className="h-6 bg-zinc-200 dark:bg-zinc-800 overflow-hidden flex">
+                    <div
+                      className="h-full bg-emerald-500 transition-all duration-500 flex items-center justify-center"
+                      style={{ width: `${stats.tasaVisitas}%` }}
+                    >
+                      {stats.tasaVisitas > 10 && (
+                        <span className="text-xs font-medium text-white">{stats.tasaVisitas}%</span>
+                      )}
+                    </div>
+                    <div
+                      className="h-full bg-amber-500 transition-all duration-500 flex items-center justify-center"
+                      style={{ width: `${(stats.clientesAsignados / clientes.length) * 100}%` }}
+                    >
+                      {(stats.clientesAsignados / clientes.length) * 100 > 10 && (
+                        <span className="text-xs font-medium text-zinc-900">
+                          {Math.round((stats.clientesAsignados / clientes.length) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ============ CHOFERES TAB ============ */}
+            {activeTab === "choferes" && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Lista de todos los choferes */}
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <SectionHeader
+                    icon={IconUsers}
+                    title="Todos los Choferes"
+                    subtitle={`${todosChoferes.length} registrados`}
+                    color="bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400"
+                  />
+
+                  <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-[600px] overflow-y-auto">
+                    {todosChoferes.length === 0 ? (
+                      <div className="px-6 py-12 text-center">
+                        <p className="text-zinc-500">No hay choferes registrados</p>
+                      </div>
+                    ) : (
+                      todosChoferes.map((chofer) => {
+                        const isActive = choferesActivos.some((a) => a.chofer.id === chofer.id);
+                        const activoData = choferesActivos.find((a) => a.chofer.id === chofer.id);
+                        const isExpanded = selectedChofer === chofer.id;
+
+                        return (
+                          <div key={chofer.id}>
+                            <button
+                              onClick={() => loadHistorial(chofer.id)}
+                              className="w-full px-6 py-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                            >
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                  <div className={`w-12 h-12 border flex items-center justify-center flex-shrink-0 ${
+                                    isActive
+                                      ? "bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30"
+                                      : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
+                                  }`}>
+                                    <span className={`text-sm font-semibold ${
+                                      isActive ? "text-emerald-600 dark:text-emerald-400" : "text-zinc-500"
+                                    }`}>
+                                      {chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <h3 className="font-medium text-zinc-900 dark:text-white">
+                                        {chofer.nombre}
+                                      </h3>
+                                      {isActive && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                                          Activo
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                                      <div className="flex items-center gap-1">
+                                        <IconMail className="w-3 h-3" />
+                                        <span>{chofer.email}</span>
+                                      </div>
+                                    </div>
+                                    {isActive && activoData && (
+                                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                        Trabajando hace {activoData.tiempoTranscurrido.formato}
                                       </p>
-                                    ) : (
-                                      historial.jornadas.slice(0, 5).map((jornada) => (
-                                        <div
-                                          key={jornada.id}
-                                          className="flex items-center justify-between p-2 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700"
-                                        >
-                                          <div className="flex items-center gap-2 text-xs">
-                                            <IconCalendar className="w-3 h-3 text-zinc-400" />
-                                            <span className="text-zinc-600 dark:text-zinc-300">
-                                              {formatDateTime(jornada.checkIn)}
-                                            </span>
-                                          </div>
-                                          <div className="flex items-center gap-2">
-                                            {jornada.checkOut ? (
-                                              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                                                {jornada.duracion?.formato}
-                                              </span>
-                                            ) : (
-                                              <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                                                En curso
-                                              </span>
-                                            )}
-                                          </div>
-                                        </div>
-                                      ))
                                     )}
                                   </div>
                                 </div>
-                              ) : null}
-                            </div>
-                          )}
+                                <IconChevronDown
+                                  className={`w-5 h-5 text-zinc-400 transition-transform ${
+                                    isExpanded ? "rotate-180" : ""
+                                  }`}
+                                />
+                              </div>
+                            </button>
+
+                            {/* Historial expandido */}
+                            {isExpanded && (
+                              <div className="px-6 pb-4 bg-zinc-50 dark:bg-zinc-800/20">
+                                {loadingHistorial ? (
+                                  <div className="py-6 text-center">
+                                    <svg className="animate-spin h-6 w-6 mx-auto text-amber-500" viewBox="0 0 24 24" fill="none">
+                                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                  </div>
+                                ) : historial ? (
+                                  <div className="space-y-4 pt-2">
+                                    {/* Resumen del chofer */}
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                        <p className="text-xl font-bold text-zinc-900 dark:text-white">
+                                          {historial.resumen.totalJornadas}
+                                        </p>
+                                        <p className="text-xs text-zinc-500">Jornadas</p>
+                                      </div>
+                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                        <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
+                                          {historial.resumen.jornadasCompletadas}
+                                        </p>
+                                        <p className="text-xs text-zinc-500">Completadas</p>
+                                      </div>
+                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                        <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                          {historial.resumen.tiempoTotal.formato}
+                                        </p>
+                                        <p className="text-xs text-zinc-500">Total</p>
+                                      </div>
+                                    </div>
+
+                                    {/* Lista de jornadas */}
+                                    <div>
+                                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
+                                        Últimas jornadas
+                                      </p>
+                                      <div className="space-y-2 max-h-60 overflow-y-auto">
+                                        {historial.jornadas.length === 0 ? (
+                                          <p className="text-sm text-zinc-500 py-2">Sin jornadas registradas</p>
+                                        ) : (
+                                          historial.jornadas.map((jornada) => (
+                                            <div
+                                              key={jornada.id}
+                                              className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700"
+                                            >
+                                              <div className="flex items-center justify-between">
+                                                <div>
+                                                  <div className="flex items-center gap-2 text-sm">
+                                                    <IconCalendar className="w-4 h-4 text-zinc-400" />
+                                                    <span className="font-medium text-zinc-900 dark:text-white">
+                                                      {formatDateTime(jornada.checkIn)}
+                                                    </span>
+                                                  </div>
+                                                  {jornada.ubicacionCheckIn && (
+                                                    <div className="flex items-center gap-1 mt-1 text-xs text-zinc-500">
+                                                      <IconMapPin className="w-3 h-3" />
+                                                      <span>{jornada.ubicacionCheckIn}</span>
+                                                    </div>
+                                                  )}
+                                                  {jornada.notas && (
+                                                    <p className="mt-1 text-xs text-zinc-500 italic">
+                                                      "{jornada.notas}"
+                                                    </p>
+                                                  )}
+                                                </div>
+                                                <div className="text-right">
+                                                  {jornada.checkOut ? (
+                                                    <span className="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                                      {jornada.duracion?.formato}
+                                                    </span>
+                                                  ) : (
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+                                                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                                                      En curso
+                                                    </span>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          ))
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : null}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Ranking de choferes activos */}
+                <div className="space-y-6">
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                    <SectionHeader
+                      icon={IconTrendingUp}
+                      title="Ranking de Actividad"
+                      subtitle="Por tiempo trabajado hoy"
+                      color="bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400"
+                    />
+
+                    <div className="p-6">
+                      {choferesRanking.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-zinc-500">No hay choferes activos</p>
                         </div>
-                      );
-                    })
-                  )}
+                      ) : (
+                        <div className="space-y-3">
+                          {choferesRanking.slice(0, 5).map((activo, index) => (
+                            <div
+                              key={activo.id}
+                              className={`flex items-center gap-4 p-3 ${
+                                index === 0 ? "bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20" : ""
+                              }`}
+                            >
+                              <div className={`w-8 h-8 flex items-center justify-center font-bold ${
+                                index === 0 ? "bg-amber-500 text-zinc-950" :
+                                index === 1 ? "bg-zinc-300 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-200" :
+                                index === 2 ? "bg-amber-700 text-white" :
+                                "bg-zinc-200 dark:bg-zinc-700 text-zinc-600 dark:text-zinc-400"
+                              }`}>
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <p className="font-medium text-zinc-900 dark:text-white">
+                                  {activo.chofer.nombre}
+                                </p>
+                                <p className="text-xs text-zinc-500">
+                                  Check-in: {formatTime(activo.checkIn)}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-zinc-900 dark:text-white">
+                                  {activo.tiempoTranscurrido.formato}
+                                </p>
+                                <p className="text-xs text-zinc-500">
+                                  {activo.tiempoTranscurrido.minutos} min
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Choferes inactivos */}
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                    <SectionHeader
+                      icon={IconAlertCircle}
+                      title="Choferes Inactivos"
+                      subtitle={`${stats.choferesInactivos} sin jornada activa`}
+                      color="bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400"
+                    />
+
+                    <div className="p-6">
+                      {stats.choferesInactivos === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-emerald-600 dark:text-emerald-400 font-medium">
+                            ¡Todos los choferes están activos!
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {todosChoferes
+                            .filter((c) => !choferesActivos.some((a) => a.chofer.id === c.id))
+                            .map((chofer) => (
+                              <div key={chofer.id} className="flex items-center gap-3 p-2">
+                                <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-zinc-500">
+                                    {chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                                  </span>
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                                    {chofer.nombre}
+                                  </p>
+                                </div>
+                                <span className="text-xs text-red-500">Sin actividad</span>
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Resumen de Clientes */}
-            <div className="mt-8 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-              <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center">
-                    <IconUser className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            {/* ============ CLIENTES TAB ============ */}
+            {activeTab === "clientes" && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Clientes Disponibles */}
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <SectionHeader
+                    icon={IconUser}
+                    title="Disponibles"
+                    subtitle={`${clientesPorStatus.disponibles.length} sin asignar`}
+                    color="bg-zinc-200 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 text-zinc-600 dark:text-zinc-400"
+                  />
+                  <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
+                    {clientesPorStatus.disponibles.length === 0 ? (
+                      <div className="px-6 py-8 text-center">
+                        <p className="text-emerald-600 dark:text-emerald-400 font-medium">
+                          ¡Todos asignados!
+                        </p>
+                      </div>
+                    ) : (
+                      clientesPorStatus.disponibles.map((cliente) => (
+                        <Link
+                          key={cliente.id}
+                          to={`/clientes/${cliente.id}`}
+                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                        >
+                          <p className="font-medium text-zinc-900 dark:text-white text-sm">
+                            {cliente.nombre}
+                          </p>
+                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                        </Link>
+                      ))
+                    )}
                   </div>
-                  <div>
-                    <h2 className="font-semibold">Estado de Clientes</h2>
-                    <p className="text-xs text-zinc-500">{clientes.length} clientes registrados</p>
+                </div>
+
+                {/* Clientes Asignados */}
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <SectionHeader
+                    icon={IconTarget}
+                    title="Asignados"
+                    subtitle={`${clientesPorStatus.asignados.length} pendientes`}
+                    color="bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400"
+                  />
+                  <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
+                    {clientesPorStatus.asignados.length === 0 ? (
+                      <div className="px-6 py-8 text-center">
+                        <p className="text-zinc-500">Ningún cliente asignado</p>
+                      </div>
+                    ) : (
+                      clientesPorStatus.asignados.map((cliente) => (
+                        <Link
+                          key={cliente.id}
+                          to={`/clientes/${cliente.id}`}
+                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                        >
+                          <p className="font-medium text-zinc-900 dark:text-white text-sm">
+                            {cliente.nombre}
+                          </p>
+                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* Clientes Visitados */}
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <SectionHeader
+                    icon={IconCheckCircle}
+                    title="Visitados"
+                    subtitle={`${clientesPorStatus.visitados.length} completados`}
+                    color="bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                  />
+                  <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
+                    {clientesPorStatus.visitados.length === 0 ? (
+                      <div className="px-6 py-8 text-center">
+                        <p className="text-zinc-500">Ningún cliente visitado aún</p>
+                      </div>
+                    ) : (
+                      clientesPorStatus.visitados.map((cliente) => (
+                        <Link
+                          key={cliente.id}
+                          to={`/clientes/${cliente.id}`}
+                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium text-zinc-900 dark:text-white text-sm">
+                                {cliente.nombre}
+                              </p>
+                              <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                            </div>
+                            <IconCheckCircle className="w-4 h-4 text-emerald-500" />
+                          </div>
+                        </Link>
+                      ))
+                    )}
                   </div>
                 </div>
               </div>
-
-              <div className="p-6">
-                <div className="flex items-center gap-4">
-                  {/* Progress bar */}
-                  <div className="flex-1 h-4 bg-zinc-200 dark:bg-zinc-800 overflow-hidden flex">
-                    <div
-                      className="h-full bg-emerald-500 transition-all duration-500"
-                      style={{
-                        width: clientes.length > 0 ? `${(clientesVisitados / clientes.length) * 100}%` : "0%",
-                      }}
-                    />
-                    <div
-                      className="h-full bg-amber-500 transition-all duration-500"
-                      style={{
-                        width: clientes.length > 0 ? `${(clientesAsignados / clientes.length) * 100}%` : "0%",
-                      }}
-                    />
-                    <div
-                      className="h-full bg-zinc-400 dark:bg-zinc-600 transition-all duration-500"
-                      style={{
-                        width: clientes.length > 0 ? `${(clientesDisponibles / clientes.length) * 100}%` : "0%",
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Legend */}
-                <div className="flex items-center gap-6 mt-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-emerald-500" />
-                    <span className="text-zinc-600 dark:text-zinc-400">
-                      Visitados ({clientesVisitados})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-amber-500" />
-                    <span className="text-zinc-600 dark:text-zinc-400">
-                      Asignados ({clientesAsignados})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-zinc-400 dark:bg-zinc-600" />
-                    <span className="text-zinc-600 dark:text-zinc-400">
-                      Disponibles ({clientesDisponibles})
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </>
         )}
       </main>
