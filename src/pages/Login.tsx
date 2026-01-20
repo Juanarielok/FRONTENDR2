@@ -66,23 +66,20 @@ export default function Login() {
         {/* Logo/Brand */}
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-amber-500 flex items-center justify-center">
-              <svg
-                viewBox="0 0 24 24"
-                className="w-6 h-6 text-zinc-950"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
-            </div>
+           <div className="w-20 h-20 flex items-center justify-center">
+  <img
+    src="public/ARRTAIUS1.png"
+    alt="Arttaius"
+    className="w-50 h-50 object-contain"
+  />
+</div>
+
             <span className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
-              LOGÍSTICA
+           ARTTAIUS R 1
             </span>
           </div>
           <p className="text-zinc-500 text-sm tracking-wide">
-            Sistema de gestión de entregas
+          Gestion y panel de control
           </p>
         </div>
 
@@ -239,7 +236,7 @@ export default function Login() {
         {/* Footer */}
         <div className="mt-6 text-center">
           <p className="text-zinc-400 dark:text-zinc-600 text-xs">
-            © 2025 Sistema de Logística. Todos los derechos reservados.
+            juanarielok@gmail.com
           </p>
         </div>
       </div>

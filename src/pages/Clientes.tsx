@@ -555,17 +555,11 @@ export default function Clientes() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-amber-500 flex items-center justify-center">
-                <svg
-                  viewBox="0 0 24 24"
-                  className="w-6 h-6 text-zinc-950"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                </svg>
-              </div>
+              <img
+    src="public/ARRTAIUS1.png"
+    alt="Arttaius"
+    className="w-10 h-10 object-contain"
+  />
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">
                   Control de Clientes
