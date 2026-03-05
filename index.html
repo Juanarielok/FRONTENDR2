@@ -5,8 +5,32 @@
     <link rel="icon" type="image/svg+xml" href="public/ARRTAIUS1.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ARTTAIUS1</title>
+    <style>
+      html.dark, html.dark body { background-color: #09090b; color: #fafafa; }
+      html.light, html.light body, html:not(.dark), html:not(.dark) body { background-color: #ffffff; color: #09090b; }
+      #root { opacity: 0; transition: none; }
+      #root.ready { opacity: 1; }
+    </style>
   </head>
   <body>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme');
+        if (theme === 'light' || theme === 'dark') {
+          document.documentElement.classList.add(theme);
+        } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+          document.documentElement.classList.add('light');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+        document.documentElement.setAttribute('data-no-transition', '');
+        window.addEventListener('DOMContentLoaded', function() {
+          requestAnimationFrame(function() {
+            document.documentElement.removeAttribute('data-no-transition');
+          });
+        });
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

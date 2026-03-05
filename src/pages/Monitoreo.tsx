@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import type { Cliente, Remito } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { LiveTrackingView } from "../components/LiveTrackingView";
 
 type ChoferActivo = {
   id: string;
@@ -109,6 +110,14 @@ function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
       <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function IconNavigation({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <polygon points="3 11 22 2 13 21 11 13 3 11" />
     </svg>
   );
 }
@@ -238,15 +247,6 @@ function IconTarget({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function IconEye({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
 // ============ HELPERS ============
 
 function formatDateTime(dateString: string) {
@@ -268,13 +268,6 @@ function formatTime(dateString: string) {
   });
 }
 
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "short",
-  });
-}
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("es-AR", {
@@ -283,20 +276,6 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-function getRelativeTime(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMins < 1) return "Ahora";
-  if (diffMins < 60) return `Hace ${diffMins}m`;
-  if (diffHours < 24) return `Hace ${diffHours}h`;
-  if (diffDays < 7) return `Hace ${diffDays}d`;
-  return formatDate(dateString);
-}
 
 // ============ COMPONENTS ============
 
@@ -399,7 +378,11 @@ export default function Monitoreo() {
   const [loadingHistorial, setLoadingHistorial] = useState(false);
 
   // Tab activa
-  const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes" | "remitos" | "rastreo">("overview");
+
+  // Remitos
+  const [remitos, setRemitos] = useState<Remito[]>([]);
+  const [loadingRemitos, setLoadingRemitos] = useState(false);
 
   async function loadData() {
     try {
@@ -462,6 +445,23 @@ export default function Monitoreo() {
       setLoadingHistorial(false);
     }
   }
+
+  async function loadRemitos() {
+    if (remitos.length > 0) return;
+    setLoadingRemitos(true);
+    try {
+      const res = await api.getAllRemitos();
+      setRemitos(res.remitos || []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingRemitos(false);
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === "remitos") loadRemitos();
+  }, [activeTab]);
 
   function logout() {
     localStorage.removeItem("token");
@@ -592,6 +592,23 @@ export default function Monitoreo() {
               </button>
               <ThemeToggle />
               <button
+                onClick={() => nav("/admin")}
+                className="w-10 h-10 flex items-center justify-center
+                  bg-zinc-100 dark:bg-zinc-900
+                  border border-zinc-300 dark:border-zinc-700
+                  text-zinc-600 dark:text-zinc-400
+                  hover:bg-zinc-200 dark:hover:bg-zinc-800
+                  hover:text-zinc-900 dark:hover:text-white
+                  hover:border-zinc-400 dark:hover:border-zinc-600
+                  transition-all duration-200"
+                title="Gestion"
+              >
+                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </button>
+              <button
                 onClick={logout}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
                          bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 
@@ -611,6 +628,8 @@ export default function Monitoreo() {
               { id: "overview", label: "Resumen", icon: IconActivity },
               { id: "choferes", label: "Choferes", icon: IconTruck },
               { id: "clientes", label: "Clientes", icon: IconUsers },
+              { id: "remitos", label: "Remitos", icon: IconFileText },
+              { id: "rastreo", label: "Rastreo", icon: IconNavigation },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1278,6 +1297,120 @@ export default function Monitoreo() {
                 </div>
               </div>
             )}
+
+            {/* ============ REMITOS TAB ============ */}
+            {activeTab === "remitos" && (
+              <div className="space-y-6">
+                {loadingRemitos ? (
+                  <div className="flex items-center justify-center py-20">
+                    <svg className="animate-spin h-6 w-6 text-amber-500" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    </svg>
+                  </div>
+                ) : remitos.length === 0 ? (
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-12 text-center">
+                    <IconFileText className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
+                    <p className="text-zinc-500">No hay remitos registrados</p>
+                  </div>
+                ) : (
+                  <>
+                    {/* Summary cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <StatCard
+                        icon={IconFileText}
+                        label="Total Remitos"
+                        value={remitos.length}
+                        color="blue"
+                      />
+                      <StatCard
+                        icon={IconDollarSign}
+                        label="Facturación Total"
+                        value={formatCurrency(remitos.reduce((s, r) => s + r.total, 0))}
+                        color="emerald"
+                      />
+                      <StatCard
+                        icon={IconPackage}
+                        label="Productos Entregados"
+                        value={remitos.reduce((s, r) => s + r.productos.reduce((ps, p) => ps + p.cantidad, 0), 0)}
+                        color="amber"
+                      />
+                    </div>
+
+                    {/* Remitos list */}
+                    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                      <SectionHeader
+                        icon={IconFileText}
+                        title="Todos los Remitos"
+                        subtitle={`${remitos.length} registros`}
+                        color="bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400"
+                      />
+                      <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
+                        {[...remitos]
+                          .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
+                          .map((remito) => {
+                            const cliente = clientes.find((c) => c.id === remito.clienteId);
+                            return (
+                              <div key={remito.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                                <div className="flex items-start justify-between gap-4">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <h3 className="font-medium text-zinc-900 dark:text-white">
+                                        {cliente?.nombre || `Cliente ${remito.clienteId}`}
+                                      </h3>
+                                      <span className="text-xs text-zinc-400">{remito.id}</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                                      <div className="flex items-center gap-1">
+                                        <IconCalendar className="w-3 h-3" />
+                                        <span>{formatDateTime(remito.fecha)}</span>
+                                      </div>
+                                      {remito.chofer && (
+                                        <div className="flex items-center gap-1">
+                                          <IconTruck className="w-3 h-3" />
+                                          <span>{remito.chofer.nombre}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {remito.productos.map((prod, pi) => (
+                                        <span
+                                          key={pi}
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400"
+                                        >
+                                          <IconPackage className="w-3 h-3" />
+                                          {prod.cantidad}x {prod.nombre}
+                                        </span>
+                                      ))}
+                                    </div>
+                                    {remito.notas && (
+                                      <p className="text-xs text-zinc-400 italic mt-1">"{remito.notas}"</p>
+                                    )}
+                                  </div>
+                                  <div className="text-right flex-shrink-0">
+                                    <p className="font-bold text-zinc-900 dark:text-white">
+                                      {formatCurrency(remito.total)}
+                                    </p>
+                                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                                      IVA: {formatCurrency(remito.iva)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+
+            {/* ============ RASTREO TAB ============ */}
+            {activeTab === "rastreo" && (
+              <LiveTrackingView clientes={clientes} />
+            )}
+
           </>
         )}
       </main>

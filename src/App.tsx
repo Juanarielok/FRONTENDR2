@@ -1,16 +1,21 @@
+import React from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/Login";
 import Clientes from "./pages/Clientes";
 import ClienteDetalle from "./pages/ClienteDetalle";
 import Monitoreo from "./pages/Monitoreo";
+import Admin from "./pages/Admin";
 
-function RequireAuth({ children }: { children: JSX.Element }) {
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === "true";
+
+function RequireAuth({ children }: { children: React.ReactElement }) {
+  if (DEV_BYPASS) return children;
   const token = localStorage.getItem("token");
   return token ? children : <Navigate to="/login" replace />;
 }
 
 export default function App() {
-  const token = localStorage.getItem("token");
+  const token = DEV_BYPASS || localStorage.getItem("token");
 
   return (
     <Routes>
@@ -40,6 +45,14 @@ export default function App() {
         element={
           <RequireAuth>
             <Monitoreo />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <RequireAuth>
+            <Admin />
           </RequireAuth>
         }
       />

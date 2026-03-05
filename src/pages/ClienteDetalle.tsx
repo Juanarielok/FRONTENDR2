@@ -35,14 +35,6 @@ function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function IconUser({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
 
 function IconMail({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -179,14 +171,6 @@ function IconPackage({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString);
@@ -274,7 +258,6 @@ export default function ClienteDetalle() {
   }
 
   function downloadPDF(remitoId: string) {
-    const token = localStorage.getItem("token");
     const url = `${import.meta.env.VITE_API_URL || "https://prototipo-r1-39r7p.ondigitalocean.app"}/remitos/${remitoId}/pdf`;
     
     // Open in new tab with auth header (for PDFs this might need adjustment based on backend)

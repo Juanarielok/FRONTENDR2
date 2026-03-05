@@ -1,3 +1,6 @@
+import { mockApi } from "./mocks/mockData";
+
+const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === "true";
 const API_URL = import.meta.env.VITE_API_URL as string || "https://prototipo-r1-39r7p.ondigitalocean.app";
 
 function getToken() {
@@ -73,7 +76,19 @@ export type Remito = {
   };
 };
 
-export const api = {
+export type LiveLocation = {
+  choferId: string;
+  latitude: number;
+  longitude: number;
+  speed: number | null;
+  heading: number | null;
+  timestamp: string;
+  updatedAt: string;
+  stale: boolean;
+  chofer: { id: string; nombre: string };
+};
+
+const realApi = {
   login(email: string, password: string) {
     return request<{ token: string; user: any }>("/auth/login", {
       method: "POST",
@@ -197,4 +212,29 @@ export const api = {
       method: "GET",
     }).catch(() => ({ count: 0, remitos: [] })); // Fallback si no hay acceso
   },
+
+  // Assignments
+  getAllAssignments() {
+    return request<{ assignments: Record<string, string[]> }>("/assignments", {
+      method: "GET",
+    });
+  },
+
+  // Reset password
+  resetPassword(id: string, newPassword: string) {
+    return request<{ message: string }>(`/users/${id}/reset-password`, {
+      method: "PUT",
+      body: JSON.stringify({ newPassword }),
+    });
+  },
+
+  // Live locations
+  getLiveLocations() {
+    return request<{
+      count: number;
+      locations: LiveLocation[];
+    }>("/locations/?active=true", { method: "GET" });
+  },
 };
+
+export const api = DEV_BYPASS ? mockApi : realApi;
