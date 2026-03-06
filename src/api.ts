@@ -1,7 +1,7 @@
 import { mockApi } from "./mocks/mockData";
 
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === "true";
-const API_URL = import.meta.env.VITE_API_URL as string || "https://prototipo-r1-39r7p.ondigitalocean.app";
+const API_URL = "https://backend-redaceite-digitalocean-9nmhi.ondigitalocean.app";
 
 function getToken() {
   return localStorage.getItem("token");
@@ -9,30 +9,27 @@ function getToken() {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = getToken();
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(options.headers || {}),
-    },
-  });
+
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    throw new Error("CORS o backend caído");
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    let errorMessage = `HTTP ${res.status}`;
-
-    try {
-      const json = JSON.parse(text);
-      errorMessage = json.error || json.message || errorMessage;
-    } catch {
-      if (text) errorMessage = text;
-    }
-
-    throw new Error(errorMessage);
+    throw new Error(text || `HTTP ${res.status}`);
   }
 
-  return (await res.json()) as T;
+  return await res.json();
 }
 
 export type Cliente = {
