@@ -67,11 +67,11 @@ export default function Login() {
         <div className="mb-8 text-center">
           <div className="inline-flex items-center gap-3 mb-2">
            <div className="w-20 h-20 flex items-center justify-center">
-  <img
-    src="public/ARRTAIUS1.png"
-    alt="Arttaius"
-    className="w-50 h-50 object-contain"
-  />
+<img
+  src="/ARRTAIUS1.png"
+  alt="Arttaius"
+  className="w-50 h-50 object-contain"
+/>
 </div>
 
             <span className="text-2xl font-bold text-zinc-900 dark:text-white tracking-tight">
