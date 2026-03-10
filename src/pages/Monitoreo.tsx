@@ -57,96 +57,60 @@ function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
     </svg>
   );
 }
-
 function IconActivity({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
+    <img src="/lupit1.png" alt="icono" className={`${className} object-contain`} />
   );
 }
 
-function IconTruck({ className = "w-5 h-5" }: { className?: string }) {
+function IconTruck({ className = "w-11 h-11" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="1" y="3" width="15" height="13" />
-      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
+    <img src="/camioncito.png" alt="icono" className={`${className} object-contain`} />
   );
 }
 
-function IconUser({ className = "w-5 h-5" }: { className?: string }) {
+function IconUser({ className = "w-9 h-9" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
+    <img src="/mancliente.png" alt="icono" className={`${className} object-contain`} />
   );
 }
 
-function IconUsers({ className = "w-5 h-5" }: { className?: string }) {
+function IconUsers({ className = "w-9 h-9" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
-    </svg>
+    <img src="/mancliente3.png" alt="icono" className={`${className} object-contain`} />
   );
 }
 
 function IconClock({ className = "w-5 h-5" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
+    <img src="/clock.png" alt="icono" className={`${className} object-contain`} />
+  );
+}
+
+function IconFileText({ className = "w-8 h-8" }: { className?: string }) {
+  return (
+    <img src="/remitico.png" alt="icono" className={`${className} object-contain`} />
   );
 }
 
 function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
+  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
-function IconNavigation({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polygon points="3 11 22 2 13 21 11 13 3 11" />
-    </svg>
-  );
+function IconNavigation({ className = "w-11 h-11" }: { className?: string }) {
+  return <img src="/trackeo1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
 function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
-    </svg>
-  );
+  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
 function IconMail({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
+  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
 function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
+  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
 function IconCalendar({ className = "w-5 h-5" }: { className?: string }) {
@@ -183,17 +147,6 @@ function IconChevronDown({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function IconFileText({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
     </svg>
   );
 }
@@ -284,7 +237,7 @@ function StatCard({
   label,
   value,
   subValue,
-  color,
+  color: _color,
   trend,
 }: {
   icon: React.ComponentType<{ className?: string }>;
@@ -294,43 +247,51 @@ function StatCard({
   color: "amber" | "emerald" | "blue" | "purple" | "red" | "cyan";
   trend?: "up" | "down" | "neutral";
 }) {
-  const colorClasses = {
-    amber: "bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400",
-    emerald: "bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400",
-    blue: "bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400",
-    purple: "bg-purple-100 dark:bg-purple-500/20 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400",
-    red: "bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400",
-    cyan: "bg-cyan-100 dark:bg-cyan-500/20 border-cyan-200 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-400",
-  };
+  void _color;
+
+  const cardShape = {
+    clipPath: "polygon(0 0, 100% 0, 100% 100%, 18% 100%, 0 62%)",
+  } as const;
 
   return (
-    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-4">
-      <div className="flex items-start justify-between">
-        <div className={`w-10 h-10 border flex items-center justify-center ${colorClasses[color]}`}>
-          <Icon className="w-5 h-5" />
-        </div>
-        {trend && (
-          <div className={`text-xs font-medium ${
-            trend === "up" ? "text-emerald-600 dark:text-emerald-400" :
-            trend === "down" ? "text-red-600 dark:text-red-400" :
-            "text-zinc-500"
-          }`}>
-            {trend === "up" && "↑"}
-            {trend === "down" && "↓"}
+    <div
+      className="group p-[3px] bg-[#f0f0f0] transition-all duration-500 hover:bg-black"
+      style={cardShape}
+    >
+      <div
+        className="bg-[#f0f0f0] backdrop-blur-md border border-[#ff000000] p-4 transition-all duration-500 group-hover:bg-black"
+        style={cardShape}
+      >
+        <div className="flex items-start justify-between">
+          <div className="w-12 h-12 flex items-center justify-center text-[#3a3a3a] transition-colors duration-300 group-hover:text-white">
+            <Icon className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-0 group-hover:invert" />
           </div>
-        )}
-      </div>
-      <div className="mt-3">
-        <p className="text-2xl font-bold text-zinc-900 dark:text-white">{value}</p>
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mt-1">{label}</p>
-        {subValue && (
-          <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1">{subValue}</p>
-        )}
+
+          {trend && (
+            <div className="text-xs font-medium text-zinc-500 transition-colors duration-300 group-hover:text-white">
+              {trend === "up" && "↑"}
+              {trend === "down" && "↓"}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 px-2 text-center">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white transition-colors duration-300 group-hover:text-white">
+            {value}
+          </p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-[3px] mt-1 transition-colors duration-300 group-hover:text-white">
+            {label}
+          </p>
+          {subValue && (
+            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 transition-colors duration-300 group-hover:text-zinc-200">
+              {subValue}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
 }
-
 function SectionHeader({
   icon: Icon,
   title,
@@ -524,120 +485,113 @@ export default function Monitoreo() {
   }, [choferesActivos]);
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
+   <div className="min-h-screen fondo-ondulado p-4 md:p-8">
+  <div className="mx-auto w-full max-w-[1600px] min-h-[calc(100vh-2rem)] md:min-h-[calc(100vh-4rem)] overflow-hidden rounded-[px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white shadow-[0_20px_60px_rgba(0,0,0,0.12)] transition-colors duration-300">
       {/* Background pattern */}
-      <div className="fixed inset-0 opacity-[0.015] dark:opacity-[0.02] pointer-events-none">
+      <div className="fixed inset-0 opacity-[0] dark:opacity-[0.02] pointer-events-none">
         <div
           className="absolute inset-0"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            ), repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            )`,
-          }}
+
         />
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
+     <header className="sticky top-0 z-50 bg-[#ffffff] dark:bg-[#0F172A]/90 backdrop-blur-sm ">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
                 to="/clientes"
                 className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
-                         flex items-center justify-center text-zinc-600 dark:text-zinc-400
+                         flex items-center justify-center text-[#000000] dark:text-zinc-400
                          hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
                          transition-colors"
               >
-                <IconArrowLeft className="w-5 h-5" />
+         <img src="/atras1.png" alt="icono" className="w-5 h-5 object-contain" />
               </Link>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-amber-500 flex items-center justify-center">
-                  <IconActivity className="w-6 h-6 text-zinc-950" />
+                <div className="w-10 h-10 bg-[#00000000] flex items-center justify-center">
+                        <img src="/monitor11.png" alt="icono" className="w-11 h-11 object-contain" />
                 </div>
-                <div>
-                  <h1 className="text-lg font-semibold tracking-tight">
-                    Centro de Monitoreo
-                  </h1>
-                  <p className="text-xs text-zinc-500">
-                    Última actualización: {formatTime(lastUpdate.toISOString())}
-                  </p>
-                </div>
+                <div
+  className="px-4 py-3"
+  style={{
+    background: "#D9D9D980",
+    clipPath: "polygon(0 0,100% 0,100% 100%,8% 100%,0 62%)",
+  }}
+>
+  <h1 className="text-lg font-semibold text-[#5a5a5a] tracking-[3px]">
+    PANEL DE MONITOREO
+  </h1>
+  <p className="text-xs text-[#5a5a5a]">
+    Última actualización: {formatTime(lastUpdate.toISOString())}
+  </p>
+</div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium
-                         bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 
-                         text-zinc-700 dark:text-zinc-300
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 
-                         disabled:opacity-50
-                         transition-all duration-200"
-              >
-                <IconRefresh className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                <span className="hidden sm:inline">Actualizar</span>
-              </button>
+        <button
+  onClick={handleRefresh}
+  disabled={refreshing}
+  className="flex items-center gap-2 px-3 py-2 text-sm font-medium
+             bg-transparent border-0 shadow-none
+             text-[#000000] dark:text-zinc-300
+             hover:bg-transparent dark:hover:bg-transparent
+             focus:outline-none focus:ring-0
+             disabled:opacity-50
+             transition-all duration-200"
+>
+  <IconRefresh className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+  <span className="hidden sm:inline">Actualizar</span>
+</button>
               <ThemeToggle />
-              <button
-                onClick={() => nav("/admin")}
-                className="w-10 h-10 flex items-center justify-center
-                  bg-zinc-100 dark:bg-zinc-900
-                  border border-zinc-300 dark:border-zinc-700
-                  text-zinc-600 dark:text-zinc-400
-                  hover:bg-zinc-200 dark:hover:bg-zinc-800
-                  hover:text-zinc-900 dark:hover:text-white
-                  hover:border-zinc-400 dark:hover:border-zinc-600
-                  transition-all duration-200"
-                title="Gestion"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </button>
-              <button
-                onClick={logout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                         bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 
-                         text-zinc-700 dark:text-zinc-300
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 
-                         transition-all duration-200"
-              >
-                <IconLogout className="w-4 h-4" />
-                <span className="hidden sm:inline">Salir</span>
-              </button>
+        <button
+  onClick={() => nav("/admin")}
+  className="w-10 h-10 flex items-center justify-center
+             bg-transparent border-0 shadow-none
+             text-[#000000] dark:text-zinc-400
+             hover:bg-transparent dark:hover:bg-transparent
+             hover:text-zinc-900 dark:hover:text-white
+             focus:outline-none focus:ring-0
+             transition-all duration-200"
+  title="Gestion"
+>
+  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+  </svg>
+</button><button
+  onClick={logout}
+  className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+             bg-transparent border-0 shadow-none
+             text-[#000000] dark:text-zinc-300
+             hover:bg-transparent dark:hover:bg-transparent
+             focus:outline-none focus:ring-0
+             transition-all duration-200"
+>
+  <img src="/gestion1.png" alt="icono" className="w-8 h-8 object-contain" />
+  <span className="hidden sm:inline">Salir</span>
+</button>
             </div>
           </div>
 
           {/* Tabs */}
           <div className="flex items-center gap-1 mt-4 -mb-4 border-b border-transparent">
             {[
-              { id: "overview", label: "Resumen", icon: IconActivity },
-              { id: "choferes", label: "Choferes", icon: IconTruck },
-              { id: "clientes", label: "Clientes", icon: IconUsers },
-              { id: "remitos", label: "Remitos", icon: IconFileText },
-              { id: "rastreo", label: "Rastreo", icon: IconNavigation },
+              { id: "overview", label: "RESUMEN", icon: IconActivity },
+              { id: "choferes", label: "CHOFERES", icon: IconTruck },
+              { id: "clientes", label: "CLIENTES", icon: IconUsers },
+              { id: "remitos", label: "REMITOS", icon: IconFileText },
+              { id: "rastreo", label: "RASTREO", icon: IconNavigation },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? "border-amber-500 text-amber-600 dark:text-amber-400"
-                    : "border-transparent text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+                    ? "border-[#ffd900] text-[#ffbb00] dark:text-amber-400"
+                    : "border-transparent text-[#000000] hover:text-[#585c5c] dark:hover:text-white"
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -886,7 +840,7 @@ export default function Monitoreo() {
                         <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
                           <IconAlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
                           <p className="text-xs text-red-600 dark:text-red-400">
-                            Hay muchos clientes sin asignar. Considera asignar más clientes a los choferes activos.
+                            Hay clientes sin asignar!
                           </p>
                         </div>
                       )}
@@ -1415,5 +1369,6 @@ export default function Monitoreo() {
         )}
       </main>
     </div>
+     </div>
   );
 }

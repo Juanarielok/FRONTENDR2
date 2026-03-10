@@ -529,40 +529,31 @@ export default function Clientes() {
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       {/* Background pattern */}
-      <div className="fixed inset-0 opacity-[0.015] dark:opacity-[0.02] pointer-events-none">
+      <div className="fixed inset-0 opacity-[0.77] dark:opacity-[0.02] pointer-events-none">
         <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            ), repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            )`,
-          }}
-        />
+  className="fixed inset-0 pointer-events-none opacity-20"
+style={{
+  backgroundImage: "url('/bgu7.jpg')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+}}
+/>
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
+      <header className="sticky top-0 z-50 bg-white dark:bg-zinc-950 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img
-    src="public/ARRTAIUS1.png"
-    alt="Arttaius"
-    className="w-10 h-10 object-contain"
-  />
+  <img
+  src="/ARRTAIUS1.png"
+  alt="Arttaius"
+  className="w-10 h-10 object-contain"
+/>
               <div>
-                <h1 className="text-lg font-semibold tracking-tight">
-                  Control de Clientes
+                <h1 className="text-lg font-semibold tracking-[3px]">
+                  PANEL DE CLIENTES
                 </h1>
                 <p className="text-xs text-zinc-500 dark:text-zinc-500">
                   Gestión y asignación de entregas
@@ -571,38 +562,35 @@ export default function Clientes() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-500 bg-zinc-100 dark:bg-zinc-900 px-3 py-2 border border-zinc-200 dark:border-zinc-800">
-                <IconUser className="w-4 h-4" />
+              <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-500 bg-[#f3f3f300] dark:border-[#f0000000] px-3 py-2 border border-[#f0000000] dark:border-[#f0000000]">
+                 <img src="/asterisco1.png" alt="icono" className="w-5 h-5 object-contain" />
                 <span>Admin</span>
               </div>
-              <Link
-                to="/monitoreo"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                         bg-amber-500 text-zinc-950
-                         hover:bg-amber-400
-                         transition-all duration-200"
-              >
-                <IconActivity className="w-4 h-4" />
-                <span className="hidden sm:inline">Monitoreo</span>
-              </Link>
+            <Link
+  to="/monitoreo"
+  className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+             bg-[#F2F3F5] text-zinc-950
+             hover:bg-[#8ab1ff]
+             transition-all duration-200
+             rounded-full"
+>
+  <img src="/monitor11.png" alt="icono" className="w-5 h-5 object-contain" />
+  <span className="hidden sm:inline">MONITOREO</span>
+</Link>
               <ThemeToggle />
-              <button
-                onClick={() => nav("/admin")}
-                className="w-10 h-10 flex items-center justify-center
-                  bg-zinc-100 dark:bg-zinc-900
-                  border border-zinc-300 dark:border-zinc-700
-                  text-zinc-600 dark:text-zinc-400
-                  hover:bg-zinc-200 dark:hover:bg-zinc-800
-                  hover:text-zinc-900 dark:hover:text-white
-                  hover:border-zinc-400 dark:hover:border-zinc-600
-                  transition-all duration-200"
-                title="Gestion"
-              >
-                <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
-              </button>
+             <button
+  onClick={() => nav("/admin")}
+  className="w-10 h-10 flex items-center justify-center
+    bg-zinc-100 dark:bg-zinc-900
+    text-zinc-600 dark:text-zinc-400
+    hover:bg-zinc-200 dark:hover:bg-zinc-800
+    hover:text-zinc-900 dark:hover:text-white
+    transition-all duration-200
+    rounded-lg"
+  title="Gestion"
+>
+  <img src="/gestion3.png" alt="icono" className="w-5 h-5 object-contain" />
+</button>
               <button
                 onClick={logout}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
@@ -612,7 +600,7 @@ export default function Clientes() {
                          hover:border-zinc-400 dark:hover:border-zinc-600
                          transition-all duration-200"
               >
-                <IconLogout className="w-4 h-4" />
+           <img src="/gestion1.png" alt="icono" className="w-5 h-5 object-contain" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
@@ -625,7 +613,7 @@ export default function Clientes() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Form Panel */}
           <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 sticky top-24 shadow-sm dark:shadow-none">
+            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 sticky top-24 shadow-sm dark:shadow-none">
               {/* Form Header */}
               <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -639,7 +627,7 @@ export default function Clientes() {
                     </div>
                   )}
                   <h2 className="font-semibold">
-                    {editingId ? "Editar Cliente" : "Nuevo Cliente"}
+                    {editingId ? "Editar Cliente" : "NUEVO CLIENTE"}
                   </h2>
                 </div>
                 {editingId && (
@@ -733,7 +721,7 @@ export default function Clientes() {
                 <button
                   onClick={() => setShowAdvanced((v) => !v)}
                   className="w-full flex items-center justify-between px-4 py-3 
-                           bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700/50 
+                           bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 
                            text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200
                            transition-colors"
                 >
@@ -785,7 +773,7 @@ export default function Clientes() {
                       />
                     </div>
 
-                    <div className="p-4 bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-700/50 space-y-4">
+                    <div className="p-4 bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-700 space-y-4">
                       <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
                         Foto del cliente (opcional)
                       </p>
@@ -834,7 +822,7 @@ export default function Clientes() {
                   className="w-full bg-amber-500 text-zinc-950 font-semibold py-3 px-4
                            transition-all duration-200 
                            hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/20
-                           disabled:opacity-50 disabled:cursor-not-allowed
+                           disabled:opacity-100 disabled:cursor-not-allowed
                            flex items-center justify-center gap-2"
                 >
                   {submitting ? (
@@ -853,7 +841,7 @@ export default function Clientes() {
                           strokeWidth="4"
                         />
                         <path
-                          className="opacity-75"
+                          className="opacity-100"
                           fill="currentColor"
                           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                         />
@@ -881,8 +869,8 @@ export default function Clientes() {
           </div>
 
           {/* Client List Panel */}
-          <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+          <div className="lg:col-span-3 z-30">
+            <div className="bg-[#ffffffa4] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
               {/* List Header */}
               <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -891,7 +879,7 @@ export default function Clientes() {
                       <IconUser className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
-                      <h2 className="font-semibold">Clientes</h2>
+                      <h2 className="font-semibold">CLIENTES</h2>
                       <p className="text-xs text-zinc-500">
                         {clientes.length} registrados
                       </p>
@@ -949,7 +937,7 @@ export default function Clientes() {
               </div>
 
               {/* Client List */}
-              <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-[calc(100vh-320px)] overflow-y-auto">
+              <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-h-[calc(100vh-320px)] overflow-y-auto">
                 {loading ? (
                   <div className="px-6 py-16 text-center">
                     <svg
@@ -958,7 +946,7 @@ export default function Clientes() {
                       fill="none"
                     >
                       <circle
-                        className="opacity-25"
+                        className="opacity-100"
                         cx="12"
                         cy="12"
                         r="10"
@@ -966,7 +954,7 @@ export default function Clientes() {
                         strokeWidth="4"
                       />
                       <path
-                        className="opacity-75"
+                        className="opacity-100"
                         fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       />
@@ -1085,7 +1073,7 @@ export default function Clientes() {
               </div>
 
               {/* Assign Button */}
-              <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/80">
+              <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
                 <button
                   onClick={asignarClientes}
                   disabled={cantidadSeleccionados === 0}
@@ -1093,7 +1081,7 @@ export default function Clientes() {
                            border-2 border-dashed transition-all duration-200
                            disabled:border-zinc-300 dark:disabled:border-zinc-700 
                            disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:cursor-not-allowed
-                           enabled:border-amber-500/50 enabled:text-amber-600 dark:enabled:text-amber-500 
+                           enabled:border-amber-500 enabled:text-amber-600 dark:enabled:text-amber-500 
                            enabled:hover:bg-amber-50 dark:enabled:hover:bg-amber-500/10 enabled:hover:border-amber-500"
                 >
                   <IconTruck className="w-5 h-5" />

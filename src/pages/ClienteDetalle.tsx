@@ -270,24 +270,15 @@ export default function ClienteDetalle() {
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       {/* Background pattern */}
-      <div className="fixed inset-0 opacity-[0.015] dark:opacity-[0.02] pointer-events-none">
+      <div className="fixed inset-0 opacity-[0.16] dark:opacity-[0.02] pointer-events-none">
         <div
           className="absolute inset-0"
-          style={{
-            backgroundImage: `repeating-linear-gradient(
-              90deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            ), repeating-linear-gradient(
-              0deg,
-              transparent,
-              transparent 100px,
-              currentColor 100px,
-              currentColor 101px
-            )`,
-          }}
+         style={{
+  backgroundImage: "url('/bgu7.jpg')",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+}}
         />
       </div>
 
@@ -371,8 +362,8 @@ export default function ClienteDetalle() {
         ) : cliente ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Client Info Panel */}
-            <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
+            <div className="lg:col-span-1 z-30">
+              <div className="bg-white  dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
                 {/* Header with avatar */}
                 <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
                   <div className="flex items-start gap-4">
@@ -442,7 +433,7 @@ export default function ClienteDetalle() {
             </div>
 
             {/* Remitos Panel */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 z-30">
               <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
