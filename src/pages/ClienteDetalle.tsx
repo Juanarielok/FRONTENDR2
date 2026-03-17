@@ -257,12 +257,33 @@ export default function ClienteDetalle() {
     nav("/login", { replace: true });
   }
 
-  function downloadPDF(remitoId: string) {
-    const url = `${import.meta.env.VITE_API_URL || "https://prototipo-r1-39r7p.ondigitalocean.app"}/remitos/${remitoId}/pdf`;
-    
-    // Open in new tab with auth header (for PDFs this might need adjustment based on backend)
-    window.open(url, "_blank");
+async function downloadPDF(remitoId: string) {
+  try {
+    const token = localStorage.getItem("token");
+    const base =
+      import.meta.env.VITE_API_URL ||
+      "https://backend-redaceite-digitalocean-9nmhi.ondigitalocean.app";
+
+    const res = await fetch(`${base}/remitos/${remitoId}/pdf`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `remito-${remitoId}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo descargar el PDF");
   }
+}
 
   const status = cliente?.status || "disponible";
   const statusStyle = statusConfig[status] || statusConfig.disponible;
