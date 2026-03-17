@@ -255,11 +255,11 @@ function StatCard({
 
   return (
     <div
-      className="group p-[3px] bg-[#f0f0f0] transition-all duration-500 hover:bg-black"
+      className="group p-[3px] bg-[#f7f6f6] transition-all duration-500 hover:bg-black"
       style={cardShape}
     >
       <div
-        className="bg-[#f0f0f0] backdrop-blur-md border border-[#ff000000] p-4 transition-all duration-500 group-hover:bg-black"
+        className="bg-[#f7f6f6] backdrop-blur-md border border-[#ff000000] p-4 transition-all duration-500 group-hover:bg-black"
         style={cardShape}
       >
         <div className="flex items-start justify-between">
@@ -268,7 +268,7 @@ function StatCard({
           </div>
 
           {trend && (
-            <div className="text-xs font-medium text-zinc-500 transition-colors duration-300 group-hover:text-white">
+            <div className="text-s font-medium text-zinc-500 transition-colors duration-300 group-hover:text-white">
               {trend === "up" && "↑"}
               {trend === "down" && "↓"}
             </div>
@@ -279,11 +279,11 @@ function StatCard({
           <p className="text-2xl font-bold text-zinc-900 dark:text-white transition-colors duration-300 group-hover:text-white">
             {value}
           </p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-[3px] mt-1 transition-colors duration-300 group-hover:text-white">
+          <p className="text-s font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-[3px] mt-1 transition-colors duration-300 group-hover:text-white">
             {label}
           </p>
           {subValue && (
-            <p className="text-xs text-zinc-400 dark:text-zinc-500 mt-1 transition-colors duration-300 group-hover:text-zinc-200">
+            <p className="text-s font-bold text-zinc-400 dark:text-zinc-500 mt-1 transition-colors duration-300 group-hover:text-zinc-200">
               {subValue}
             </p>
           )}
@@ -313,7 +313,7 @@ function SectionHeader({
         </div>
         <div>
           <h2 className="font-semibold">{title}</h2>
-          {subtitle && <p className="text-xs text-zinc-500">{subtitle}</p>}
+          {subtitle && <p className="text-s text-zinc-500">{subtitle}</p>}
         </div>
       </div>
       {action}
@@ -523,7 +523,7 @@ export default function Monitoreo() {
   <h1 className="text-lg font-semibold text-[#5a5a5a] tracking-[3px]">
     PANEL DE MONITOREO
   </h1>
-  <p className="text-xs text-[#5a5a5a]">
+  <p className="text-m text-[#5a5a5a]">
     Última actualización: {formatTime(lastUpdate.toISOString())}
   </p>
 </div>
@@ -579,19 +579,19 @@ export default function Monitoreo() {
           {/* Tabs */}
           <div className="flex items-center gap-1 mt-4 -mb-4 border-b border-transparent">
             {[
-              { id: "overview", label: "RESUMEN", icon: IconActivity },
-              { id: "choferes", label: "CHOFERES", icon: IconTruck },
-              { id: "clientes", label: "CLIENTES", icon: IconUsers },
-              { id: "remitos", label: "REMITOS", icon: IconFileText },
-              { id: "rastreo", label: "RASTREO", icon: IconNavigation },
+              { id: "overview", label: "Resumen", icon: IconActivity },
+              { id: "choferes", label: "Choferes", icon: IconTruck },
+              { id: "clientes", label: "Clientes", icon: IconUsers },
+              { id: "remitos", label: "Remitos", icon: IconFileText },
+              { id: "rastreo", label: "Rastreo", icon: IconNavigation },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 font-semibold text-lg font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? "border-[#ffd900] text-[#ffbb00] dark:text-amber-400"
-                    : "border-transparent text-[#000000] hover:text-[#585c5c] dark:hover:text-white"
+                    : "border-transparent text-[#000000] hover:text-[#585c5c] "
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -694,7 +694,7 @@ export default function Monitoreo() {
                       subtitle={`${choferesActivos.length} choferes trabajando ahora`}
                       color="bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                       action={
-                        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
+                        <div className="flex items-center gap-2 text-s text-emerald-600 dark:text-emerald-400">
                           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                           En vivo
                         </div>
@@ -725,7 +725,7 @@ export default function Monitoreo() {
                                       {activo.chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                                     </span>
                                   </div>
-                                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-zinc-950 text-xs font-bold flex items-center justify-center">
+                                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-zinc-950 text-s font-bold flex items-center justify-center">
                                     {index + 1}
                                   </span>
                                 </div>
@@ -733,7 +733,7 @@ export default function Monitoreo() {
                                   <h3 className="font-medium text-zinc-900 dark:text-white">
                                     {activo.chofer.nombre}
                                   </h3>
-                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500">
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-s text-zinc-500">
                                     <div className="flex items-center gap-1">
                                       <IconClock className="w-3 h-3" />
                                       <span>Check-in: {formatTime(activo.checkIn)}</span>
@@ -758,7 +758,7 @@ export default function Monitoreo() {
                                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                   {activo.tiempoTranscurrido.formato}
                                 </div>
-                                <p className="text-xs text-zinc-500 mt-1">
+                                <p className="text-s text-zinc-500 mt-1">
                                   {activo.tiempoTranscurrido.minutos} min
                                 </p>
                               </div>
@@ -803,7 +803,7 @@ export default function Monitoreo() {
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <p className="text-3xl font-bold text-zinc-900 dark:text-white">{stats.tasaCobertura}%</p>
-                            <p className="text-xs text-zinc-500">cobertura</p>
+                            <p className="text-s text-zinc-500">cobertura</p>
                           </div>
                         </div>
                       </div>
@@ -839,7 +839,7 @@ export default function Monitoreo() {
                       {stats.clientesDisponibles > stats.clientesAsignados + stats.clientesVisitados && (
                         <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
                           <IconAlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <p className="text-xs text-red-600 dark:text-red-400">
+                          <p className="text-s text-red-600 dark:text-red-400">
                             Hay clientes sin asignar!
                           </p>
                         </div>
@@ -862,7 +862,7 @@ export default function Monitoreo() {
                       style={{ width: `${stats.tasaVisitas}%` }}
                     >
                       {stats.tasaVisitas > 10 && (
-                        <span className="text-xs font-medium text-white">{stats.tasaVisitas}%</span>
+                        <span className="text-s font-medium text-white">{stats.tasaVisitas}%</span>
                       )}
                     </div>
                     <div
@@ -870,7 +870,7 @@ export default function Monitoreo() {
                       style={{ width: `${(stats.clientesAsignados / clientes.length) * 100}%` }}
                     >
                       {(stats.clientesAsignados / clientes.length) * 100 > 10 && (
-                        <span className="text-xs font-medium text-zinc-900">
+                        <span className="text-s font-medium text-zinc-900">
                           {Math.round((stats.clientesAsignados / clientes.length) * 100)}%
                         </span>
                       )}
@@ -928,20 +928,20 @@ export default function Monitoreo() {
                                         {chofer.nombre}
                                       </h3>
                                       {isActive && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-s font-medium">
                                           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                           Activo
                                         </span>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                                    <div className="flex items-center gap-3 mt-1 text-s text-zinc-500">
                                       <div className="flex items-center gap-1">
                                         <IconMail className="w-3 h-3" />
                                         <span>{chofer.email}</span>
                                       </div>
                                     </div>
                                     {isActive && activoData && (
-                                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                      <p className="text-s text-emerald-600 dark:text-emerald-400 mt-1">
                                         Trabajando hace {activoData.tiempoTranscurrido.formato}
                                       </p>
                                     )}
@@ -973,25 +973,25 @@ export default function Monitoreo() {
                                         <p className="text-xl font-bold text-zinc-900 dark:text-white">
                                           {historial.resumen.totalJornadas}
                                         </p>
-                                        <p className="text-xs text-zinc-500">Jornadas</p>
+                                        <p className="text-s text-zinc-500">Jornadas</p>
                                       </div>
                                       <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
                                         <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                                           {historial.resumen.jornadasCompletadas}
                                         </p>
-                                        <p className="text-xs text-zinc-500">Completadas</p>
+                                        <p className="text-s text-zinc-500">Completadas</p>
                                       </div>
                                       <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
                                         <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
                                           {historial.resumen.tiempoTotal.formato}
                                         </p>
-                                        <p className="text-xs text-zinc-500">Total</p>
+                                        <p className="text-s text-zinc-500">Total</p>
                                       </div>
                                     </div>
 
                                     {/* Lista de jornadas */}
                                     <div>
-                                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
+                                      <p className="text-s text-zinc-500 uppercase tracking-wider mb-2">
                                         Últimas jornadas
                                       </p>
                                       <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -1012,24 +1012,24 @@ export default function Monitoreo() {
                                                     </span>
                                                   </div>
                                                   {jornada.ubicacionCheckIn && (
-                                                    <div className="flex items-center gap-1 mt-1 text-xs text-zinc-500">
+                                                    <div className="flex items-center gap-1 mt-1 text-s text-zinc-500">
                                                       <IconMapPin className="w-3 h-3" />
                                                       <span>{jornada.ubicacionCheckIn}</span>
                                                     </div>
                                                   )}
                                                   {jornada.notas && (
-                                                    <p className="mt-1 text-xs text-zinc-500 italic">
+                                                    <p className="mt-1 text-s text-zinc-500 italic">
                                                       "{jornada.notas}"
                                                     </p>
                                                   )}
                                                 </div>
                                                 <div className="text-right">
                                                   {jornada.checkOut ? (
-                                                    <span className="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium">
+                                                    <span className="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-s font-medium">
                                                       {jornada.duracion?.formato}
                                                     </span>
                                                   ) : (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-medium">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-s font-medium">
                                                       <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
                                                       En curso
                                                     </span>
@@ -1088,7 +1088,7 @@ export default function Monitoreo() {
                                 <p className="font-medium text-zinc-900 dark:text-white">
                                   {activo.chofer.nombre}
                                 </p>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-s text-zinc-500">
                                   Check-in: {formatTime(activo.checkIn)}
                                 </p>
                               </div>
@@ -1096,7 +1096,7 @@ export default function Monitoreo() {
                                 <p className="font-semibold text-zinc-900 dark:text-white">
                                   {activo.tiempoTranscurrido.formato}
                                 </p>
-                                <p className="text-xs text-zinc-500">
+                                <p className="text-s text-zinc-500">
                                   {activo.tiempoTranscurrido.minutos} min
                                 </p>
                               </div>
@@ -1130,7 +1130,7 @@ export default function Monitoreo() {
                             .map((chofer) => (
                               <div key={chofer.id} className="flex items-center gap-3 p-2">
                                 <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
-                                  <span className="text-xs font-semibold text-zinc-500">
+                                  <span className="text-s font-semibold text-zinc-500">
                                     {chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                                   </span>
                                 </div>
@@ -1139,7 +1139,7 @@ export default function Monitoreo() {
                                     {chofer.nombre}
                                   </p>
                                 </div>
-                                <span className="text-xs text-red-500">Sin actividad</span>
+                                <span className="text-s text-red-500">Sin actividad</span>
                               </div>
                             ))}
                         </div>
@@ -1178,7 +1178,7 @@ export default function Monitoreo() {
                           <p className="font-medium text-zinc-900 dark:text-white text-sm">
                             {cliente.nombre}
                           </p>
-                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                          <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
                         </Link>
                       ))
                     )}
@@ -1208,7 +1208,7 @@ export default function Monitoreo() {
                           <p className="font-medium text-zinc-900 dark:text-white text-sm">
                             {cliente.nombre}
                           </p>
-                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                          <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
                         </Link>
                       ))
                     )}
@@ -1240,7 +1240,7 @@ export default function Monitoreo() {
                               <p className="font-medium text-zinc-900 dark:text-white text-sm">
                                 {cliente.nombre}
                               </p>
-                              <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
+                              <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
                             </div>
                             <IconCheckCircle className="w-4 h-4 text-emerald-500" />
                           </div>
@@ -1312,9 +1312,9 @@ export default function Monitoreo() {
                                       <h3 className="font-medium text-zinc-900 dark:text-white">
                                         {cliente?.nombre || `Cliente ${remito.clienteId}`}
                                       </h3>
-                                      <span className="text-xs text-zinc-400">{remito.id}</span>
+                                      <span className="text-s text-zinc-400">{remito.id}</span>
                                     </div>
-                                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
+                                    <div className="flex items-center gap-3 mt-1 text-s text-zinc-500">
                                       <div className="flex items-center gap-1">
                                         <IconCalendar className="w-3 h-3" />
                                         <span>{formatDateTime(remito.fecha)}</span>
@@ -1330,7 +1330,7 @@ export default function Monitoreo() {
                                       {remito.productos.map((prod, pi) => (
                                         <span
                                           key={pi}
-                                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-xs text-zinc-600 dark:text-zinc-400"
+                                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-s text-zinc-600 dark:text-zinc-400"
                                         >
                                           <IconPackage className="w-3 h-3" />
                                           {prod.cantidad}x {prod.nombre}
@@ -1338,7 +1338,7 @@ export default function Monitoreo() {
                                       ))}
                                     </div>
                                     {remito.notas && (
-                                      <p className="text-xs text-zinc-400 italic mt-1">"{remito.notas}"</p>
+                                      <p className="text-s text-zinc-400 italic mt-1">"{remito.notas}"</p>
                                     )}
                                   </div>
                                   <div className="text-right flex-shrink-0">
@@ -1372,3 +1372,5 @@ export default function Monitoreo() {
      </div>
   );
 }
+
+////////good one

@@ -324,7 +324,7 @@ function FormInput({
 }) {
   return (
     <div>
-      <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+      <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
         {label} {required && <span className="text-amber-500">*</span>}
       </label>
       <input
@@ -435,9 +435,15 @@ export default function Clientes() {
   function selectAll() {
     if (seleccionados.size === filteredClientes.length) {
       setSeleccionados(new Set());
-    } else {
-      setSeleccionados(new Set(filteredClientes.map((c) => c.id)));
-    }
+   } else {
+  setSeleccionados(
+    new Set(
+      filteredClientes
+        .filter((c) => c.status !== "asignado")
+        .map((c) => c.id)
+    )
+  );
+}
   }
 
   function loadToEdit(c: Cliente) {
@@ -542,7 +548,7 @@ style={{
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white dark:bg-zinc-950 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
+      <header className="sticky top-0 z-50 bg-[#ffffff80] dark:bg-zinc-950 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -609,7 +615,7 @@ style={{
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8 font-semibold">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Form Panel */}
           <div className="lg:col-span-2">
@@ -641,7 +647,7 @@ style={{
               </div>
 
               {/* Form Body */}
-              <div className="p-6 space-y-5">
+              <div className="p-6 space-y-5 font-semibold">
                 <FormInput
                   label="Email"
                   value={form.email}
@@ -981,23 +987,30 @@ style={{
                   </div>
                 ) : (
                   filteredClientes.map((c) => {
+                    
                     const checked = seleccionados.has(c.id);
+                    const disabled = c.status === "asignado";
                     return (
                       <div
                         key={c.id}
                         className={`px-6 py-4 transition-all duration-200 ${
-                          checked
-                            ? "bg-amber-50 dark:bg-amber-500/5 border-l-2 border-l-amber-500"
-                            : "hover:bg-zinc-50 dark:hover:bg-zinc-800/30 border-l-2 border-l-transparent"
-                        }`}
+                          
+                           disabled
+    ? "opacity-40 grayscale bg-zinc-100 dark:bg-zinc-800/40 border-l-2 border-l-zinc-400 cursor-not-allowed"
+    : checked
+    ? "bg-amber-50 dark:bg-amber-500/5 border-l-2 border-l-amber-500"
+    : "hover:bg-zinc-50 dark:hover:bg-zinc-800/30 border-l-2 border-l-transparent"
+}`}
                       >
                         <div className="flex items-start gap-4">
                           {/* Checkbox */}
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleSeleccion(c.id);
-                            }}
+                           disabled={disabled}
+onClick={(e) => {
+  e.stopPropagation();
+  if (disabled) return;
+  toggleSeleccion(c.id);
+}}
                             className={`w-5 h-5 mt-0.5 border flex-shrink-0 flex items-center justify-center transition-all duration-200
                                       ${
                                         checked
@@ -1040,6 +1053,12 @@ style={{
                                 <h3 className="font-medium text-zinc-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
                                   {c.nombre}
                                 </h3>
+{disabled && (
+  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 bg-zinc-300 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
+    ASIGNADO
+  </span>
+)}
+
                                 <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
                                   <IconMail className="w-3 h-3" />
                                   <span className="truncate">{c.email}</span>

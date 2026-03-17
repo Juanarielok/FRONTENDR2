@@ -10,25 +10,34 @@ export default function Login() {
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const [mostrarSplash, setMostrarSplash] = useState(true);
-  const [mostrarPanel, setMostrarPanel] = useState(false);
-  const [mostrarFondo, setMostrarFondo] = useState(false);
+  const [mostrarSplash, setMostrarSplash] = useState(
+  !sessionStorage.getItem("loginSplashMostrado")
+);
+const [mostrarPanel, setMostrarPanel] = useState(
+  !!sessionStorage.getItem("loginSplashMostrado")
+);
+const [mostrarFondo, setMostrarFondo] = useState(
+  !!sessionStorage.getItem("loginSplashMostrado")
+);
 
-  useEffect(() => {
-    const tiempo1 = setTimeout(() => {
-      setMostrarSplash(false);
-      setMostrarPanel(true);
-    }, 1800);
+useEffect(() => {
+  if (sessionStorage.getItem("loginSplashMostrado")) return;
 
-    const tiempo2 = setTimeout(() => {
-      setMostrarFondo(true);
-    }, 2800);
+  const tiempo1 = setTimeout(() => {
+    setMostrarSplash(false);
+    setMostrarPanel(true);
+    sessionStorage.setItem("loginSplashMostrado", "true");
+  }, 1800);
 
-    return () => {
-      clearTimeout(tiempo1);
-      clearTimeout(tiempo2);
-    };
-  }, []);
+  const tiempo2 = setTimeout(() => {
+    setMostrarFondo(true);
+  }, 2800);
+
+  return () => {
+    clearTimeout(tiempo1);
+    clearTimeout(tiempo2);
+  };
+}, []);
 
   async function onLogin() {
     setErr("");
@@ -50,7 +59,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950 relative overflow-hidden">
+    <div className="min-h-screen bg-white relative overflow-hidden">
       {/* Splash blanco */}
       <div
         className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-700 ${
@@ -96,7 +105,7 @@ export default function Login() {
               backgroundPosition: "center",
             }}
           />
-          <div className="absolute inset-0 bg-white/70 dark:bg-white/70" />
+          <div className="absolute inset-0 bg-white/70 " />
         </div>
 
         {/* Luces decorativas */}
@@ -127,43 +136,43 @@ export default function Login() {
                 />
               </div>
 
-              <span className="text-5xl font-bold text-zinc-900 dark:text-white tracking-tight">
+              <span className="text-5xl font-bold text-zinc-900  tracking-tight">
                 ARTTAIUS
               </span>
             </div>
-            <p className="text-zinc-500 text-sm tracking-wide">
+            <p className="text-zinc-500 text-sm font-semibold tracking-wide">
               Gestion y panel de control
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 p-8 relative shadow-lg dark:shadow-none">
+          <div className="bg-white/80  backdrop-blur-sm border border-zinc-200  p-8 relative shadow-lg">
             <div className="mb-6">
-              <h1 className="text-xl font-semibold text-zinc-500 dark:text-white mb-1">
+              <h1 className="text-xl font-semibold text-zinc-500  mb-1">
                 INICIAR SESION
               </h1>
             </div>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-zinc-500  uppercase tracking-wider mb-2">
                   Email
                 </label>
                 <div className="relative">
                   <input
                     type="email"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
-                               text-zinc-900 dark:text-white px-4 py-3 
+                    className="w-full bg-zinc-50 border border-zinc-300  
+                               text-zinc-900  px-4 py-3  font-semibold
                                outline-none transition-all duration-200
                                focus:border-[#9e9e9e] 
-                               placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                               placeholder:text-zinc-400"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="admin@empresa.com"
                     autoComplete="email"
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 ">
                     <svg
                       viewBox="0 0 24 24"
                       className="w-5 h-5"
@@ -178,24 +187,24 @@ export default function Login() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                   Contraseña
                 </label>
                 <div className="relative">
                   <input
                     type="password"
-                    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-[#9e9e9e] dark:border-zinc-700 
-                               text-zinc-900 dark:text-white px-4 py-3 
+                    className="w-full bg-zinc-50 -950 border border-[#9e9e9e] 
+                               text-zinc-900  px-4 py-3 
                                outline-none transition-all duration-200
                                focus:border-[#9e9e9e] 
-                               placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                               placeholder:text-zinc-400 "
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="••••••••"
                     autoComplete="current-password"
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 dark:text-zinc-600">
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 ">
                     <svg
                       viewBox="0 0 24 24"
                       className="w-5 h-5"
@@ -278,7 +287,7 @@ export default function Login() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-zinc-400 dark:text-zinc-600 text-xs">
+            <p className="text-zinc-400 text-xs">
               juanarielok@gmail.com
             </p>
           </div>
