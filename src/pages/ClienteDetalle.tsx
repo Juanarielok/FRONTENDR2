@@ -284,10 +284,10 @@ if (!res.ok) {
     a.click();
     a.remove();
     window.URL.revokeObjectURL(url);
-  } catch (e) {
-    console.error(e);
-    alert("No se pudo descargar el PDF");
-  }
+  }catch (e: any) {
+  console.error("PDF CATCH", e);
+  alert(String(e?.message || e));
+}
 }
 
   const status = cliente?.status || "disponible";
