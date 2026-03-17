@@ -268,7 +268,12 @@ async function downloadPDF(remitoId: string) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+if (!res.ok) {
+  const texto = await res.text();
+  console.error("PDF ERROR", res.status, texto);
+  alert(`PDF ${res.status}: ${texto}`);
+  return;
+}
 
     const blob = await res.blob();
     const url = window.URL.createObjectURL(blob);
