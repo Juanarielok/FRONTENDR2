@@ -10,13 +10,13 @@
 } */
 @font-face{
   font-family:'Peps';
-  src:url('/lit23.ttf') format('truetype');
+  src:url('/lit233.ttf') format('truetype');
   font-weight: bolder;
- letter-spacing: 2px;
+ letter-spacing: 0.4px;
 } 
 html, body,text-lg, #root {
   font-family:'Peps', sans-serif !important;
-    letter-spacing: 2px;
+    letter-spacing: 0.4px;
     -webkit-font-smoothing: antialiased;
 -moz-osx-font-smoothing: grayscale;
 text-rendering: optimizeLegibility;

@@ -13,6 +13,7 @@ type FormState = {
   cuit: string;
   telefono: string;
   ubicacion: string;
+  localidad: string;
   razonSocial: string;
   tipoComercio: string;
   notas: string;
@@ -21,6 +22,10 @@ type FormState = {
 };
 
 type FormErrors = Partial<Record<keyof FormState, string>>;
+
+type ColumnaIdentificador = "dni" | "cuit" | "email";
+type ColumnaTelefono = "telefono" | "localidad";
+type ColumnaExtra = "proxima_visita" | "opcion_2" | "opcion_3";
 
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -84,6 +89,8 @@ function validate(form: FormState, editing: boolean): FormErrors {
     errors.ubicacion = "Ubicación inválida";
   }
 
+  if (!form.localidad.trim()) errors.localidad = "Localidad requerida";
+
   if (!form.razonSocial.trim()) errors.razonSocial = "Razón social requerida";
   if (!form.tipoComercio.trim())
     errors.tipoComercio = "Tipo de comercio requerido";
@@ -115,6 +122,7 @@ const emptyForm: FormState = {
   cuit: "",
   telefono: "",
   ubicacion: "",
+  localidad: "",
   razonSocial: "",
   tipoComercio: "",
   notas: "",
@@ -163,36 +171,6 @@ function IconUser({ className = "w-5 h-5" }: { className?: string }) {
     >
       <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function IconMail({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
     </svg>
   );
 }
@@ -362,10 +340,65 @@ export default function Clientes() {
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showFormPanel, setShowFormPanel] = useState(false);
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  
+  const [modoEdicionRapida, setModoEdicionRapida] = useState(false);
+  const [columnaIdentificador, setColumnaIdentificador] =
+    useState<ColumnaIdentificador>(() => {
+      const guardado = localStorage.getItem("clientes_columna_identificador");
+      if (guardado === "dni" || guardado === "cuit" || guardado === "email") {
+        return guardado;
+      }
+      return "dni";
+    });
+  const [columnaTelefono, setColumnaTelefono] =
+    useState<ColumnaTelefono>(() => {
+      const guardado = localStorage.getItem("clientes_columna_telefono");
+      if (guardado === "telefono" || guardado === "localidad") {
+        return guardado;
+      }
+      return "telefono";
+    });
+  const [columnaExtra, setColumnaExtra] = useState<ColumnaExtra>(() => {
+    const guardado = localStorage.getItem("clientes_columna_extra");
+    if (
+      guardado === "proxima_visita" ||
+      guardado === "opcion_2" ||
+      guardado === "opcion_3"
+    ) {
+      return guardado;
+    }
+    return "proxima_visita";
+  });
+
+  useEffect(() => {
+    localStorage.setItem(
+      "clientes_columna_identificador",
+      columnaIdentificador
+    );
+  }, [columnaIdentificador]);
+
+  useEffect(() => {
+    localStorage.setItem("clientes_columna_telefono", columnaTelefono);
+  }, [columnaTelefono]);
+
+  useEffect(() => {
+    localStorage.setItem("clientes_columna_extra", columnaExtra);
+  }, [columnaExtra]);
+
+  function getValorColumnaIdentificador(c: Cliente) {
+    if (columnaIdentificador === "cuit") return c.cuit || "-";
+    if (columnaIdentificador === "email") return c.email || "-";
+    return c.dni || "-";
+  }
+
+  function getValorColumnaTelefono(c: Cliente) {
+    if (columnaTelefono === "localidad") return (c as any).localidad || "-";
+    return c.telefono || "-";
+  }
+
   // Modal de asignación
   const [showAsignarModal, setShowAsignarModal] = useState(false);
 
@@ -374,6 +407,9 @@ export default function Clientes() {
     [seleccionados]
   );
 
+  const color1 = "bg-white dark:bg-zinc-950";
+  const color2 = "bg-zinc-50 dark:bg-zinc-900";
+
   const filteredClientes = useMemo(() => {
     if (!searchTerm.trim()) return clientes;
     const term = searchTerm.toLowerCase();
@@ -381,7 +417,8 @@ export default function Clientes() {
       (c) =>
         c.nombre.toLowerCase().includes(term) ||
         c.email.toLowerCase().includes(term) ||
-        c.ubicacion.toLowerCase().includes(term)
+        c.ubicacion.toLowerCase().includes(term) ||
+        (((c as any).localidad || "") as string).toLowerCase().includes(term)
     );
   }, [clientes, searchTerm]);
 
@@ -446,6 +483,18 @@ export default function Clientes() {
 }
   }
 
+  function activarEdicionRapida() {
+    setModoEdicionRapida(true);
+    setEditingId(null);
+    setShowFormPanel(false);
+  }
+
+  function detenerEdicionRapida() {
+    setModoEdicionRapida(false);
+    cancelarEdicion();
+    setShowFormPanel(false);
+  }
+
   function loadToEdit(c: Cliente) {
     setEditingId(c.id);
     setForm({
@@ -456,6 +505,7 @@ export default function Clientes() {
       cuit: c.cuit,
       telefono: c.telefono,
       ubicacion: c.ubicacion,
+      localidad: (c as any).localidad || "",
       razonSocial: c.razonSocial,
       tipoComercio: c.tipoComercio,
       notas: c.notas,
@@ -463,6 +513,7 @@ export default function Clientes() {
       fotoFile: null,
     });
     setErrors({});
+    setShowFormPanel(true);
     // Auto-expand advanced if editing
     setShowAdvanced(true);
   }
@@ -493,6 +544,7 @@ export default function Clientes() {
       cuit: form.cuit.trim(),
       telefono: form.telefono.trim(),
       ubicacion: form.ubicacion.trim(),
+      localidad: form.localidad.trim(),
       razonSocial: form.razonSocial.trim(),
       tipoComercio: form.tipoComercio.trim(),
       notas: form.notas.trim(),
@@ -558,7 +610,7 @@ style={{
   className="w-10 h-10 object-contain"
 />
               <div>
-                <h1 className="text-lg font-semibold tracking-[3px]">
+                <h1 className="text-lg font-semibold tracking-[0.4px]">
                   PANEL DE CLIENTES
                 </h1>
                 <p className="text-xs text-zinc-500 dark:text-zinc-500">
@@ -615,14 +667,29 @@ style={{
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8 font-semibold">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+      <main
+        className={`${showFormPanel ? "max-w-7xl" : "max-w-[98vw]"} mx-auto px-6 py-8 font-semibold transition-all duration-300`}
+      >
+        <div
+          className={`${showFormPanel ? "grid grid-cols-1 lg:grid-cols-5 gap-8" : "grid grid-cols-1 gap-0"} transition-all duration-300`}
+        >
           {/* Form Panel */}
+          {showFormPanel && (
           <div className="lg:col-span-2">
             <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 sticky top-24 shadow-sm dark:shadow-none">
               {/* Form Header */}
-              <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-                <div className="flex items-center gap-3">
+              <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                      if (modoEdicionRapida) {
+                        detenerEdicionRapida();
+                        return;
+                      }
+                      setShowFormPanel(false);
+                    }}
+                  className="flex items-center gap-3 text-left flex-1"
+                >
                   {editingId ? (
                     <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center">
                       <IconPencil className="w-4 h-4 text-amber-600 dark:text-amber-500" />
@@ -635,15 +702,33 @@ style={{
                   <h2 className="font-semibold">
                     {editingId ? "Editar Cliente" : "NUEVO CLIENTE"}
                   </h2>
-                </div>
-                {editingId && (
+                </button>
+
+                <div className="flex items-center gap-2">
+                  {editingId && (
+                    <button
+                      onClick={cancelarEdicion}
+                      className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      title="Cancelar edición"
+                    >
+                      <IconX className="w-5 h-5" />
+                    </button>
+                  )}
                   <button
-                    onClick={cancelarEdicion}
+                    type="button"
+                    onClick={() => {
+                      if (modoEdicionRapida) {
+                        detenerEdicionRapida();
+                        return;
+                      }
+                      setShowFormPanel(false);
+                    }}
                     className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                    title="Ocultar panel"
                   >
-                    <IconX className="w-5 h-5" />
+                    <IconChevronUp className="w-5 h-5" />
                   </button>
-                )}
+                </div>
               </div>
 
               {/* Form Body */}
@@ -714,14 +799,23 @@ style={{
                   />
 
                   <FormInput
-                    label="Ubicación"
-                    value={form.ubicacion}
-                    onChange={(v) => setField("ubicacion", v)}
-                    error={errors.ubicacion}
-                    placeholder="Buenos Aires"
+                    label="Localidad"
+                    value={form.localidad}
+                    onChange={(v) => setField("localidad", v)}
+                    error={errors.localidad}
+                    placeholder="Capital Federal"
                     required
                   />
                 </div>
+
+                <FormInput
+                  label="Ubicación"
+                  value={form.ubicacion}
+                  onChange={(v) => setField("ubicacion", v)}
+                  error={errors.ubicacion}
+                  placeholder="Buenos Aires"
+                  required
+                />
 
                 {/* Advanced Toggle */}
                 <button
@@ -873,17 +967,18 @@ style={{
               </div>
             </div>
           </div>
+          )}
 
           {/* Client List Panel */}
-          <div className="lg:col-span-3 z-30">
+          <div className={`${showFormPanel ? "lg:col-span-3" : "lg:col-span-1"} z-30 w-full transition-all duration-300`}>
             <div className="bg-[#ffffffa4] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
               {/* List Header */}
               <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center">
-                      <IconUser className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                    </div>
+                   <div className="w-11 h-11 flex items-center justify-center overflow-hidden">
+  <img src="/mancliente3.png" alt="Cliente" className="w-11 h-11 object-contain" />
+</div>
                     <div>
                       <h2 className="font-semibold">CLIENTES</h2>
                       <p className="text-xs text-zinc-500">
@@ -892,34 +987,60 @@ style={{
                     </div>
                   </div>
 
-                  {/* Search */}
-                  <div className="relative flex-1 sm:max-w-xs">
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Buscar cliente..."
-                      className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
-                               text-zinc-900 dark:text-white pl-10 pr-4 py-2 text-sm
-                               outline-none transition-all duration-200
-                               focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20
-                               placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
-                    />
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-4 h-4 text-zinc-400 dark:text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
+                  {/* Search + toggle */}
+                  <div className="flex w-full sm:w-auto items-center gap-2 sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={activarEdicionRapida}
+                      className={`shrink-0 px-3 py-2 text-xs font-medium border transition-colors ${
+                        modoEdicionRapida
+                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-400 text-amber-700 dark:text-amber-400"
+                          : "bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+                      }`}
                     >
-                      <circle cx="11" cy="11" r="8" />
-                      <path d="M21 21l-4.35-4.35" />
-                    </svg>
+                      EDITAR
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setModoEdicionRapida(false);
+                        cancelarEdicion();
+                        setShowFormPanel((v) => !v);
+                      }}
+                      className="shrink-0 px-3 py-2 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                    >
+                      {showFormPanel ? "CERRAR +" : "AÑADIR CLIENTE +"}
+                    </button>
+
+                    <div className="relative flex-1 sm:w-72">
+                      <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Buscar cliente..."
+                        className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
+                                 text-zinc-900 dark:text-white pl-10 pr-4 py-2 text-sm
+                                 outline-none transition-all duration-200
+                                 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20
+                                 placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
+                      />
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="w-4 h-4 text-zinc-400 dark:text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                      </svg>
+                    </div>
                   </div>
                 </div>
 
                 {/* Selection bar */}
-                {filteredClientes.length > 0 && (
+                {!modoEdicionRapida && filteredClientes.length > 0 && (
                   <div className="mt-4 flex items-center justify-between">
                     <button
                       onClick={selectAll}
@@ -943,7 +1064,7 @@ style={{
               </div>
 
               {/* Client List */}
-              <div className="divide-y divide-zinc-200 dark:divide-zinc-800 max-h-[calc(100vh-320px)] overflow-y-auto">
+              <div className={`${showFormPanel ? "max-h-[calc(100vh-320px)]" : "max-h-[calc(100vh-230px)]"} overflow-y-auto overflow-x-auto`}>
                 {loading ? (
                   <div className="px-6 py-16 text-center">
                     <svg
@@ -986,128 +1107,192 @@ style={{
                     </p>
                   </div>
                 ) : (
-                  filteredClientes.map((c) => {
-                    
-                    const checked = seleccionados.has(c.id);
-                    const disabled = c.status === "asignado";
-                    return (
-                      <div
-                        key={c.id}
-                        className={`px-6 py-4 transition-all duration-200 ${
-                          
-                           disabled
-    ? "opacity-40 grayscale bg-zinc-100 dark:bg-zinc-800/40 border-l-2 border-l-zinc-400 cursor-not-allowed"
-    : checked
-    ? "bg-amber-50 dark:bg-amber-500/5 border-l-2 border-l-amber-500"
-    : "hover:bg-zinc-50 dark:hover:bg-zinc-800/30 border-l-2 border-l-transparent"
-}`}
-                      >
-                        <div className="flex items-start gap-4">
-                          {/* Checkbox */}
-                          <button
-                           disabled={disabled}
-onClick={(e) => {
-  e.stopPropagation();
-  if (disabled) return;
-  toggleSeleccion(c.id);
-}}
-                            className={`w-5 h-5 mt-0.5 border flex-shrink-0 flex items-center justify-center transition-all duration-200
-                                      ${
-                                        checked
-                                          ? "bg-amber-500 border-amber-500"
-                                          : "border-zinc-400 dark:border-zinc-600 hover:border-zinc-500 dark:hover:border-zinc-400"
-                                      }`}
+                  <table
+                    className="min-w-full border-collapse table-fixed"
+                    style={{ fontSize: "12px", lineHeight: "14px" }}
+                  >
+                    <thead className="sticky top-0 z-10 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700">
+                      <tr className="text-left uppercase text-zinc-500 dark:text-zinc-400">
+                        <th className="h-5 px-2 py-0 w-10 border-r border-zinc-200 dark:border-zinc-700">Sel</th>
+                        <th className="h-5 px-2 py-0 w-40 border-r border-zinc-200 dark:border-zinc-700">Cliente</th>
+                        <th className="h-5 px-2 py-0 w-44 border-r border-zinc-200 dark:border-zinc-700">
+                          <select
+                            value={columnaIdentificador}
+                            onChange={(e) =>
+                              setColumnaIdentificador(
+                                e.target.value as ColumnaIdentificador
+                              )
+                            }
+                            className="w-full bg-transparent outline-none text-[12x] uppercase font-semibold text-zinc-500 dark:text-zinc-400"
+                            title="Elegir dato a mostrar"
                           >
-                            {checked && (
-                              <IconCheck className="w-3 h-3 text-zinc-950" />
-                            )}
-                          </button>
-
-                          {/* Avatar - Clickable */}
-                          <Link 
-                            to={`/clientes/${c.id}`}
-                            className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0 hover:border-amber-500 transition-colors"
+                            <option value="dni">DNI</option>
+                            <option value="cuit">CUIT/CUIL</option>
+                            <option value="email">Mail</option>
+                          </select>
+                        </th>
+                        <th className="h-5 px-2 py-0 w-28 border-r border-zinc-200 dark:border-zinc-700">
+                          <select
+                            value={columnaTelefono}
+                            onChange={(e) =>
+                              setColumnaTelefono(
+                                e.target.value as ColumnaTelefono
+                              )
+                            }
+                            className="w-full bg-transparent outline-none text-[12px] uppercase font-semibold text-zinc-500 dark:text-zinc-400"
+                            title="Elegir dato a mostrar"
                           >
-                            {c.foto ? (
-                              <img
-                                src={c.foto}
-                                alt=""
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-500">
-                                {c.nombre
-                                  .split(" ")
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .slice(0, 2)
-                                  .toUpperCase()}
-                              </span>
-                            )}
-                          </Link>
+                            <option value="telefono">Teléfono</option>
+                            <option value="localidad">Localidad</option>
+                          </select>
+                        </th>
+                        <th className="h-5 px-2 py-0 w-32 border-r border-zinc-200 dark:border-zinc-700">Ubicación</th>
+                        <th className="h-5 px-2 py-0 w-32 border-r border-zinc-200 dark:border-zinc-700">Razón social</th>
+                        <th className="h-5 px-2 py-0 w-24 border-r border-zinc-200 dark:border-zinc-700">Estado</th>
+                        <th className="h-5 px-2 py-0 w-28 border-l border-zinc-200 dark:border-zinc-700">
+                          <select
+                            value={columnaExtra}
+                            onChange={(e) =>
+                              setColumnaExtra(e.target.value as ColumnaExtra)
+                            }
+                            className="w-full bg-transparent outline-none text-[12px] uppercase font-semibold text-zinc-500 dark:text-zinc-400"
+                            title="Elegir dato a mostrar"
+                          >
+                            <option value="proxima_visita">Próxima visita</option>
+                            <option value="opcion_2">Opción 2</option>
+                            <option value="opcion_3">Opción 3</option>
+                          </select>
+                        </th>
+                      </tr>
+                    </thead>
 
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <Link to={`/clientes/${c.id}`} className="group">
-                                <h3 className="font-medium text-zinc-900 dark:text-white truncate group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">
-                                  {c.nombre}
-                                </h3>
-{disabled && (
-  <span className="inline-block mt-1 text-[10px] px-2 py-0.5 bg-zinc-300 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300">
-    ASIGNADO
-  </span>
-)}
+                    <tbody>
+                      {filteredClientes.map((c, index) => {
+                        const checked = seleccionados.has(c.id);
+                        const disabled = c.status === "asignado";
+                        const rowColor = index % 2 === 0 ? color1 : color2;
+                        const estadoColor = disabled
+                          ? "bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300"
+                          : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300";
 
-                                <div className="flex items-center gap-2 mt-1 text-xs text-zinc-500">
-                                  <IconMail className="w-3 h-3" />
-                                  <span className="truncate">{c.email}</span>
-                                </div>
-                                <div className="flex items-center gap-2 mt-0.5 text-xs text-zinc-500">
-                                  <IconMapPin className="w-3 h-3" />
-                                  <span className="truncate">{c.ubicacion}</span>
-                                </div>
-                              </Link>
-
-                              {/* Edit button */}
+                        return (
+                          <tr
+                            key={c.id}
+                            onClick={() => {
+                              if (modoEdicionRapida) loadToEdit(c);
+                            }}
+                            className={`group border-b border-zinc-200 dark:border-zinc-800 ${rowColor} ${
+                              modoEdicionRapida
+                                ? "cursor-pointer hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                                : "hover:brightness-[0.985] dark:hover:brightness-110"
+                            }`}
+                            style={{ height: "25px" }}
+                          >
+                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800">
                               <button
+                                disabled={disabled || modoEdicionRapida}
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  loadToEdit(c);
+                                  if (disabled || modoEdicionRapida) return;
+                                  toggleSeleccion(c.id);
                                 }}
-                                className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-amber-600 dark:hover:text-amber-500 
-                                         hover:bg-zinc-100 dark:hover:bg-zinc-800 
-                                         transition-all duration-200"
-                                title="Editar cliente"
+                                className={`w-[14px] h-[14px] border flex items-center justify-center ${
+                                  checked
+                                    ? "bg-amber-500 border-amber-500"
+                                    : "border-zinc-400 dark:border-zinc-600"
+                                } ${modoEdicionRapida ? "opacity-40 cursor-not-allowed" : ""}`}
                               >
-                                <IconPencil className="w-4 h-4" />
+                                {checked && <IconCheck className="w-[12x] h-[15px] text-zinc-950" />}
                               </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
+                            </td>
+
+                            <td className="relative h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white">
+                              {modoEdicionRapida && (
+                                <div className="pointer-events-none absolute inset-0 hidden group-hover:flex items-center justify-center bg-amber-200/60 dark:bg-amber-500/10 z-10">
+                                  <span className="text-[12px] font-bold tracking-[0.14em] text-amber-900 dark:text-amber-300">
+                                    EDITAR CONTACTO
+                                  </span>
+                                </div>
+                              )}
+
+                              {modoEdicionRapida ? (
+                                <span className="block truncate" title={c.nombre}>
+                                  {c.nombre}
+                                </span>
+                              ) : (
+                                <Link
+                                  to={`/clientes/${c.id}`}
+                                  className="block truncate hover:text-amber-600 dark:hover:text-amber-500"
+                                  title={c.nombre}
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {c.nombre}
+                                </Link>
+                              )}
+                            </td>
+
+                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                              <span className="block truncate" title={getValorColumnaIdentificador(c)}>{getValorColumnaIdentificador(c)}</span>
+                            </td>
+
+                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                              <span className="block truncate" title={getValorColumnaTelefono(c)}>
+                                {getValorColumnaTelefono(c)}
+                              </span>
+                            </td>
+
+                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                              <span className="block truncate" title={c.ubicacion || "-"}>{c.ubicacion || "-"}</span>
+                            </td>
+
+                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                              <span className="block truncate" title={c.razonSocial || "-"}>{c.razonSocial || "-"}</span>
+                            </td>
+
+                            <td className={`h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 uppercase text-center font-semibold ${estadoColor}`}>
+                              {disabled ? "Asignado" : "Disponible"}
+                            </td>
+
+                            <td className="h-5 px-2 py-0 align-middle text-zinc-500 dark:text-zinc-400">
+                              <span className="block truncate">&nbsp;</span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 )}
               </div>
 
               {/* Assign Button */}
               <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-                <button
-                  onClick={asignarClientes}
-                  disabled={cantidadSeleccionados === 0}
-                  className="w-full flex items-center justify-center gap-3 py-3 px-4
-                           border-2 border-dashed transition-all duration-200
-                           disabled:border-zinc-300 dark:disabled:border-zinc-700 
-                           disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:cursor-not-allowed
-                           enabled:border-amber-500 enabled:text-amber-600 dark:enabled:text-amber-500 
-                           enabled:hover:bg-amber-50 dark:enabled:hover:bg-amber-500/10 enabled:hover:border-amber-500"
-                >
-                  <IconTruck className="w-5 h-5" />
-                  <span className="font-semibold">
-                    ASIGNAR {cantidadSeleccionados > 0 && `(${cantidadSeleccionados})`} A CHOFER
-                  </span>
-                </button>
+                {modoEdicionRapida ? (
+                  <button
+                    onClick={detenerEdicionRapida}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4
+                               border-2 border-dashed border-amber-500 text-amber-700 dark:text-amber-400
+                               hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all duration-200"
+                  >
+                    <IconX className="w-5 h-5" />
+                    <span className="font-semibold">DETENER EDICIÓN</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={asignarClientes}
+                    disabled={cantidadSeleccionados === 0}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4
+                             border-2 border-dashed transition-all duration-200
+                             disabled:border-zinc-300 dark:disabled:border-zinc-700 
+                             disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:cursor-not-allowed
+                             enabled:border-amber-500 enabled:text-amber-600 dark:enabled:text-amber-500 
+                             enabled:hover:bg-amber-50 dark:enabled:hover:bg-amber-500/10 enabled:hover:border-amber-500"
+                  >
+                    <IconTruck className="w-5 h-5" />
+                    <span className="font-semibold">
+                      ASIGNAR {cantidadSeleccionados > 0 && `(${cantidadSeleccionados})`} A CHOFER
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
           </div>
