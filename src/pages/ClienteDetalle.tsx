@@ -74,6 +74,18 @@ function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function IconTrash({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
+}
+
 function IconFilter({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -166,6 +178,8 @@ export default function ClienteDetalle() {
   const [error, setError] = useState<string | null>(null);
   const [mostrarFiltroPeriodos, setMostrarFiltroPeriodos] = useState(false);
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState("todos");
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -196,6 +210,20 @@ export default function ClienteDetalle() {
   function logout() {
     localStorage.removeItem("token");
     nav("/login", { replace: true });
+  }
+
+  async function confirmDelete() {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await api.deleteUser(id);
+      nav("/clientes", { replace: true });
+    } catch (e: any) {
+      console.error("Error al borrar cliente:", e);
+    } finally {
+      setDeleting(false);
+      setShowDeleteModal(false);
+    }
   }
 
   async function downloadPDF(remitoId: string) {
@@ -396,16 +424,28 @@ export default function ClienteDetalle() {
                   </div>
                 </div>
 
-                <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
+                <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex gap-3">
                   <Link
                     to={`/clientes?edit=${cliente.id}`}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 px-4
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4
                              bg-amber-500 text-zinc-950 font-semibold
                              hover:bg-amber-400 transition-colors"
                   >
                     <IconPencil className="w-4 h-4" />
                     Editar Cliente
                   </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    disabled={deleting}
+                    className="flex items-center justify-center gap-2 py-2.5 px-4 font-semibold transition-colors
+                             bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400
+                             hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400
+                             disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <IconTrash className="w-4 h-4" />
+                    {deleting ? "Borrando..." : "Borrar"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -572,6 +612,50 @@ export default function ClienteDetalle() {
           </div>
         ) : null}
       </main>
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => !deleting && setShowDeleteModal(false)}
+          />
+          <div className="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                <IconTrash className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Borrar cliente</h3>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+              ¿Estás seguro de borrar cliente <span className="font-semibold text-zinc-900 dark:text-white">{cliente?.nombre}</span>? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium rounded-lg
+                         bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300
+                         hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors
+                         disabled:opacity-50"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium rounded-lg
+                         bg-red-600 text-white hover:bg-red-700 transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? "Borrando..." : "Sí, borrar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

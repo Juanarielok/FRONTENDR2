@@ -64,6 +64,18 @@ function IconX({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function IconTrash({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  );
+}
+
 function IconCheck({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -120,6 +132,8 @@ export default function Admin() {
   const [newPassword, setNewPassword] = useState("");
   const [resetting, setResetting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [deleteModal, setDeleteModal] = useState<User | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (tab === "gestion") loadUsers();
@@ -198,6 +212,21 @@ export default function Admin() {
       setFeedback({ type: "err", text: err.message || "Error reseteando contrasena" });
     } finally {
       setResetting(false);
+    }
+  }
+
+  async function handleDeleteUser() {
+    if (!deleteModal) return;
+    setDeleting(true);
+    try {
+      await api.deleteUser(deleteModal.id);
+      setFeedback({ type: "ok", text: `"${deleteModal.nombre}" eliminado` });
+      setDeleteModal(null);
+      loadUsers();
+    } catch (err: any) {
+      setFeedback({ type: "err", text: err.message || "Error eliminando usuario" });
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -512,6 +541,13 @@ export default function Admin() {
                       >
                         <IconKey className="w-4 h-4" />
                       </button>
+                      <button
+                        onClick={() => setDeleteModal(user)}
+                        className="w-9 h-9 flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-red-500 hover:text-red-500 transition-all"
+                        title="Borrar usuario"
+                      >
+                        <IconTrash className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -606,6 +642,50 @@ export default function Admin() {
               >
                 <IconKey className="w-4 h-4" />
                 {resetting ? "Reseteando..." : "Resetear"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======== DELETE MODAL ======== */}
+      {deleteModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => !deleting && setDeleteModal(null)}
+          />
+          <div className="relative bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl p-6 max-w-md w-full mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/15 flex items-center justify-center flex-shrink-0">
+                <IconTrash className="w-5 h-5 text-red-600 dark:text-red-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Borrar usuario</h3>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+              ¿Estás seguro de borrar usuario <span className="font-semibold text-zinc-900 dark:text-white">{deleteModal.nombre}</span>? Esta acción no se puede deshacer.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteModal(null)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium rounded-lg
+                         bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300
+                         hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors
+                         disabled:opacity-50"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteUser}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium rounded-lg
+                         bg-red-600 text-white hover:bg-red-700 transition-colors
+                         disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deleting ? "Borrando..." : "Sí, borrar"}
               </button>
             </div>
           </div>

@@ -209,6 +209,12 @@ export const mockApi = {
     return { message: "Usuario actualizado", user: idx >= 0 ? clientes[idx] : clientes[0] };
   },
 
+  async deleteUser(id: string) {
+    const idx = clientes.findIndex((c) => c.id === id);
+    if (idx >= 0) clientes.splice(idx, 1);
+    return { message: "User deleted successfully", userId: id };
+  },
+
   async getRemitosByCliente(clienteId: string) {
     await delay();
     const filtered = remitos.filter((r) => r.clienteId === clienteId);

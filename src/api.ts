@@ -122,6 +122,12 @@ const realApi = {
     });
   },
 
+  deleteUser(id: string) {
+    return request<{ message: string; userId: string }>(`/users/${id}`, {
+      method: "DELETE",
+    });
+  },
+
   // Remitos
   getRemitosByCliente(clienteId: string) {
     return request<{ count: number; remitos: Remito[] }>(`/remitos/cliente/${clienteId}`, {
