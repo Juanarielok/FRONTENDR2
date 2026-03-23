@@ -276,7 +276,7 @@ export default function ClienteDetalle() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/bg1444.jpg')",
+            backgroundImage: "url('/bg0991.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",

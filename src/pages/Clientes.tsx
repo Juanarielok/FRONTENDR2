@@ -4,6 +4,7 @@ import { api } from "../api";
 import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { AsignarChoferModal } from "../components/AsignarChoferModal";
+import ubicacionesRaw from "../data/ubicaciones.json";
 
 type FormState = {
   email: string;
@@ -129,6 +130,69 @@ const emptyForm: FormState = {
   fotoUrl: "",
   fotoFile: null,
 };
+
+
+const OPCIONES_TIPO_COMERCIO = [
+  "Restaurante",
+  "Bar",
+  "Rotisería",
+  "Colegio",
+  "Comida rápida",
+  "Parrilla",
+  "Panadería",
+  "Confitería",
+  "Café",
+  "Supermercado",
+  "Hotel",
+  "Catering",
+  "Hospital",
+  "Club",
+  "Fábrica",
+];
+
+type ProvinciaCatalogo = {
+  nombre: string;
+  localidades: string[];
+};
+
+type PaisCatalogo = {
+  codigo: string;
+  nombre: string;
+  bandera: string;
+  provincias: ProvinciaCatalogo[];
+};
+
+const CATALOGO_UBICACIONES: PaisCatalogo[] = ubicacionesRaw as PaisCatalogo[];
+
+function parsearLocalidadGuardada(valor: string) {
+  const partes = valor
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (partes.length !== 3) {
+    return {
+      pais: "",
+      provincia: "",
+      localidad: "",
+    };
+  }
+
+  return {
+    localidad: partes[0],
+    provincia: partes[1],
+    pais: partes[2],
+  };
+}
+
+function construirLocalidadFinal(
+  localidad: string,
+  provincia: string,
+  pais: string
+) {
+  if (!localidad || !provincia || !pais) return "";
+  return `${localidad}, ${provincia}, ${pais}`;
+}
 
 // Icons
 function IconPencil({ className = "w-5 h-5" }: { className?: string }) {
@@ -355,6 +419,9 @@ export default function Clientes() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showFormPanel, setShowFormPanel] = useState(false);
+  const [paisSeleccionado, setPaisSeleccionado] = useState("");
+  const [provinciaSeleccionada, setProvinciaSeleccionada] = useState("");
+  const [localidadSeleccionada, setLocalidadSeleccionada] = useState("");
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -427,6 +494,26 @@ export default function Clientes() {
 
   const color1 = "bg-white dark:bg-zinc-950";
   const color2 = "bg-zinc-50 dark:bg-zinc-900";
+
+  const provinciasCatalogo = useMemo(() => {
+    const pais = CATALOGO_UBICACIONES.find(
+      (item) => item.codigo === paisSeleccionado
+    );
+    return pais?.provincias || [];
+  }, [paisSeleccionado]);
+
+  const localidadesCatalogo = useMemo(() => {
+    const provincia = provinciasCatalogo.find(
+      (item) => item.nombre === provinciaSeleccionada
+    );
+    return provincia?.localidades || [];
+  }, [provinciasCatalogo, provinciaSeleccionada]);
+
+  function resetSelectorLocalidad() {
+    setPaisSeleccionado("");
+    setProvinciaSeleccionada("");
+    setLocalidadSeleccionada("");
+  }
 
   const localidadesDisponibles = useMemo(() => {
     return Array.from(
@@ -560,7 +647,13 @@ export default function Clientes() {
   }
 
   function loadToEdit(c: Cliente) {
+    const localidadGuardada = (c as any).localidad || "";
+    const parseado = parsearLocalidadGuardada(localidadGuardada);
+
     setEditingId(c.id);
+    setPaisSeleccionado(parseado.pais);
+    setProvinciaSeleccionada(parseado.provincia);
+    setLocalidadSeleccionada(parseado.localidad);
     setForm({
       email: c.email,
       password: "",
@@ -569,7 +662,7 @@ export default function Clientes() {
       cuit: c.cuit,
       telefono: c.telefono,
       ubicacion: c.ubicacion,
-      localidad: (c as any).localidad || "",
+      localidad: localidadGuardada,
       razonSocial: c.razonSocial,
       tipoComercio: c.tipoComercio,
       notas: c.notas,
@@ -585,6 +678,7 @@ export default function Clientes() {
     setEditingId(null);
     setForm(emptyForm);
     setErrors({});
+    resetSelectorLocalidad();
   }
 
   async function submit() {
@@ -629,6 +723,7 @@ export default function Clientes() {
       setClientes((prev) => [creado, ...prev]);
       setForm(emptyForm);
       setErrors({});
+      resetSelectorLocalidad();
     } catch (e: any) {
       console.error("ERROR BACKEND:", e);
       alert(e?.message || "Error creando/actualizando");
@@ -656,7 +751,7 @@ export default function Clientes() {
         <div
           className="fixed inset-0 pointer-events-none opacity-20"
           style={{
-            backgroundImage: "url('/bgu7.jpg')",
+            backgroundImage: "url('/bg0991.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -858,14 +953,98 @@ export default function Clientes() {
                       inputMode="tel"
                     />
 
-                    <FormInput
-                      label="Localidad"
-                      value={form.localidad}
-                      onChange={(v) => setField("localidad", v)}
-                      error={errors.localidad}
-                      placeholder="Capital Federal"
-                      required
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                        Localidad <span className="text-amber-500">*</span>
+                      </label>
+
+                      <div className="grid grid-cols-3 gap-2">
+                        <select
+                          value={paisSeleccionado}
+                          onChange={(e) => {
+                            setPaisSeleccionado(e.target.value);
+                            setProvinciaSeleccionada("");
+                            setLocalidadSeleccionada("");
+                            setField("localidad", "");
+                          }}
+                          className={`w-full bg-zinc-50 dark:bg-zinc-950 border text-zinc-900 dark:text-white px-3 py-2.5 text-sm
+                                     outline-none transition-all duration-200
+                                     ${
+                                       errors.localidad
+                                         ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/20"
+                                         : "border-zinc-300 dark:border-zinc-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                                     }`}
+                        >
+                          <option value="">País</option>
+                          {CATALOGO_UBICACIONES.map((pais) => (
+                            <option key={pais.codigo} value={pais.codigo}>
+                              {pais.bandera} {pais.codigo}
+                            </option>
+                          ))}
+                        </select>
+
+                        <select
+                          value={provinciaSeleccionada}
+                          onChange={(e) => {
+                            setProvinciaSeleccionada(e.target.value);
+                            setLocalidadSeleccionada("");
+                            setField("localidad", "");
+                          }}
+                          disabled={!paisSeleccionado}
+                          className={`w-full bg-zinc-50 dark:bg-zinc-950 border text-zinc-900 dark:text-white px-3 py-2.5 text-sm
+                                     outline-none transition-all duration-200 disabled:opacity-50
+                                     ${
+                                       errors.localidad
+                                         ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/20"
+                                         : "border-zinc-300 dark:border-zinc-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                                     }`}
+                        >
+                          <option value="">Provincia</option>
+                          {provinciasCatalogo.map((provincia) => (
+                            <option key={provincia.nombre} value={provincia.nombre}>
+                              {provincia.nombre}
+                            </option>
+                          ))}
+                        </select>
+
+                        <select
+                          value={localidadSeleccionada}
+                          onChange={(e) => {
+                            const valor = e.target.value;
+                            setLocalidadSeleccionada(valor);
+                            setField(
+                              "localidad",
+                              construirLocalidadFinal(
+                                valor,
+                                provinciaSeleccionada,
+                                paisSeleccionado
+                              )
+                            );
+                          }}
+                          disabled={!provinciaSeleccionada}
+                          className={`w-full bg-zinc-50 dark:bg-zinc-950 border text-zinc-900 dark:text-white px-3 py-2.5 text-sm
+                                     outline-none transition-all duration-200 disabled:opacity-50
+                                     ${
+                                       errors.localidad
+                                         ? "border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500/20"
+                                         : "border-zinc-300 dark:border-zinc-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                                     }`}
+                        >
+                          <option value="">Localidad</option>
+                          {localidadesCatalogo.map((localidad) => (
+                            <option key={localidad} value={localidad}>
+                              {localidad}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {errors.localidad && (
+                        <p className="mt-1 text-xs text-red-500 dark:text-red-400 flex items-center gap-1">
+                          <span>⚠</span> {errors.localidad}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   <FormInput
@@ -904,14 +1083,33 @@ export default function Clientes() {
                           required
                         />
 
-                        <FormInput
-                          label="Tipo comercio"
-                          value={form.tipoComercio}
-                          onChange={(v) => setField("tipoComercio", v)}
-                          error={errors.tipoComercio}
-                          placeholder="Mayorista"
-                          required
-                        />
+                        <div>
+  <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+    Tipo comercio
+  </label>
+  <select
+    value={form.tipoComercio}
+    onChange={(e) => setField("tipoComercio", e.target.value)}
+    className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
+           text-zinc-900 dark:text-white px-3 py-2.5 text-sm
+           outline-none transition-all duration-200
+           focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+    required
+  >
+    <option value="">Elegir tipo</option>
+    {OPCIONES_TIPO_COMERCIO.map((tipo) => (
+      <option key={tipo} value={tipo}>
+        {tipo}
+      </option>
+    ))}
+  </select>
+
+  {errors.tipoComercio && (
+    <p className="mt-1 text-xs text-red-500 dark:text-red-400">
+      ⚠ {errors.tipoComercio}
+    </p>
+  )}
+</div>
                       </div>
 
                       <div>
@@ -1494,3 +1692,5 @@ export default function Clientes() {
     </div>
   );
 }
+
+////hasta ahora bien creo
