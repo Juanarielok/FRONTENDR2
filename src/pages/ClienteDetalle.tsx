@@ -25,26 +25,6 @@ const statusConfig = {
   },
 };
 
-function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function IconFileText({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <polyline points="10 9 9 9 8 9" />
-    </svg>
-  );
-}
-
 function IconDownload({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
@@ -315,7 +295,7 @@ export default function ClienteDetalle() {
                          hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
                          transition-colors"
               >
-                <IconArrowLeft className="w-5 h-5" />
+                <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
               </Link>
               <div>
                 <h1 className="text-lg font-semibold tracking-tight">Detalle del Cliente</h1>
@@ -368,8 +348,8 @@ export default function ClienteDetalle() {
                 <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
                   <div className="flex items-start gap-4">
                     <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {cliente.foto ? (
-                        <img src={cliente.foto} alt={cliente.nombre} className="w-full h-full object-cover" />
+                      {(cliente as any).foto ? (
+                        <img src={(cliente as any).foto} alt={cliente.nombre} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-xl font-bold text-zinc-400 dark:text-zinc-500">
                           {cliente.nombre
@@ -455,9 +435,10 @@ export default function ClienteDetalle() {
                 <div className="px-4 xl:px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center flex-shrink-0">
-                        <IconFileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                      <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                        <img src="/pep.png" alt="pep" className="w-8 h-8 object-contain" />
                       </div>
+
                       <div className="min-w-0">
                         <h2 className="font-semibold">Remitos</h2>
                         <p className="text-xs text-zinc-500">
@@ -613,7 +594,6 @@ export default function ClienteDetalle() {
         ) : null}
       </main>
 
-      {/* Delete confirmation modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
@@ -627,9 +607,12 @@ export default function ClienteDetalle() {
               </div>
               <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Borrar cliente</h3>
             </div>
+
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-              ¿Estás seguro de borrar cliente <span className="font-semibold text-zinc-900 dark:text-white">{cliente?.nombre}</span>? Esta acción no se puede deshacer.
+              ¿Estás seguro de borrar cliente{" "}
+              <span className="font-semibold text-zinc-900 dark:text-white">{cliente?.nombre}</span>? Esta acción no se puede deshacer.
             </p>
+
             <div className="flex gap-3 justify-end">
               <button
                 type="button"

@@ -513,7 +513,6 @@ export default function Clientes() {
 
   function setField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
-    // Clear error when user starts typing
     if (errors[key]) {
       setErrors((prev) => ({ ...prev, [key]: undefined }));
     }
@@ -579,7 +578,6 @@ export default function Clientes() {
     });
     setErrors({});
     setShowFormPanel(true);
-    // Auto-expand advanced if editing
     setShowAdvanced(true);
   }
 
@@ -644,7 +642,6 @@ export default function Clientes() {
   }
 
   function handleAsignacionExitosa() {
-    // Limpiar selección y recargar clientes
     setSeleccionados(new Set());
     cargarClientes();
   }
@@ -655,29 +652,27 @@ export default function Clientes() {
 
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
-      {/* Background pattern */}
       <div className="fixed inset-0 opacity-[0.77] dark:opacity-[0.02] pointer-events-none">
         <div
-  className="fixed inset-0 pointer-events-none opacity-20"
-style={{
-  backgroundImage: "url('/bgu7.jpg')",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}}
-/>
+          className="fixed inset-0 pointer-events-none opacity-20"
+          style={{
+            backgroundImage: "url('/bgu7.jpg')",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        />
       </div>
 
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-[#ffffff80] dark:bg-zinc-950 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-  <img
-  src="/ARRTAIUS1.png"
-  alt="Arttaius"
-  className="w-10 h-10 object-contain"
-/>
+              <img
+                src="/ARRTAIUS1.png"
+                alt="Arttaius"
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <h1 className="text-lg font-semibold tracking-[0.4px]">
                   PANEL DE CLIENTES
@@ -690,34 +685,34 @@ style={{
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-500 bg-[#f3f3f300] dark:border-[#f0000000] px-3 py-2 border border-[#f0000000] dark:border-[#f0000000]">
-                 <img src="/asterisco1.png" alt="icono" className="w-5 h-5 object-contain" />
+                <img src="/asterisco1.png" alt="icono" className="w-5 h-5 object-contain" />
                 <span>Admin</span>
               </div>
-            <Link
-  to="/monitoreo"
-  className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+              <Link
+                to="/monitoreo"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
              bg-[#F2F3F5] text-zinc-950
              hover:bg-[#8ab1ff]
              transition-all duration-200
              rounded-full"
->
-  <img src="/monitor11.png" alt="icono" className="w-5 h-5 object-contain" />
-  <span className="hidden sm:inline">MONITOREO</span>
-</Link>
+              >
+                <img src="/monitor11.png" alt="icono" className="w-5 h-5 object-contain" />
+                <span className="hidden sm:inline">MONITOREO</span>
+              </Link>
               <ThemeToggle />
-             <button
-  onClick={() => nav("/admin")}
-  className="w-10 h-10 flex items-center justify-center
+              <button
+                onClick={() => nav("/admin")}
+                className="w-10 h-10 flex items-center justify-center
     bg-zinc-100 dark:bg-zinc-900
     text-zinc-600 dark:text-zinc-400
     hover:bg-zinc-200 dark:hover:bg-zinc-800
     hover:text-zinc-900 dark:hover:text-white
     transition-all duration-200
     rounded-lg"
-  title="Gestion"
->
-  <img src="/gestion3.png" alt="icono" className="w-5 h-5 object-contain" />
-</button>
+                title="Gestion"
+              >
+                <img src="/gestion3.png" alt="icono" className="w-5 h-5 object-contain" />
+              </button>
               <button
                 onClick={logout}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
@@ -727,7 +722,7 @@ style={{
                          hover:border-zinc-400 dark:hover:border-zinc-600
                          transition-all duration-200"
               >
-           <img src="/gestion1.png" alt="icono" className="w-5 h-5 object-contain" />
+                <img src="/gestion1.png" alt="icono" className="w-5 h-5 object-contain" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
@@ -735,54 +730,16 @@ style={{
         </div>
       </header>
 
-      {/* Main Content */}
       <main
         className={`${showFormPanel ? "max-w-7xl" : "max-w-[98vw]"} mx-auto px-6 py-8 font-semibold transition-all duration-300`}
       >
         <div
           className={`${showFormPanel ? "grid grid-cols-1 lg:grid-cols-5 gap-8" : "grid grid-cols-1 gap-0"} transition-all duration-300`}
         >
-          {/* Form Panel */}
           {showFormPanel && (
-          <div className="lg:col-span-2">
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 sticky top-24 shadow-sm dark:shadow-none">
-              {/* Form Header */}
-              <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                      if (modoEdicionRapida) {
-                        detenerEdicionRapida();
-                        return;
-                      }
-                      setShowFormPanel(false);
-                    }}
-                  className="flex items-center gap-3 text-left flex-1"
-                >
-                  {editingId ? (
-                    <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center">
-                      <IconPencil className="w-4 h-4 text-amber-600 dark:text-amber-500" />
-                    </div>
-                  ) : (
-                    <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
-                      <IconPlus className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
-                    </div>
-                  )}
-                  <h2 className="font-semibold">
-                    {editingId ? "Editar Cliente" : "NUEVO CLIENTE"}
-                  </h2>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  {editingId && (
-                    <button
-                      onClick={cancelarEdicion}
-                      className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                      title="Cancelar edición"
-                    >
-                      <IconX className="w-5 h-5" />
-                    </button>
-                  )}
+            <div className="lg:col-span-2">
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 sticky top-24 shadow-sm dark:shadow-none">
+                <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between gap-3">
                   <button
                     type="button"
                     onClick={() => {
@@ -792,180 +749,212 @@ style={{
                       }
                       setShowFormPanel(false);
                     }}
-                    className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-                    title="Ocultar panel"
+                    className="flex items-center gap-3 text-left flex-1"
                   >
-                    <IconChevronUp className="w-5 h-5" />
+                    {editingId ? (
+                      <div className="w-8 h-8 bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center">
+                        <IconPencil className="w-4 h-4 text-amber-600 dark:text-amber-500" />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
+                        <IconPlus className="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
+                      </div>
+                    )}
+                    <h2 className="font-semibold">
+                      {editingId ? "Editar Cliente" : "NUEVO CLIENTE"}
+                    </h2>
                   </button>
-                </div>
-              </div>
 
-              {/* Form Body */}
-              <div className="p-6 space-y-5 font-semibold">
-                <FormInput
-                  label="Email"
-                  value={form.email}
-                  onChange={(v) => setField("email", v)}
-                  error={errors.email}
-                  placeholder="cliente@empresa.com"
-                  type="email"
-                  required
-                  inputMode="email"
-                />
-
-                <FormInput
-                  label={editingId ? "Password (opcional)" : "Password"}
-                  value={form.password}
-                  onChange={(v) => setField("password", v)}
-                  error={errors.password}
-                  placeholder={
-                    editingId ? "Dejar vacío para no cambiar" : "Mínimo 8 caracteres"
-                  }
-                  type="password"
-                  required={!editingId}
-                />
-
-                <FormInput
-                  label="Nombre completo"
-                  value={form.nombre}
-                  onChange={(v) => setField("nombre", v)}
-                  error={errors.nombre}
-                  placeholder="Juan Pérez"
-                  required
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormInput
-                    label="DNI"
-                    value={form.dni}
-                    onChange={(v) => setField("dni", v)}
-                    error={errors.dni}
-                    placeholder="12345678"
-                    required
-                    inputMode="numeric"
-                  />
-
-                  <FormInput
-                    label="CUIT/CUIL"
-                    value={form.cuit}
-                    onChange={(v) => setField("cuit", formatCUIT(v))}
-                    error={errors.cuit}
-                    placeholder="27-12345678-9"
-                    required
-                    inputMode="numeric"
-                  />
+                  <div className="flex items-center gap-2">
+                    {editingId && (
+                      <button
+                        onClick={cancelarEdicion}
+                        className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                        title="Cancelar edición"
+                      >
+                        <IconX className="w-5 h-5" />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (modoEdicionRapida) {
+                          detenerEdicionRapida();
+                          return;
+                        }
+                        setShowFormPanel(false);
+                      }}
+                      className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      title="Ocultar panel"
+                    >
+                      <IconChevronUp className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="p-6 space-y-5 font-semibold">
                   <FormInput
-                    label="Teléfono"
-                    value={form.telefono}
-                    onChange={(v) => setField("telefono", v)}
-                    error={errors.telefono}
-                    placeholder="+54 11 1234-5678"
+                    label="Email"
+                    value={form.email}
+                    onChange={(v) => setField("email", v)}
+                    error={errors.email}
+                    placeholder="cliente@empresa.com"
+                    type="email"
                     required
-                    inputMode="tel"
+                    inputMode="email"
                   />
 
                   <FormInput
-                    label="Localidad"
-                    value={form.localidad}
-                    onChange={(v) => setField("localidad", v)}
-                    error={errors.localidad}
-                    placeholder="Capital Federal"
+                    label={editingId ? "Password (opcional)" : "Password"}
+                    value={form.password}
+                    onChange={(v) => setField("password", v)}
+                    error={errors.password}
+                    placeholder={
+                      editingId ? "Dejar vacío para no cambiar" : "Mínimo 8 caracteres"
+                    }
+                    type="password"
+                    required={!editingId}
+                  />
+
+                  <FormInput
+                    label="Nombre completo"
+                    value={form.nombre}
+                    onChange={(v) => setField("nombre", v)}
+                    error={errors.nombre}
+                    placeholder="Juan Pérez"
                     required
                   />
-                </div>
 
-                <FormInput
-                  label="Ubicación"
-                  value={form.ubicacion}
-                  onChange={(v) => setField("ubicacion", v)}
-                  error={errors.ubicacion}
-                  placeholder="Buenos Aires"
-                  required
-                />
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormInput
+                      label="DNI"
+                      value={form.dni}
+                      onChange={(v) => setField("dni", v)}
+                      error={errors.dni}
+                      placeholder="12345678"
+                      required
+                      inputMode="numeric"
+                    />
 
-                {/* Advanced Toggle */}
-                <button
-                  onClick={() => setShowAdvanced((v) => !v)}
-                  className="w-full flex items-center justify-between px-4 py-3 
+                    <FormInput
+                      label="CUIT/CUIL"
+                      value={form.cuit}
+                      onChange={(v) => setField("cuit", formatCUIT(v))}
+                      error={errors.cuit}
+                      placeholder="27-12345678-9"
+                      required
+                      inputMode="numeric"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormInput
+                      label="Teléfono"
+                      value={form.telefono}
+                      onChange={(v) => setField("telefono", v)}
+                      error={errors.telefono}
+                      placeholder="+54 11 1234-5678"
+                      required
+                      inputMode="tel"
+                    />
+
+                    <FormInput
+                      label="Localidad"
+                      value={form.localidad}
+                      onChange={(v) => setField("localidad", v)}
+                      error={errors.localidad}
+                      placeholder="Capital Federal"
+                      required
+                    />
+                  </div>
+
+                  <FormInput
+                    label="Ubicación"
+                    value={form.ubicacion}
+                    onChange={(v) => setField("ubicacion", v)}
+                    error={errors.ubicacion}
+                    placeholder="Buenos Aires"
+                    required
+                  />
+
+                  <button
+                    onClick={() => setShowAdvanced((v) => !v)}
+                    className="w-full flex items-center justify-between px-4 py-3 
                            bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 
                            text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200
                            transition-colors"
-                >
-                  <span>Campos adicionales</span>
-                  {showAdvanced ? (
-                    <IconChevronUp className="w-4 h-4" />
-                  ) : (
-                    <IconChevronDown className="w-4 h-4" />
-                  )}
-                </button>
+                  >
+                    <span>Campos adicionales</span>
+                    {showAdvanced ? (
+                      <IconChevronUp className="w-4 h-4" />
+                    ) : (
+                      <IconChevronDown className="w-4 h-4" />
+                    )}
+                  </button>
 
-                {/* Advanced Fields */}
-                {showAdvanced && (
-                  <div className="space-y-5 pt-2">
-                    <div className="grid grid-cols-2 gap-4">
-                      <FormInput
-                        label="Razón social"
-                        value={form.razonSocial}
-                        onChange={(v) => setField("razonSocial", v)}
-                        error={errors.razonSocial}
-                        placeholder="Empresa S.A."
-                        required
-                      />
+                  {showAdvanced && (
+                    <div className="space-y-5 pt-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormInput
+                          label="Razón social"
+                          value={form.razonSocial}
+                          onChange={(v) => setField("razonSocial", v)}
+                          error={errors.razonSocial}
+                          placeholder="Empresa S.A."
+                          required
+                        />
 
-                      <FormInput
-                        label="Tipo comercio"
-                        value={form.tipoComercio}
-                        onChange={(v) => setField("tipoComercio", v)}
-                        error={errors.tipoComercio}
-                        placeholder="Mayorista"
-                        required
-                      />
-                    </div>
+                        <FormInput
+                          label="Tipo comercio"
+                          value={form.tipoComercio}
+                          onChange={(v) => setField("tipoComercio", v)}
+                          error={errors.tipoComercio}
+                          placeholder="Mayorista"
+                          required
+                        />
+                      </div>
 
-                    <div>
-                      <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                        Notas
-                      </label>
-                      <textarea
-                        value={form.notas}
-                        onChange={(e) => setField("notas", e.target.value)}
-                        className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
+                      <div>
+                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Notas
+                        </label>
+                        <textarea
+                          value={form.notas}
+                          onChange={(e) => setField("notas", e.target.value)}
+                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 
                                  text-zinc-900 dark:text-white px-3 py-2.5 text-sm
                                  outline-none transition-all duration-200 resize-none
                                  focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20
                                  placeholder:text-zinc-400 dark:placeholder:text-zinc-600"
-                        rows={3}
-                        placeholder="Observaciones del cliente..."
-                      />
-                    </div>
+                          rows={3}
+                          placeholder="Observaciones del cliente..."
+                        />
+                      </div>
 
-                    <div className="p-4 bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-700 space-y-4">
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                        Foto del cliente (opcional)
-                      </p>
+                      <div className="p-4 bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-700 space-y-4">
+                        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
+                          Foto del cliente (opcional)
+                        </p>
 
-                      <FormInput
-                        label="URL de imagen"
-                        value={form.fotoUrl}
-                        onChange={(v) => setField("fotoUrl", v)}
-                        error={errors.fotoUrl}
-                        placeholder="https://..."
-                      />
+                        <FormInput
+                          label="URL de imagen"
+                          value={form.fotoUrl}
+                          onChange={(v) => setField("fotoUrl", v)}
+                          error={errors.fotoUrl}
+                          placeholder="https://..."
+                        />
 
-                      <div>
-                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                          O subir archivo
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg"
-                          onChange={(e) =>
-                            setField("fotoFile", e.target.files?.[0] ?? null)
-                          }
-                          className="w-full text-sm text-zinc-600 dark:text-zinc-400 
+                        <div>
+                          <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                            O subir archivo
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            onChange={(e) =>
+                              setField("fotoFile", e.target.files?.[0] ?? null)
+                            }
+                            className="w-full text-sm text-zinc-600 dark:text-zinc-400 
                                    file:mr-4 file:py-2 file:px-4
                                    file:border file:border-zinc-300 dark:file:border-zinc-600 
                                    file:text-sm file:font-medium
@@ -973,81 +962,78 @@ style={{
                                    file:text-zinc-700 dark:file:text-zinc-300
                                    hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 
                                    file:cursor-pointer file:transition-colors"
-                        />
-                        {errors.fotoFile && (
-                          <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-                            ⚠ {errors.fotoFile}
-                          </p>
-                        )}
+                          />
+                          {errors.fotoFile && (
+                            <p className="mt-1 text-xs text-red-500 dark:text-red-400">
+                              ⚠ {errors.fotoFile}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Submit Button */}
-                <button
-                  onClick={submit}
-                  disabled={submitting}
-                  className="w-full bg-amber-500 text-zinc-950 font-semibold py-3 px-4
+                  <button
+                    onClick={submit}
+                    disabled={submitting}
+                    className="w-full bg-amber-500 text-zinc-950 font-semibold py-3 px-4
                            transition-all duration-200 
                            hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/20
                            disabled:opacity-100 disabled:cursor-not-allowed
                            flex items-center justify-center gap-2"
-                >
-                  {submitting ? (
-                    <>
-                      <svg
-                        className="animate-spin h-5 w-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-100"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                      <span>GUARDANDO...</span>
-                    </>
-                  ) : (
-                    <>
-                      {editingId ? (
-                        <>
-                          <IconCheck className="w-5 h-5" />
-                          <span>GUARDAR CAMBIOS</span>
-                        </>
-                      ) : (
-                        <>
-                          <IconPlus className="w-5 h-5" />
-                          <span>CREAR CLIENTE</span>
-                        </>
-                      )}
-                    </>
-                  )}
-                </button>
+                  >
+                    {submitting ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-100"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <span>GUARDANDO...</span>
+                      </>
+                    ) : (
+                      <>
+                        {editingId ? (
+                          <>
+                            <IconCheck className="w-5 h-5" />
+                            <span>GUARDAR CAMBIOS</span>
+                          </>
+                        ) : (
+                          <>
+                            <IconPlus className="w-5 h-5" />
+                            <span>CREAR CLIENTE</span>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
           )}
 
-          {/* Client List Panel */}
           <div className={`${showFormPanel ? "lg:col-span-3" : "lg:col-span-1"} z-30 w-full transition-all duration-300`}>
             <div className="bg-[#ffffffa4] dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-              {/* List Header */}
               <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                   <div className="w-11 h-11 flex items-center justify-center overflow-hidden">
-  <img src="/mancliente3.png" alt="Cliente" className="w-11 h-11 object-contain" />
-</div>
+                    <div className="w-11 h-11 flex items-center justify-center overflow-hidden">
+                      <img src="/mancliente3.png" alt="Cliente" className="w-11 h-11 object-contain" />
+                    </div>
                     <div>
                       <h2 className="font-semibold">CLIENTES</h2>
                       <p className="text-xs text-zinc-500">
@@ -1056,20 +1042,122 @@ style={{
                     </div>
                   </div>
 
-                  {/* Search + toggle */}
                   <div className="flex w-full sm:w-auto items-center gap-2 sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setShowFiltros((v) => !v)}
-                      className={`shrink-0 px-3 py-2 text-xs font-medium border transition-colors flex items-center gap-2 ${
-                        showFiltros
-                          ? "bg-amber-100 dark:bg-amber-500/20 border-amber-400 text-amber-700 dark:text-amber-400"
-                          : "bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
-                      }`}
-                    >
-                      <IconFilter className="w-4 h-4" />
-                      <span>FILTRAR</span>
-                    </button>
+                    <div className="relative shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setShowFiltros((v) => !v)}
+                        className={`shrink-0 px-3 py-2 text-xs font-medium border transition-all duration-200 flex items-center gap-2 rounded-xl ${
+                          showFiltros
+                            ? "bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white shadow-sm"
+                            : "bg-zinc-100/90 dark:bg-zinc-800/90 border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-900"
+                        }`}
+                      >
+                        <IconFilter className="w-4 h-4" />
+                        <span>FILTRAR</span>
+                        {showFiltros ? (
+                          <IconChevronUp className="w-4 h-4" />
+                        ) : (
+                          <IconChevronDown className="w-4 h-4" />
+                        )}
+                      </button>
+
+                      {showFiltros && (
+                        <div className="absolute right-0 top-full mt-2 w-[320px] rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md shadow-xl z-50 overflow-hidden">
+                          <div className="px-4 py-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <IconFilter className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
+                              <span className="text-xs font-semibold tracking-[0.08em] text-zinc-700 dark:text-zinc-300">
+                                FILTROS
+                              </span>
+                            </div>
+
+                            <button
+                              type="button"
+                              onClick={() => setShowFiltros(false)}
+                              className="p-1.5 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                            >
+                              <IconX className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          <div className="p-4 space-y-3">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em] mb-1.5">
+                                Estado
+                              </label>
+                              <select
+                                value={filtroEstado}
+                                onChange={(e) =>
+                                  setFiltroEstado(
+                                    e.target.value as "todos" | "disponible" | "asignado"
+                                  )
+                                }
+                                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                              >
+                                <option value="todos">Todos</option>
+                                <option value="disponible">Disponible</option>
+                                <option value="asignado">Asignado</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em] mb-1.5">
+                                Localidad
+                              </label>
+                              <select
+                                value={filtroLocalidad}
+                                onChange={(e) => setFiltroLocalidad(e.target.value)}
+                                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                              >
+                                <option value="todas">Todas</option>
+                                {localidadesDisponibles.map((localidad) => (
+                                  <option key={localidad} value={localidad}>
+                                    {localidad}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-[0.08em] mb-1.5">
+                                Tipo de comercio
+                              </label>
+                              <select
+                                value={filtroTipoComercio}
+                                onChange={(e) => setFiltroTipoComercio(e.target.value)}
+                                className="w-full rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                              >
+                                <option value="todos">Todos</option>
+                                {tiposComercioDisponibles.map((tipo) => (
+                                  <option key={tipo} value={tipo}>
+                                    {tipo}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+
+                          <div className="px-4 py-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={limpiarFiltros}
+                              className="flex-1 rounded-xl px-3 py-2 text-xs font-semibold border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                            >
+                              LIMPIAR
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setShowFiltros(false)}
+                              className="flex-1 rounded-xl px-3 py-2 text-xs font-semibold border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                            >
+                              CERRAR
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
 
                     <button
                       type="button"
@@ -1109,78 +1197,6 @@ style={{
                   </div>
                 </div>
 
-                {showFiltros && (
-                  <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                          Estado
-                        </label>
-                        <select
-                          value={filtroEstado}
-                          onChange={(e) =>
-                            setFiltroEstado(
-                              e.target.value as "todos" | "disponible" | "asignado"
-                            )
-                          }
-                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
-                        >
-                          <option value="todos">Todos</option>
-                          <option value="disponible">Disponible</option>
-                          <option value="asignado">Asignado</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                          Localidad
-                        </label>
-                        <select
-                          value={filtroLocalidad}
-                          onChange={(e) => setFiltroLocalidad(e.target.value)}
-                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
-                        >
-                          <option value="todas">Todas</option>
-                          {localidadesDisponibles.map((localidad) => (
-                            <option key={localidad} value={localidad}>
-                              {localidad}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
-                          Tipo de comercio
-                        </label>
-                        <select
-                          value={filtroTipoComercio}
-                          onChange={(e) => setFiltroTipoComercio(e.target.value)}
-                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
-                        >
-                          <option value="todos">Todos</option>
-                          {tiposComercioDisponibles.map((tipo) => (
-                            <option key={tipo} value={tipo}>
-                              {tipo}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="flex items-end">
-                        <button
-                          type="button"
-                          onClick={limpiarFiltros}
-                          className="w-full px-3 py-2.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
-                        >
-                          LIMPIAR FILTROS
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Selection bar */}
                 {!modoEdicionRapida && filteredClientes.length > 0 && (
                   <div className="mt-4 flex items-center justify-between">
                     <button
@@ -1204,7 +1220,6 @@ style={{
                 )}
               </div>
 
-              {/* Client List */}
               <div className={`${showFormPanel ? "max-h-[calc(100vh-320px)]" : "max-h-[calc(100vh-230px)]"} overflow-y-auto overflow-x-auto`}>
                 {loading ? (
                   <div className="px-6 py-16 text-center">
@@ -1411,7 +1426,6 @@ style={{
                 )}
               </div>
 
-              {/* Assign Button */}
               <div className="px-1 py-1 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
                 <div className="flex items-stretch gap-3">
                   <div
@@ -1426,7 +1440,7 @@ style={{
                       disabled={cantidadSeleccionados === 0 || modoEdicionRapida}
                       className="flex-1 flex items-center justify-center gap-3 py-1 px-1 disabled:cursor-not-allowed"
                     >
-                     <img src="/camioncito.png" alt="Camión" className="w-9 h-9 object-contain" />
+                      <img src="/camioncito.png" alt="Camión" className="w-9 h-9 object-contain" />
                       <span className="font-semibold">
                         ASIGNAR {cantidadSeleccionados > 0 && `(${cantidadSeleccionados})`} A CHOFER
                       </span>
@@ -1471,7 +1485,6 @@ style={{
         </div>
       </main>
 
-      {/* Modal de asignación */}
       <AsignarChoferModal
         isOpen={showAsignarModal}
         onClose={() => setShowAsignarModal(false)}
