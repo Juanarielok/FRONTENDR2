@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { api } from "../api";
 import type { Cliente, Remito } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 
-// Status badge colors
 const statusConfig = {
   disponible: {
     bg: "bg-emerald-100 dark:bg-emerald-500/20",
@@ -26,73 +25,10 @@ const statusConfig = {
   },
 };
 
-// Icons
 function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-
-function IconMail({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-      <polyline points="22,6 12,13 2,6" />
-    </svg>
-  );
-}
-
-function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
-    </svg>
-  );
-}
-
-function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function IconBuilding({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16" />
-    </svg>
-  );
-}
-
-function IconCreditCard({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-      <line x1="1" y1="10" x2="23" y2="10" />
-    </svg>
-  );
-}
-
-function IconId({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <line x1="2" y1="10" x2="22" y2="10" />
-    </svg>
-  );
-}
-
-function IconTag({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z" />
-      <line x1="7" y1="7" x2="7.01" y2="7" />
     </svg>
   );
 }
@@ -105,28 +41,6 @@ function IconFileText({ className = "w-5 h-5" }: { className?: string }) {
       <line x1="16" y1="13" x2="8" y2="13" />
       <line x1="16" y1="17" x2="8" y2="17" />
       <polyline points="10 9 9 9 8 9" />
-    </svg>
-  );
-}
-
-function IconNotes({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-    </svg>
-  );
-}
-
-function IconCalendar({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
   );
 }
@@ -160,23 +74,21 @@ function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function IconPackage({ className = "w-5 h-5" }: { className?: string }) {
+function IconFilter({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
-      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-      <line x1="12" y1="22.08" x2="12" y2="12" />
+      <path d="M3 5h18" />
+      <path d="M6 12h12" />
+      <path d="M10 19h4" />
     </svg>
   );
 }
-
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString);
   return date.toLocaleDateString("es-AR", {
     day: "2-digit",
-    month: "short",
+    month: "2-digit",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
@@ -190,30 +102,58 @@ function formatCurrency(amount: number) {
   }).format(amount);
 }
 
-// Info Row Component
-function InfoRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string | undefined;
-}) {
-  if (!value) return null;
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
-      <div className="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-        <Icon className="w-4 h-4 text-zinc-500 dark:text-zinc-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-          {label}
-        </p>
-        <p className="text-zinc-900 dark:text-white mt-0.5 break-words">{value}</p>
-      </div>
-    </div>
-  );
+function getStatusLabel(status?: string) {
+  if (!status) return "-";
+  return statusConfig[status as keyof typeof statusConfig]?.label || status;
+}
+
+function extractFromNotas(texto: string | undefined, etiquetas: string[]) {
+  if (!texto) return "-";
+
+  for (const etiqueta of etiquetas) {
+    const regex = new RegExp(etiqueta + String.raw`:\s*(.*?)(?=\s+[A-ZÁÉÍÓÚÑ][^:]*:|$)`, "i");
+    const match = texto.match(regex);
+    if (match?.[1]?.trim()) return match[1].trim();
+  }
+
+  return "-";
+}
+
+function getCargoRemito(remito: Remito) {
+  return extractFromNotas((remito as any).notas, ["Cargo"]);
+}
+
+function getDetalleRemito(remito: Remito) {
+  const nombres = (remito.productos || [])
+    .map((prod: any) => prod?.nombre?.trim())
+    .filter(Boolean);
+
+  if (nombres.length === 0) return "-";
+  return nombres.join(", ");
+}
+
+function getCantidadItems(remito: Remito) {
+  return (remito.productos || []).reduce((total: number, prod: any) => {
+    return total + Number(prod?.cantidad || 0);
+  }, 0);
+}
+
+function getPeriodoKey(dateString: string) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}`;
+}
+
+function getPeriodoLabel(periodo: string) {
+  const [year, month] = periodo.split("-");
+  const date = new Date(Number(year), Number(month) - 1, 1);
+
+  const mes = date.toLocaleDateString("es-AR", {
+    month: "long",
+  });
+
+  return `${mes.charAt(0).toUpperCase() + mes.slice(1)} ${year}`;
 }
 
 export default function ClienteDetalle() {
@@ -224,7 +164,8 @@ export default function ClienteDetalle() {
   const [remitos, setRemitos] = useState<Remito[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [expandedRemito, setExpandedRemito] = useState<string | null>(null);
+  const [mostrarFiltroPeriodos, setMostrarFiltroPeriodos] = useState(false);
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState("todos");
 
   useEffect(() => {
     if (!id) return;
@@ -235,8 +176,8 @@ export default function ClienteDetalle() {
 
       try {
         const [clienteRes, remitosRes] = await Promise.all([
-          api.getCliente(id!),
-          api.getRemitosByCliente(id!),
+          api.getCliente(id),
+          api.getRemitosByCliente(id),
         ]);
 
         setCliente(clienteRes.user);
@@ -257,60 +198,86 @@ export default function ClienteDetalle() {
     nav("/login", { replace: true });
   }
 
-async function downloadPDF(remitoId: string) {
-  try {
-    const token = localStorage.getItem("token");
-    const base =
-      import.meta.env.VITE_API_URL ||
-      "https://backend-redaceite-digitalocean-9nmhi.ondigitalocean.app";
+  async function downloadPDF(remitoId: string) {
+    try {
+      const token = localStorage.getItem("token");
+      const base =
+        import.meta.env.VITE_API_URL ||
+        "https://backend-redaceite-digitalocean-9nmhi.ondigitalocean.app";
 
-    const res = await fetch(`${base}/remitos/${remitoId}/pdf`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
+      const res = await fetch(`${base}/remitos/${remitoId}/pdf`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
 
-if (!res.ok) {
-  const texto = await res.text();
-  console.error("PDF ERROR", res.status, texto);
-  alert(`PDF ${res.status}: ${texto}`);
-  return;
-}
+      if (!res.ok) {
+        const texto = await res.text();
+        console.error("PDF ERROR", res.status, texto);
+        alert(`PDF ${res.status}: ${texto}`);
+        return;
+      }
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `remito-${remitoId}.pdf`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    window.URL.revokeObjectURL(url);
-  }catch (e: any) {
-  console.error("PDF CATCH", e);
-  alert(String(e?.message || e));
-}
-}
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `remito-${remitoId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e: any) {
+      console.error("PDF CATCH", e);
+      alert(String(e?.message || e));
+    }
+  }
 
   const status = cliente?.status || "disponible";
-  const statusStyle = statusConfig[status] || statusConfig.disponible;
+  const statusStyle = statusConfig[status as keyof typeof statusConfig] || statusConfig.disponible;
+
+  const filasCliente = cliente
+    ? [
+        ["Nombre", cliente.nombre || "-"],
+        ["Razón social", cliente.razonSocial || "-"],
+        ["Estado", getStatusLabel(cliente.status)],
+        ["Email", cliente.email || "-"],
+        ["Teléfono", cliente.telefono || "-"],
+        ["DNI", cliente.dni || "-"],
+        ["CUIT/CUIL", cliente.cuit || "-"],
+        ["Localidad", (cliente as any).localidad || "-"],
+        ["Ubicación", cliente.ubicacion || "-"],
+        ["Tipo de comercio", cliente.tipoComercio || "-"],
+        ["Usuario", (cliente as any).usuario || "-"],
+        ["Código de área", (cliente as any).codigoArea || "-"],
+        ["Notas", cliente.notas || "-"],
+      ]
+    : [];
+
+  const periodosDisponibles = useMemo(() => {
+    const unicos = Array.from(new Set(remitos.map((remito) => getPeriodoKey(remito.fecha))));
+    return unicos.sort((a, b) => b.localeCompare(a));
+  }, [remitos]);
+
+  const remitosFiltrados = useMemo(() => {
+    if (periodoSeleccionado === "todos") return remitos;
+    return remitos.filter((remito) => getPeriodoKey(remito.fecha) === periodoSeleccionado);
+  }, [remitos, periodoSeleccionado]);
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
-      {/* Background pattern */}
+    <div className="min-h-screen overflow-x-hidden bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       <div className="fixed inset-0 opacity-[0.16] dark:opacity-[0.02] pointer-events-none">
         <div
           className="absolute inset-0"
-         style={{
-  backgroundImage: "url('/bgu7.jpg')",
-  backgroundRepeat: "no-repeat",
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}}
+          style={{
+            backgroundImage: "url('/bg1444.jpg')",
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
         />
       </div>
 
-      {/* Header */}
       <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-6xl mx-auto px-6 py-4">
+        <div className="max-w-[96vw] 2xl:max-w-[1800px] mx-auto px-4 xl:px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Link
@@ -323,12 +290,8 @@ if (!res.ok) {
                 <IconArrowLeft className="w-5 h-5" />
               </Link>
               <div>
-                <h1 className="text-lg font-semibold tracking-tight">
-                  Detalle del Cliente
-                </h1>
-                <p className="text-xs text-zinc-500">
-                  Información completa y remitos
-                </p>
+                <h1 className="text-lg font-semibold tracking-tight">Detalle del Cliente</h1>
+                <p className="text-xs text-zinc-500">Información completa y remitos</p>
               </div>
             </div>
 
@@ -351,23 +314,11 @@ if (!res.ok) {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-6 py-8">
+      <main className="max-w-[96vw] 2xl:max-w-[1800px] mx-auto px-4 xl:px-6 py-8 overflow-x-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
-            <svg
-              className="animate-spin h-10 w-10 text-amber-500"
-              viewBox="0 0 24 24"
-              fill="none"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
+            <svg className="animate-spin h-10 w-10 text-amber-500" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path
                 className="opacity-75"
                 fill="currentColor"
@@ -378,28 +329,19 @@ if (!res.ok) {
         ) : error ? (
           <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-6 text-center">
             <p className="text-red-600 dark:text-red-400">{error}</p>
-            <button
-              onClick={() => nav("/clientes")}
-              className="mt-4 text-sm text-red-700 dark:text-red-300 underline"
-            >
+            <button onClick={() => nav("/clientes")} className="mt-4 text-sm text-red-700 dark:text-red-300 underline">
               Volver a clientes
             </button>
           </div>
         ) : cliente ? (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Client Info Panel */}
-            <div className="lg:col-span-1 z-30">
-              <div className="bg-white  dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-                {/* Header with avatar */}
+          <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.7fr] gap-3 xl:gap-4">
+            <div className="min-w-0 z-30">
+              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
                 <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
                   <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0">
+                    <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
                       {cliente.foto ? (
-                        <img
-                          src={cliente.foto}
-                          alt={cliente.nombre}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={cliente.foto} alt={cliente.nombre} className="w-full h-full object-cover" />
                       ) : (
                         <span className="text-xl font-bold text-zinc-400 dark:text-zinc-500">
                           {cliente.nombre
@@ -412,12 +354,8 @@ if (!res.ok) {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h2 className="text-xl font-semibold truncate">
-                        {cliente.nombre}
-                      </h2>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">
-                        {cliente.razonSocial}
-                      </p>
+                      <h2 className="text-xl font-semibold truncate">{cliente.nombre}</h2>
+                      <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{cliente.razonSocial}</p>
                       <div className="mt-2">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
@@ -429,21 +367,35 @@ if (!res.ok) {
                   </div>
                 </div>
 
-                {/* Info rows */}
-                <div className="p-6 space-y-1">
-                  <InfoRow icon={IconMail} label="Email" value={cliente.email} />
-                  <InfoRow icon={IconPhone} label="Teléfono" value={cliente.telefono} />
-                  <InfoRow icon={IconMapPin} label="Ubicación" value={cliente.ubicacion} />
-                  <InfoRow icon={IconId} label="DNI" value={cliente.dni} />
-                  <InfoRow icon={IconCreditCard} label="CUIT" value={cliente.cuit} />
-                  <InfoRow icon={IconBuilding} label="Razón Social" value={cliente.razonSocial} />
-                  <InfoRow icon={IconTag} label="Tipo de Comercio" value={cliente.tipoComercio} />
-                  {cliente.notas && (
-                    <InfoRow icon={IconNotes} label="Notas" value={cliente.notas} />
-                  )}
+                <div className="p-4 xl:p-6">
+                  <div className="w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                    <table
+                      className="w-full border-collapse table-fixed"
+                      style={{ fontSize: "10px", lineHeight: "14px" }}
+                    >
+                      <tbody>
+                        {filasCliente.map(([label, value], index) => {
+                          const rowColor =
+                            index % 2 === 0
+                              ? "bg-white dark:bg-zinc-950"
+                              : "bg-zinc-50 dark:bg-zinc-900";
+
+                          return (
+                            <tr key={label} className={`border-b border-zinc-200 dark:border-zinc-800 ${rowColor}`}>
+                              <td className="align-top h-6 px-2 py-1 w-[34%] border-r border-zinc-200 dark:border-zinc-800 font-semibold uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400 whitespace-normal break-words">
+                                {label}
+                              </td>
+                              <td className="align-top h-6 px-2 py-1 w-[66%] text-zinc-900 dark:text-white whitespace-normal break-words">
+                                {value}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
 
-                {/* Actions */}
                 <div className="p-6 border-t border-zinc-200 dark:border-zinc-800">
                   <Link
                     to={`/clientes?edit=${cliente.id}`}
@@ -458,204 +410,162 @@ if (!res.ok) {
               </div>
             </div>
 
-            {/* Remitos Panel */}
-            <div className="lg:col-span-2 z-30">
+            <div className="min-w-0 z-30">
               <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-                {/* Header */}
-                <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center">
+                <div className="px-4 xl:px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 bg-purple-100 dark:bg-purple-500/20 border border-purple-200 dark:border-purple-500/30 flex items-center justify-center flex-shrink-0">
                         <IconFileText className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <h2 className="font-semibold">Remitos</h2>
                         <p className="text-xs text-zinc-500">
-                          {remitos.length} documento{remitos.length !== 1 ? "s" : ""}
+                          {remitosFiltrados.length} documento{remitosFiltrados.length !== 1 ? "s" : ""}
                         </p>
                       </div>
+                    </div>
+
+                    <div className="relative flex-shrink-0">
+                      <button
+                        onClick={() => setMostrarFiltroPeriodos((prev) => !prev)}
+                        className="flex items-center gap-2 px-3 py-2 text-xs font-medium
+                                 bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700
+                                 text-zinc-700 dark:text-zinc-300
+                                 hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
+                                 transition-colors"
+                        title="Filtrar por períodos"
+                      >
+                        <IconFilter className="w-4 h-4" />
+                        <span>Períodos</span>
+                      </button>
+
+                      {mostrarFiltroPeriodos && (
+                        <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-lg z-40">
+                          <button
+                            onClick={() => {
+                              setPeriodoSeleccionado("todos");
+                              setMostrarFiltroPeriodos(false);
+                            }}
+                            className={`w-full text-left px-3 py-2 text-xs border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
+                              periodoSeleccionado === "todos"
+                                ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                                : "text-zinc-600 dark:text-zinc-300"
+                            }`}
+                          >
+                            Todos los períodos
+                          </button>
+
+                          {periodosDisponibles.map((periodo) => (
+                            <button
+                              key={periodo}
+                              onClick={() => {
+                                setPeriodoSeleccionado(periodo);
+                                setMostrarFiltroPeriodos(false);
+                              }}
+                              className={`w-full text-left px-3 py-2 text-xs border-b last:border-b-0 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
+                                periodoSeleccionado === periodo
+                                  ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white"
+                                  : "text-zinc-600 dark:text-zinc-300"
+                              }`}
+                            >
+                              {getPeriodoLabel(periodo)}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Remitos List */}
-                <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
-                  {remitos.length === 0 ? (
-                    <div className="px-6 py-16 text-center">
-                      <div className="w-16 h-16 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                        <IconFileText className="w-8 h-8 text-zinc-400 dark:text-zinc-600" />
-                      </div>
-                      <p className="text-zinc-600 dark:text-zinc-400 font-medium">
-                        No hay remitos
-                      </p>
-                      <p className="text-zinc-500 dark:text-zinc-600 text-sm mt-1">
-                        Este cliente aún no tiene remitos generados
-                      </p>
-                    </div>
-                  ) : (
-                    remitos.map((remito) => {
-                      const isExpanded = expandedRemito === remito.id;
-                      return (
-                        <div key={remito.id} className="transition-colors">
-                          {/* Remito Header */}
-                          <button
-                            onClick={() =>
-                              setExpandedRemito(isExpanded ? null : remito.id)
-                            }
-                            className="w-full px-6 py-4 flex items-center justify-between hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors text-left"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center">
-                                <IconPackage className="w-5 h-5 text-zinc-500 dark:text-zinc-400" />
-                              </div>
-                              <div>
-                                <p className="font-medium text-zinc-900 dark:text-white">
-                                  Remito #{remito.id.slice(-8).toUpperCase()}
-                                </p>
-                                <div className="flex items-center gap-2 text-xs text-zinc-500 mt-0.5">
-                                  <IconCalendar className="w-3 h-3" />
-                                  <span>{formatDateTime(remito.fecha)}</span>
-                                </div>
-                              </div>
-                            </div>
+                <div className="p-4 xl:p-6">
+                  <div className="w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                    <table
+                      className="w-full border-collapse table-fixed"
+                      style={{ fontSize: "10px", lineHeight: "14px" }}
+                    >
+                      <thead>
+                        <tr className="bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                          <th className="align-top px-1 py-1 w-[8%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Remito</th>
+                          <th className="align-top px-1 py-1 w-[13%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Fecha</th>
+                          <th className="align-top px-1 py-1 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Chofer</th>
+                          <th className="align-top px-1 py-1 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cargo</th>
+                          <th className="align-top px-1 py-1 w-[19%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Detalle</th>
+                          <th className="align-top px-1 py-1 w-[7%] text-center border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cantidad</th>
+                          <th className="align-top px-1 py-1 w-[11%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Subtotal</th>
+                          <th className="align-top px-1 py-1 w-[7%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">IVA</th>
+                          <th className="align-top px-1 py-1 w-[10%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Total</th>
+                          <th className="align-top px-1 py-1 w-[5%] text-center whitespace-normal break-words">PDF</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {remitosFiltrados.length === 0 ? (
+                          <tr>
+                            <td colSpan={10} className="h-10 px-3 py-2 text-center text-zinc-500 dark:text-zinc-400">
+                              Este cliente aún no tiene remitos generados
+                            </td>
+                          </tr>
+                        ) : (
+                          remitosFiltrados.map((remito, index) => {
+                            const rowColor =
+                              index % 2 === 0
+                                ? "bg-white dark:bg-zinc-950"
+                                : "bg-zinc-50 dark:bg-zinc-900";
 
-                            <div className="flex items-center gap-4">
-                              <div className="text-right">
-                                <p className="font-semibold text-zinc-900 dark:text-white">
-                                  {formatCurrency(remito.total)}
-                                </p>
-                                <p className="text-xs text-zinc-500">
-                                  {remito.productos.length} producto
-                                  {remito.productos.length !== 1 ? "s" : ""}
-                                </p>
-                              </div>
-                              <svg
-                                viewBox="0 0 24 24"
-                                className={`w-5 h-5 text-zinc-400 transition-transform duration-200 ${
-                                  isExpanded ? "rotate-180" : ""
-                                }`}
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                              >
-                                <polyline points="6 9 12 15 18 9" />
-                              </svg>
-                            </div>
-                          </button>
-
-                          {/* Expanded Content */}
-                          {isExpanded && (
-                            <div className="px-6 pb-6 animate-fade-in">
-                              {/* Chofer info */}
-                              {remito.chofer && (
-                                <div className="mb-4 p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
-                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                                    Entregado por
-                                  </p>
-                                  <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                                    {remito.chofer.nombre}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Products table */}
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-sm">
-                                  <thead>
-                                    <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                                      <th className="text-left py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                                        Producto
-                                      </th>
-                                      <th className="text-center py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                                        Cant.
-                                      </th>
-                                      <th className="text-right py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                                        Precio
-                                      </th>
-                                      <th className="text-right py-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">
-                                        Subtotal
-                                      </th>
-                                    </tr>
-                                  </thead>
-                                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                                    {remito.productos.map((prod, idx) => (
-                                      <tr key={idx}>
-                                        <td className="py-2 text-zinc-900 dark:text-white">
-                                          {prod.nombre}
-                                        </td>
-                                        <td className="py-2 text-center text-zinc-600 dark:text-zinc-400">
-                                          {prod.cantidad}
-                                        </td>
-                                        <td className="py-2 text-right text-zinc-600 dark:text-zinc-400">
-                                          {formatCurrency(prod.precio)}
-                                        </td>
-                                        <td className="py-2 text-right text-zinc-900 dark:text-white">
-                                          {formatCurrency(prod.subtotal)}
-                                        </td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                  <tfoot className="border-t border-zinc-200 dark:border-zinc-700">
-                                    <tr>
-                                      <td colSpan={3} className="py-2 text-right text-zinc-500 dark:text-zinc-400">
-                                        Subtotal
-                                      </td>
-                                      <td className="py-2 text-right text-zinc-900 dark:text-white">
-                                        {formatCurrency(remito.subtotal)}
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td colSpan={3} className="py-2 text-right text-zinc-500 dark:text-zinc-400">
-                                        IVA (21%)
-                                      </td>
-                                      <td className="py-2 text-right text-zinc-900 dark:text-white">
-                                        {formatCurrency(remito.iva)}
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td colSpan={3} className="py-2 text-right font-semibold text-zinc-900 dark:text-white">
-                                        Total
-                                      </td>
-                                      <td className="py-2 text-right font-semibold text-amber-600 dark:text-amber-500">
-                                        {formatCurrency(remito.total)}
-                                      </td>
-                                    </tr>
-                                  </tfoot>
-                                </table>
-                              </div>
-
-                              {/* Notes */}
-                              {remito.notas && (
-                                <div className="mt-4 p-3 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
-                                  <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">
-                                    Notas
-                                  </p>
-                                  <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                                    {remito.notas}
-                                  </p>
-                                </div>
-                              )}
-
-                              {/* Download PDF button */}
-                              <div className="mt-4 flex justify-end">
-                                <button
-                                  onClick={() => downloadPDF(remito.id)}
-                                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                                           bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 
-                                           text-zinc-700 dark:text-zinc-300
-                                           hover:bg-zinc-200 dark:hover:bg-zinc-700 
-                                           transition-colors"
+                            return (
+                              <tr key={remito.id} className={`border-b border-zinc-200 dark:border-zinc-800 ${rowColor}`}>
+                                <td className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-medium whitespace-normal break-words">
+                                  #{remito.id.slice(-8).toUpperCase()}
+                                </td>
+                                <td className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                  {formatDateTime(remito.fecha)}
+                                </td>
+                                <td
+                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  title={remito.chofer?.nombre || "-"}
                                 >
-                                  <IconDownload className="w-4 h-4" />
-                                  Descargar PDF
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
+                                  {remito.chofer?.nombre || "-"}
+                                </td>
+                                <td
+                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  title={getCargoRemito(remito)}
+                                >
+                                  {getCargoRemito(remito)}
+                                </td>
+                                <td
+                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  title={getDetalleRemito(remito)}
+                                >
+                                  {getDetalleRemito(remito)}
+                                </td>
+                                <td className="align-top px-1 py-1 text-center border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                  {getCantidadItems(remito)}
+                                </td>
+                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                  {formatCurrency(remito.subtotal)}
+                                </td>
+                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                  {formatCurrency(remito.iva)}
+                                </td>
+                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-semibold whitespace-normal break-words">
+                                  {formatCurrency(remito.total)}
+                                </td>
+                                <td className="align-top px-1 py-1 text-center">
+                                  <button
+                                    onClick={() => downloadPDF(remito.id)}
+                                    className="inline-flex items-center justify-center w-5 h-5 border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                    title="Descargar PDF"
+                                  >
+                                    <IconDownload className="w-3 h-3" />
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

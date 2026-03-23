@@ -237,6 +237,20 @@ function IconPlus({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
+function IconFilter({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <polygon points="3 4 21 4 14 12 14 19 10 21 10 12 3 4" />
+    </svg>
+  );
+}
+
 function IconX({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg
@@ -344,6 +358,10 @@ export default function Clientes() {
 
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showFiltros, setShowFiltros] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState<"todos" | "disponible" | "asignado">("todos");
+  const [filtroLocalidad, setFiltroLocalidad] = useState("todas");
+  const [filtroTipoComercio, setFiltroTipoComercio] = useState("todos");
   const [modoEdicionRapida, setModoEdicionRapida] = useState(false);
   const [columnaIdentificador, setColumnaIdentificador] =
     useState<ColumnaIdentificador>(() => {
@@ -410,17 +428,58 @@ export default function Clientes() {
   const color1 = "bg-white dark:bg-zinc-950";
   const color2 = "bg-zinc-50 dark:bg-zinc-900";
 
+  const localidadesDisponibles = useMemo(() => {
+    return Array.from(
+      new Set(
+        clientes
+          .map((c) => String((c as any).localidad || "").trim())
+          .filter(Boolean)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  }, [clientes]);
+
+  const tiposComercioDisponibles = useMemo(() => {
+    return Array.from(
+      new Set(clientes.map((c) => String(c.tipoComercio || "").trim()).filter(Boolean))
+    ).sort((a, b) => a.localeCompare(b));
+  }, [clientes]);
+
   const filteredClientes = useMemo(() => {
-    if (!searchTerm.trim()) return clientes;
-    const term = searchTerm.toLowerCase();
-    return clientes.filter(
-      (c) =>
+    const term = searchTerm.trim().toLowerCase();
+
+    return clientes.filter((c) => {
+      const localidad = String((c as any).localidad || "").trim();
+      const coincideBusqueda =
+        !term ||
         c.nombre.toLowerCase().includes(term) ||
         c.email.toLowerCase().includes(term) ||
         c.ubicacion.toLowerCase().includes(term) ||
-        (((c as any).localidad || "") as string).toLowerCase().includes(term)
-    );
-  }, [clientes, searchTerm]);
+        localidad.toLowerCase().includes(term);
+
+      const coincideEstado =
+        filtroEstado === "todos" ||
+        (filtroEstado === "asignado" && c.status === "asignado") ||
+        (filtroEstado === "disponible" && c.status !== "asignado");
+
+      const coincideLocalidad =
+        filtroLocalidad === "todas" || localidad === filtroLocalidad;
+
+      const coincideTipoComercio =
+        filtroTipoComercio === "todos" || c.tipoComercio === filtroTipoComercio;
+
+      return (
+        coincideBusqueda &&
+        coincideEstado &&
+        coincideLocalidad &&
+        coincideTipoComercio
+      );
+    });
+  }, [clientes, searchTerm, filtroEstado, filtroLocalidad, filtroTipoComercio]);
+
+  const cantidadSeleccionables = useMemo(
+    () => filteredClientes.filter((c) => c.status !== "asignado").length,
+    [filteredClientes]
+  );
 
   async function cargarClientes() {
     setLoading(true);
@@ -460,6 +519,12 @@ export default function Clientes() {
     }
   }
 
+  function limpiarFiltros() {
+    setFiltroEstado("todos");
+    setFiltroLocalidad("todas");
+    setFiltroTipoComercio("todos");
+  }
+
   function toggleSeleccion(id: string) {
     setSeleccionados((prev) => {
       const next = new Set(prev);
@@ -470,17 +535,17 @@ export default function Clientes() {
   }
 
   function selectAll() {
-    if (seleccionados.size === filteredClientes.length) {
+    if (cantidadSeleccionados === cantidadSeleccionables) {
       setSeleccionados(new Set());
-   } else {
-  setSeleccionados(
-    new Set(
-      filteredClientes
-        .filter((c) => c.status !== "asignado")
-        .map((c) => c.id)
-    )
-  );
-}
+    } else {
+      setSeleccionados(
+        new Set(
+          filteredClientes
+            .filter((c) => c.status !== "asignado")
+            .map((c) => c.id)
+        )
+      );
+    }
   }
 
   function activarEdicionRapida() {
@@ -582,6 +647,10 @@ export default function Clientes() {
     // Limpiar selección y recargar clientes
     setSeleccionados(new Set());
     cargarClientes();
+  }
+
+  function cancelarSeleccionados() {
+    setSeleccionados(new Set());
   }
 
   return (
@@ -991,14 +1060,15 @@ style={{
                   <div className="flex w-full sm:w-auto items-center gap-2 sm:justify-end">
                     <button
                       type="button"
-                      onClick={activarEdicionRapida}
-                      className={`shrink-0 px-3 py-2 text-xs font-medium border transition-colors ${
-                        modoEdicionRapida
+                      onClick={() => setShowFiltros((v) => !v)}
+                      className={`shrink-0 px-3 py-2 text-xs font-medium border transition-colors flex items-center gap-2 ${
+                        showFiltros
                           ? "bg-amber-100 dark:bg-amber-500/20 border-amber-400 text-amber-700 dark:text-amber-400"
                           : "bg-zinc-100 dark:bg-zinc-800 border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700"
                       }`}
                     >
-                      EDITAR
+                      <IconFilter className="w-4 h-4" />
+                      <span>FILTRAR</span>
                     </button>
 
                     <button
@@ -1039,6 +1109,77 @@ style={{
                   </div>
                 </div>
 
+                {showFiltros && (
+                  <div className="mt-4 p-4 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Estado
+                        </label>
+                        <select
+                          value={filtroEstado}
+                          onChange={(e) =>
+                            setFiltroEstado(
+                              e.target.value as "todos" | "disponible" | "asignado"
+                            )
+                          }
+                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                        >
+                          <option value="todos">Todos</option>
+                          <option value="disponible">Disponible</option>
+                          <option value="asignado">Asignado</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Localidad
+                        </label>
+                        <select
+                          value={filtroLocalidad}
+                          onChange={(e) => setFiltroLocalidad(e.target.value)}
+                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                        >
+                          <option value="todas">Todas</option>
+                          {localidadesDisponibles.map((localidad) => (
+                            <option key={localidad} value={localidad}>
+                              {localidad}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
+                          Tipo de comercio
+                        </label>
+                        <select
+                          value={filtroTipoComercio}
+                          onChange={(e) => setFiltroTipoComercio(e.target.value)}
+                          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20"
+                        >
+                          <option value="todos">Todos</option>
+                          {tiposComercioDisponibles.map((tipo) => (
+                            <option key={tipo} value={tipo}>
+                              {tipo}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex items-end">
+                        <button
+                          type="button"
+                          onClick={limpiarFiltros}
+                          className="w-full px-3 py-2.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                        >
+                          LIMPIAR FILTROS
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Selection bar */}
                 {!modoEdicionRapida && filteredClientes.length > 0 && (
                   <div className="mt-4 flex items-center justify-between">
@@ -1046,7 +1187,7 @@ style={{
                       onClick={selectAll}
                       className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-amber-600 dark:hover:text-amber-500 transition-colors"
                     >
-                      {seleccionados.size === filteredClientes.length
+                      {cantidadSeleccionados === cantidadSeleccionables && cantidadSeleccionables > 0
                         ? "Deseleccionar todos"
                         : "Seleccionar todos"}
                     </button>
@@ -1174,6 +1315,12 @@ style={{
                         const estadoColor = disabled
                           ? "bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300"
                           : "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300";
+                        const textoSecundario = disabled
+                          ? "text-zinc-400 dark:text-zinc-500"
+                          : "text-zinc-600 dark:text-zinc-300";
+                        const textoPrincipal = disabled
+                          ? "text-zinc-400 dark:text-zinc-500"
+                          : "text-zinc-900 dark:text-white";
 
                         return (
                           <tr
@@ -1206,7 +1353,7 @@ style={{
                               </button>
                             </td>
 
-                            <td className="relative h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white">
+                            <td className={`relative h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 ${textoPrincipal}`}>
                               {modoEdicionRapida && (
                                 <div className="pointer-events-none absolute inset-0 hidden group-hover:flex items-center justify-center bg-amber-200/60 dark:bg-amber-500/10 z-10">
                                   <span className="text-[12px] font-bold tracking-[0.14em] text-amber-900 dark:text-amber-300">
@@ -1222,7 +1369,7 @@ style={{
                               ) : (
                                 <Link
                                   to={`/clientes/${c.id}`}
-                                  className="block truncate hover:text-amber-600 dark:hover:text-amber-500"
+                                  className={`block truncate ${disabled ? "" : "hover:text-amber-600 dark:hover:text-amber-500"}`}
                                   title={c.nombre}
                                   onClick={(e) => e.stopPropagation()}
                                 >
@@ -1231,21 +1378,21 @@ style={{
                               )}
                             </td>
 
-                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                            <td className={`h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 ${textoSecundario}`}>
                               <span className="block truncate" title={getValorColumnaIdentificador(c)}>{getValorColumnaIdentificador(c)}</span>
                             </td>
 
-                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-nowrap">
+                            <td className={`h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 whitespace-nowrap ${textoSecundario}`}>
                               <span className="block truncate" title={getValorColumnaTelefono(c)}>
                                 {getValorColumnaTelefono(c)}
                               </span>
                             </td>
 
-                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                            <td className={`h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 ${textoSecundario}`}>
                               <span className="block truncate" title={c.ubicacion || "-"}>{c.ubicacion || "-"}</span>
                             </td>
 
-                            <td className="h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300">
+                            <td className={`h-5 px-2 py-0 align-middle border-r border-zinc-200 dark:border-zinc-800 ${textoSecundario}`}>
                               <span className="block truncate" title={c.razonSocial || "-"}>{c.razonSocial || "-"}</span>
                             </td>
 
@@ -1253,7 +1400,7 @@ style={{
                               {disabled ? "Asignado" : "Disponible"}
                             </td>
 
-                            <td className="h-5 px-2 py-0 align-middle text-zinc-500 dark:text-zinc-400">
+                            <td className={`h-5 px-2 py-0 align-middle ${disabled ? "text-zinc-400 dark:text-zinc-500" : "text-zinc-500 dark:text-zinc-400"}`}>
                               <span className="block truncate">&nbsp;</span>
                             </td>
                           </tr>
@@ -1265,34 +1412,59 @@ style={{
               </div>
 
               {/* Assign Button */}
-              <div className="px-6 py-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
-                {modoEdicionRapida ? (
-                  <button
-                    onClick={detenerEdicionRapida}
-                    className="w-full flex items-center justify-center gap-3 py-3 px-4
-                               border-2 border-dashed border-amber-500 text-amber-700 dark:text-amber-400
-                               hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all duration-200"
+              <div className="px-1 py-1 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
+                <div className="flex items-stretch gap-3">
+                  <div
+                    className={`flex-[7] flex items-stretch border-2 border-dashed transition-all duration-200 ${
+                      cantidadSeleccionados === 0 || modoEdicionRapida
+                        ? "border-zinc-300 dark:border-zinc-700 text-zinc-400 dark:text-zinc-600"
+                        : "border-amber-500 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                    }`}
                   >
-                    <IconX className="w-5 h-5" />
-                    <span className="font-semibold">DETENER EDICIÓN</span>
-                  </button>
-                ) : (
+                    <button
+                      onClick={asignarClientes}
+                      disabled={cantidadSeleccionados === 0 || modoEdicionRapida}
+                      className="flex-1 flex items-center justify-center gap-3 py-1 px-1 disabled:cursor-not-allowed"
+                    >
+                     <img src="/camioncito.png" alt="Camión" className="w-9 h-9 object-contain" />
+                      <span className="font-semibold">
+                        ASIGNAR {cantidadSeleccionados > 0 && `(${cantidadSeleccionados})`} A CHOFER
+                      </span>
+                    </button>
+
+                    {cantidadSeleccionados > 3 && !modoEdicionRapida && (
+                      <button
+                        type="button"
+                        onClick={cancelarSeleccionados}
+                        className="m-1 px-3 py-2 border border-current text-[11px] font-semibold uppercase tracking-[0.02em] hover:bg-zinc-100/80 dark:hover:bg-zinc-800/80 transition-colors"
+                      >
+                        Cancelar {cantidadSeleccionados} seleccionados
+                      </button>
+                    )}
+                  </div>
+
                   <button
-                    onClick={asignarClientes}
-                    disabled={cantidadSeleccionados === 0}
-                    className="w-full flex items-center justify-center gap-3 py-3 px-4
-                             border-2 border-dashed transition-all duration-200
-                             disabled:border-zinc-300 dark:disabled:border-zinc-700 
-                             disabled:text-zinc-400 dark:disabled:text-zinc-600 disabled:cursor-not-allowed
-                             enabled:border-amber-500 enabled:text-amber-600 dark:enabled:text-amber-500 
-                             enabled:hover:bg-amber-50 dark:enabled:hover:bg-amber-500/10 enabled:hover:border-amber-500"
+                    type="button"
+                    onClick={modoEdicionRapida ? detenerEdicionRapida : activarEdicionRapida}
+                    className={`flex-[3] flex items-center justify-center gap-3 py-3 px-4 border-2 border-dashed transition-all duration-200 ${
+                      modoEdicionRapida
+                        ? "border-amber-500 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
+                        : "border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    }`}
                   >
-                    <IconTruck className="w-5 h-5" />
-                    <span className="font-semibold">
-                      ASIGNAR {cantidadSeleccionados > 0 && `(${cantidadSeleccionados})`} A CHOFER
-                    </span>
+                    {modoEdicionRapida ? (
+                      <>
+                        <IconX className="w-5 h-5" />
+                        <span className="font-semibold">DETENER EDICIÓN</span>
+                      </>
+                    ) : (
+                      <>
+                        <IconPencil className="w-5 h-5" />
+                        <span className="font-semibold">EDITAR</span>
+                      </>
+                    )}
                   </button>
-                )}
+                </div>
               </div>
             </div>
           </div>
