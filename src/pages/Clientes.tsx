@@ -749,9 +749,9 @@ export default function Clientes() {
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       <div className="fixed inset-0 opacity-[0.77] dark:opacity-[0.02] pointer-events-none">
         <div
-          className="fixed inset-0 pointer-events-none opacity-20"
+          className="fixed inset-0 pointer-events-none opacity-100"
           style={{
-            backgroundImage: "url('/bg088.jpg')",
+            backgroundImage: "url('/bg078.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -1659,11 +1659,11 @@ bg-transparent border-none shadow-none"
                   <button
                     type="button"
                     onClick={modoEdicionRapida ? detenerEdicionRapida : activarEdicionRapida}
-                    className={`flex-[3] flex items-center justify-center gap-3 py-3 px-4 border-2 border-dashed transition-all duration-200 ${
-                      modoEdicionRapida
-                        ? "border-amber-500 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10"
-                        : "border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-                    }`}
+                    className={`flex-[3] flex items-center justify-center gap-3 py-3 px-4 transition-all duration-200 ${
+  modoEdicionRapida
+    ? "bg-[#be8b5b] text-[#1f2937] hover:bg-[#c4a56b]"
+    : "bg-[#27272a] text-[#ffffff] hover:bg-[#3f3f46]"
+}`}
                   >
                     {modoEdicionRapida ? (
                       <>

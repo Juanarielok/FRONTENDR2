@@ -272,11 +272,11 @@ export default function ClienteDetalle() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
-      <div className="fixed inset-0 opacity-[0.16] dark:opacity-[0.02] pointer-events-none">
+      <div className="fixed inset-0 opacity-[1] dark:opacity-[0.02] pointer-events-none">
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/bg088.jpg')",
+            backgroundImage: "url('/bg078.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
