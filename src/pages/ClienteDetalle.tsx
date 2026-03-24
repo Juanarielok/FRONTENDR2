@@ -276,7 +276,7 @@ export default function ClienteDetalle() {
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: "url('/bg0991.jpg')",
+            backgroundImage: "url('/bg088.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -308,13 +308,12 @@ export default function ClienteDetalle() {
               <button
                 onClick={logout}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                         bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 
-                         text-zinc-700 dark:text-zinc-300
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white 
-                         hover:border-zinc-400 dark:hover:border-zinc-600
-                         transition-all duration-200"
+text-zinc-700 dark:text-zinc-300
+hover:text-zinc-900 dark:hover:text-white
+transition-all duration-200
+bg-transparent border-none shadow-none"
               >
-                <IconLogout className="w-4 h-4" />
+               <img src="/gestion1.png" alt="icono" className="w-8 h-8 object-contain" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
             </div>

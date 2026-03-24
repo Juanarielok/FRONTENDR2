@@ -751,7 +751,7 @@ export default function Clientes() {
         <div
           className="fixed inset-0 pointer-events-none opacity-20"
           style={{
-            backgroundImage: "url('/bg0991.jpg')",
+            backgroundImage: "url('/bg088.jpg')",
             backgroundRepeat: "no-repeat",
             backgroundSize: "cover",
             backgroundPosition: "center",
@@ -780,44 +780,41 @@ export default function Clientes() {
 
             <div className="flex items-center gap-3">
               <div className="hidden sm:flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-500 bg-[#f3f3f300] dark:border-[#f0000000] px-3 py-2 border border-[#f0000000] dark:border-[#f0000000]">
-                <img src="/asterisco1.png" alt="icono" className="w-5 h-5 object-contain" />
+                <img src="/important.svg" alt="icono" className="w-5 h-5 object-contain" />
                 <span>Admin</span>
               </div>
               <Link
                 to="/monitoreo"
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-             bg-[#F2F3F5] text-zinc-950
-             hover:bg-[#8ab1ff]
-             transition-all duration-200
-             rounded-full"
+             className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+text-zinc-700 dark:text-zinc-300
+hover:text-zinc-900 dark:hover:text-white
+transition-all duration-200
+bg-transparent border-none shadow-none"
               >
-                <img src="/monitor11.png" alt="icono" className="w-5 h-5 object-contain" />
-                <span className="hidden sm:inline">MONITOREO</span>
+                <img src="/monitor11.png" alt="icono" className="w-7 h-7 object-contain" />
+          
               </Link>
               <ThemeToggle />
               <button
                 onClick={() => nav("/admin")}
-                className="w-10 h-10 flex items-center justify-center
-    bg-zinc-100 dark:bg-zinc-900
-    text-zinc-600 dark:text-zinc-400
-    hover:bg-zinc-200 dark:hover:bg-zinc-800
-    hover:text-zinc-900 dark:hover:text-white
-    transition-all duration-200
-    rounded-lg"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+text-zinc-700 dark:text-zinc-300
+hover:text-zinc-900 dark:hover:text-white
+transition-all duration-200
+bg-transparent border-none shadow-none"
                 title="Gestion"
               >
-                <img src="/gestion3.png" alt="icono" className="w-5 h-5 object-contain" />
+                <img src="/gestion88.png" alt="icono" className="w-6 h-6 object-contain" />
               </button>
               <button
                 onClick={logout}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                         bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700
-                         text-zinc-700 dark:text-zinc-300
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
-                         hover:border-zinc-400 dark:hover:border-zinc-600
-                         transition-all duration-200"
+text-zinc-700 dark:text-zinc-300
+hover:text-zinc-900 dark:hover:text-white
+transition-all duration-200
+bg-transparent border-none shadow-none"
               >
-                <img src="/gestion1.png" alt="icono" className="w-5 h-5 object-contain" />
+                <img src="/gestion1.png" alt="icono" className="w-8 h-8 object-contain" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
             </div>
@@ -1446,8 +1443,12 @@ export default function Clientes() {
                   </div>
                 ) : filteredClientes.length === 0 ? (
                   <div className="px-6 py-16 text-center">
-                    <div className="w-16 h-16 mx-auto bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                      <IconUser className="w-8 h-8 text-zinc-400 dark:text-zinc-600" />
+                    <div className="w-16 h-16 mx-auto">
+                     <img
+  src="/nouser.png"
+  alt="Usuario"
+  className="w-18 h-18 object-contain"
+/>
                     </div>
                     <p className="text-zinc-600 dark:text-zinc-400 font-medium">
                       {searchTerm
@@ -1457,7 +1458,7 @@ export default function Clientes() {
                     <p className="text-zinc-500 dark:text-zinc-600 text-sm mt-1">
                       {searchTerm
                         ? "Intenta con otra búsqueda"
-                        : "Crea el primer cliente usando el formulario"}
+                        : "???"}
                     </p>
                   </div>
                 ) : (
@@ -1627,11 +1628,11 @@ export default function Clientes() {
               <div className="px-1 py-1 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900">
                 <div className="flex items-stretch gap-3">
                   <div
-                    className={`flex-[7] flex items-stretch border-2 border-dashed transition-all duration-200 ${
-                      cantidadSeleccionados === 0 || modoEdicionRapida
-                        ? "border-zinc-300 dark:border-zinc-700 text-zinc-400 dark:text-zinc-600"
-                        : "border-amber-500 text-amber-600 dark:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10"
-                    }`}
+                    className={`flex-[7] flex items-stretch transition-all duration-200 ${
+  cantidadSeleccionados === 0 || modoEdicionRapida
+    ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600"
+    : "bg-[#4627E8] text-[#ffffff] hover:bg-[#4627E8]"
+}`}
                   >
                     <button
                       onClick={asignarClientes}

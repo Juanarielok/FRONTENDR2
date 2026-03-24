@@ -257,12 +257,19 @@ export default function Admin() {
         <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigate("/monitoreo")}
-                className="w-10 h-10 flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white transition-all"
-              >
-                <IconArrowLeft className="w-5 h-5" />
-              </button>
+         
+
+<button
+  type="button"
+  className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
+             flex items-center justify-center text-zinc-600 dark:text-zinc-400
+             hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
+             transition-colors"
+  onClick={() => window.history.back()}
+>
+  <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
+</button>
+         
               <div>
                 <h1 className="text-xl font-bold tracking-tight">Gestion</h1>
                 <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">

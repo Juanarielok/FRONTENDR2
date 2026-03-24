@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
-import type { Cliente, Remito } from "../api";
+import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { LiveTrackingView } from "../components/LiveTrackingView";
 
@@ -50,13 +50,6 @@ type ChoferHistorial = {
 
 // ============ ICONS ============
 
-function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-  );
-}
 function IconActivity({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <img src="/lupit1.png" alt="icono" className={`${className} object-contain`} />
@@ -87,12 +80,6 @@ function IconClock({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function IconFileText({ className = "w-8 h-8" }: { className?: string }) {
-  return (
-    <img src="/remitico.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
 function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
   return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
@@ -106,10 +93,6 @@ function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
 }
 
 function IconMail({ className = "w-5 h-5" }: { className?: string }) {
-  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
-}
-
-function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
   return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
 }
 
@@ -147,26 +130,6 @@ function IconChevronDown({ className = "w-5 h-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
       <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function IconPackage({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="16.5" y1="9.4" x2="7.5" y2="4.21" />
-      <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
-      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-      <line x1="12" y1="22.08" x2="12" y2="12" />
-    </svg>
-  );
-}
-
-function IconDollarSign({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="1" x2="12" y2="23" />
-      <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
     </svg>
   );
 }
@@ -220,15 +183,6 @@ function formatTime(dateString: string) {
     minute: "2-digit",
   });
 }
-
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-  }).format(amount);
-}
-
 
 // ============ COMPONENTS ============
 
@@ -339,11 +293,7 @@ export default function Monitoreo() {
   const [loadingHistorial, setLoadingHistorial] = useState(false);
 
   // Tab activa
-  const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes" | "remitos" | "rastreo">("overview");
-
-  // Remitos
-  const [remitos, setRemitos] = useState<Remito[]>([]);
-  const [loadingRemitos, setLoadingRemitos] = useState(false);
+  const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes" | "rastreo">("overview");
 
   async function loadData() {
     try {
@@ -407,23 +357,6 @@ export default function Monitoreo() {
     }
   }
 
-  async function loadRemitos() {
-    if (remitos.length > 0) return;
-    setLoadingRemitos(true);
-    try {
-      const res = await api.getAllRemitos();
-      setRemitos(res.remitos || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoadingRemitos(false);
-    }
-  }
-
-  useEffect(() => {
-    if (activeTab === "remitos") loadRemitos();
-  }, [activeTab]);
-
   function logout() {
     localStorage.removeItem("token");
     nav("/login", { replace: true });
@@ -485,8 +418,7 @@ export default function Monitoreo() {
   }, [choferesActivos]);
 
   return (
-   <div className="min-h-screen fondo-ondulado p-4 md:p-8">
-  <div className="mx-auto w-full max-w-[1600px] min-h-[calc(100vh-2rem)] md:min-h-[calc(100vh-4rem)] overflow-hidden rounded-[px] border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white shadow-[0_20px_60px_rgba(0,0,0,0.12)] transition-colors duration-300">
+    <div className="min-h-screen fondo-ondulado bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       {/* Background pattern */}
       <div className="fixed inset-0 opacity-[0] dark:opacity-[0.02] pointer-events-none">
         <div
@@ -500,15 +432,15 @@ export default function Monitoreo() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link
-                to="/clientes"
-                className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
-                         flex items-center justify-center text-[#000000] dark:text-zinc-400
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
-                         transition-colors"
-              >
-         <img src="/atras1.png" alt="icono" className="w-5 h-5 object-contain" />
-              </Link>
+               <Link
+                            to="/clientes"
+                            className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
+                                     flex items-center justify-center text-zinc-600 dark:text-zinc-400
+                                     hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
+                                     transition-colors"
+                          >
+                            <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
+                          </Link>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-[#00000000] flex items-center justify-center">
                         <img src="/monitor11.png" alt="icono" className="w-11 h-11 object-contain" />
@@ -582,7 +514,6 @@ export default function Monitoreo() {
               { id: "overview", label: "Resumen", icon: IconActivity },
               { id: "choferes", label: "Choferes", icon: IconTruck },
               { id: "clientes", label: "Clientes", icon: IconUsers },
-              { id: "remitos", label: "Remitos", icon: IconFileText },
               { id: "rastreo", label: "Rastreo", icon: IconNavigation },
             ].map((tab) => (
               <button
@@ -1252,114 +1183,6 @@ export default function Monitoreo() {
               </div>
             )}
 
-            {/* ============ REMITOS TAB ============ */}
-            {activeTab === "remitos" && (
-              <div className="space-y-6">
-                {loadingRemitos ? (
-                  <div className="flex items-center justify-center py-20">
-                    <svg className="animate-spin h-6 w-6 text-amber-500" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                  </div>
-                ) : remitos.length === 0 ? (
-                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-12 text-center">
-                    <IconFileText className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-                    <p className="text-zinc-500">No hay remitos registrados</p>
-                  </div>
-                ) : (
-                  <>
-                    {/* Summary cards */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <StatCard
-                        icon={IconFileText}
-                        label="Total Remitos"
-                        value={remitos.length}
-                        color="blue"
-                      />
-                      <StatCard
-                        icon={IconDollarSign}
-                        label="Facturación Total"
-                        value={formatCurrency(remitos.reduce((s, r) => s + r.total, 0))}
-                        color="emerald"
-                      />
-                      <StatCard
-                        icon={IconPackage}
-                        label="Productos Entregados"
-                        value={remitos.reduce((s, r) => s + r.productos.reduce((ps, p) => ps + p.cantidad, 0), 0)}
-                        color="amber"
-                      />
-                    </div>
-
-                    {/* Remitos list */}
-                    <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
-                      <SectionHeader
-                        icon={IconFileText}
-                        title="Todos los Remitos"
-                        subtitle={`${remitos.length} registros`}
-                        color="bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400"
-                      />
-                      <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50">
-                        {[...remitos]
-                          .sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime())
-                          .map((remito) => {
-                            const cliente = clientes.find((c) => c.id === remito.clienteId);
-                            return (
-                              <div key={remito.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
-                                <div className="flex items-start justify-between gap-4">
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <h3 className="font-medium text-zinc-900 dark:text-white">
-                                        {cliente?.nombre || `Cliente ${remito.clienteId}`}
-                                      </h3>
-                                      <span className="text-s text-zinc-400">{remito.id}</span>
-                                    </div>
-                                    <div className="flex items-center gap-3 mt-1 text-s text-zinc-500">
-                                      <div className="flex items-center gap-1">
-                                        <IconCalendar className="w-3 h-3" />
-                                        <span>{formatDateTime(remito.fecha)}</span>
-                                      </div>
-                                      {remito.chofer && (
-                                        <div className="flex items-center gap-1">
-                                          <IconTruck className="w-3 h-3" />
-                                          <span>{remito.chofer.nombre}</span>
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="flex flex-wrap gap-2 mt-2">
-                                      {remito.productos.map((prod, pi) => (
-                                        <span
-                                          key={pi}
-                                          className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800 text-s text-zinc-600 dark:text-zinc-400"
-                                        >
-                                          <IconPackage className="w-3 h-3" />
-                                          {prod.cantidad}x {prod.nombre}
-                                        </span>
-                                      ))}
-                                    </div>
-                                    {remito.notas && (
-                                      <p className="text-s text-zinc-400 italic mt-1">"{remito.notas}"</p>
-                                    )}
-                                  </div>
-                                  <div className="text-right flex-shrink-0">
-                                    <p className="font-bold text-zinc-900 dark:text-white">
-                                      {formatCurrency(remito.total)}
-                                    </p>
-                                    <p className="text-[10px] text-zinc-400 mt-0.5">
-                                      IVA: {formatCurrency(remito.iva)}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
             {/* ============ RASTREO TAB ============ */}
             {activeTab === "rastreo" && (
               <LiveTrackingView clientes={clientes} />
@@ -1369,8 +1192,5 @@ export default function Monitoreo() {
         )}
       </main>
     </div>
-     </div>
   );
 }
-
-////////good one
