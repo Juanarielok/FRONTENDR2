@@ -1,97 +1,37 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
+import {
+  IconArrowLeft,
+  IconActivity,
+  IconLogout,
+  IconUserPlus,
+  IconUsers,
+  IconUser,
+  IconPencil as IconEdit,
+  IconKey,
+  IconX,
+  IconTrash,
+  IconCheck,
+  IconSearch,
+  IconEye,
+  IconEyeOff,
+} from "../components/icons";
+import {
+  formatCuit,
+  onlyDigits,
+  validateCuit,
+  validateDni,
+  validateEmail,
+  validateLocation,
+  validatePassword,
+  validatePhone,
+  validateRequired,
+} from "../utils/validation";
 
 type User = Omit<Cliente, "role"> & { role: string };
-
-// ============ ICONS ============
-
-function IconArrowLeft({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M19 12H5M12 19l-7-7 7-7" />
-    </svg>
-  );
-}
-
-function IconUserPlus({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="8.5" cy="7" r="4" />
-      <line x1="20" y1="8" x2="20" y2="14" />
-      <line x1="23" y1="11" x2="17" y2="11" />
-    </svg>
-  );
-}
-
-function IconUsers({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-  );
-}
-
-function IconEdit({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
-}
-
-function IconKey({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
-    </svg>
-  );
-}
-
-function IconX({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function IconTrash({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  );
-}
-
-function IconCheck({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
-
-function IconSearch({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
 
 // ============ COMPONENTS ============
 
@@ -111,12 +51,157 @@ const emptyForm = {
   notas: "",
 };
 
+type AdminForm = typeof emptyForm;
+type AdminFormField = Exclude<keyof AdminForm, "role">;
+type AdminFormErrors = Partial<Record<AdminFormField, string>>;
+type EditField = Exclude<AdminFormField, "password">;
+type EditForm = Record<EditField, string>;
+
+const emptyEditForm: EditForm = {
+  nombre: "",
+  email: "",
+  telefono: "",
+  dni: "",
+  cuit: "",
+  ubicacion: "",
+  razonSocial: "",
+  tipoComercio: "",
+  notas: "",
+};
+
+const createValidatedFields: AdminFormField[] = [
+  "nombre",
+  "email",
+  "password",
+  "telefono",
+  "dni",
+  "cuit",
+  "ubicacion",
+];
+
+const editFields: {
+  key: EditField;
+  label: string;
+  type?: "text" | "email" | "tel";
+  inputMode?: "text" | "email" | "tel" | "numeric";
+  required?: boolean;
+}[] = [
+  { key: "nombre", label: "Nombre", required: true },
+  { key: "email", label: "Email", type: "email", inputMode: "email", required: true },
+  { key: "telefono", label: "Teléfono", type: "tel", inputMode: "tel" },
+  { key: "dni", label: "DNI", inputMode: "numeric" },
+  { key: "cuit", label: "CUIT/CUIL", inputMode: "numeric" },
+  { key: "ubicacion", label: "Ubicación" },
+  { key: "razonSocial", label: "Razón social" },
+  { key: "tipoComercio", label: "Tipo de comercio" },
+  { key: "notas", label: "Notas" },
+];
+
+function getCreateFieldError(values: AdminForm, field: AdminFormField) {
+  switch (field) {
+    case "nombre":
+      return validateRequired(values.nombre, "Nombre");
+    case "email":
+      return validateEmail(values.email);
+    case "password":
+      return validatePassword(values.password);
+    case "telefono":
+      return validatePhone(values.telefono, false);
+    case "dni":
+      return validateDni(values.dni, false);
+    case "cuit":
+      return validateCuit(values.cuit, false);
+    case "ubicacion":
+      return validateLocation(values.ubicacion, false);
+    default:
+      return undefined;
+  }
+}
+
+function validateCreateForm(values: AdminForm) {
+  const errors: AdminFormErrors = {};
+  const visibleFields =
+    values.role === "cliente"
+      ? createValidatedFields
+      : createValidatedFields.filter((field) => field !== "ubicacion");
+
+  visibleFields.forEach((field) => {
+    const error = getCreateFieldError(values, field);
+    if (error) errors[field] = error;
+  });
+  return errors;
+}
+
+function getEditFieldError(values: EditForm, field: EditField) {
+  switch (field) {
+    case "nombre":
+      return validateRequired(values.nombre, "Nombre");
+    case "email":
+      return validateEmail(values.email);
+    case "telefono":
+      return validatePhone(values.telefono, false);
+    case "dni":
+      return validateDni(values.dni, false);
+    case "cuit":
+      return validateCuit(values.cuit, false);
+    case "ubicacion":
+      return validateLocation(values.ubicacion, false);
+    default:
+      return undefined;
+  }
+}
+
+function validateEditForm(values: EditForm) {
+  const errors: Partial<Record<EditField, string>> = {};
+  editFields.forEach(({ key }) => {
+    const error = getEditFieldError(values, key);
+    if (error) errors[key] = error;
+  });
+  return errors;
+}
+
+function normalizeCreatePayload(values: AdminForm): AdminForm {
+  return {
+    ...values,
+    email: values.email.trim().toLowerCase(),
+    nombre: values.nombre.trim(),
+    dni: onlyDigits(values.dni),
+    cuit: formatCuit(values.cuit.trim()),
+    telefono: values.telefono.trim(),
+    ubicacion: values.ubicacion.trim(),
+    razonSocial: values.razonSocial.trim(),
+    tipoComercio: values.tipoComercio.trim(),
+    notas: values.notas.trim(),
+  };
+}
+
+function normalizeEditPayload(values: EditForm): EditForm {
+  return {
+    ...values,
+    email: values.email.trim().toLowerCase(),
+    nombre: values.nombre.trim(),
+    dni: onlyDigits(values.dni),
+    cuit: formatCuit(values.cuit.trim()),
+    telefono: values.telefono.trim(),
+    ubicacion: values.ubicacion.trim(),
+    razonSocial: values.razonSocial.trim(),
+    tipoComercio: values.tipoComercio.trim(),
+    notas: values.notas.trim(),
+  };
+}
+
+function focusField(id: string) {
+  requestAnimationFrame(() => document.getElementById(id)?.focus());
+}
+
 export default function Admin() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("crear");
 
   // Create user state
   const [form, setForm] = useState({ ...emptyForm });
+  const [createErrors, setCreateErrors] = useState<AdminFormErrors>({});
+  const [showCreatePassword, setShowCreatePassword] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -126,10 +211,13 @@ export default function Admin() {
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [search, setSearch] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [editForm, setEditForm] = useState<Record<string, string>>({});
+  const [editForm, setEditForm] = useState<EditForm>({ ...emptyEditForm });
+  const [editErrors, setEditErrors] = useState<Partial<Record<EditField, string>>>({});
   const [saving, setSaving] = useState(false);
   const [resetModal, setResetModal] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [resetPasswordError, setResetPasswordError] = useState<string>();
+  const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [deleteModal, setDeleteModal] = useState<User | null>(null);
@@ -149,22 +237,73 @@ export default function Admin() {
       setUsers(clienteRes.users as User[]);
       setChoferes(choferRes.users as User[]);
     } catch {
-      setFeedback({ type: "err", text: "Error cargando usuarios" });
+      setFeedback({ type: "err", text: "Error al cargar los usuarios" });
     } finally {
       setLoadingUsers(false);
     }
   }
 
+  function changeCreateField(field: AdminFormField, value: string) {
+    const nextValue =
+      field === "cuit"
+        ? formatCuit(value)
+        : field === "dni"
+          ? onlyDigits(value).slice(0, 8)
+          : value;
+    setForm((current) => ({ ...current, [field]: nextValue }));
+    if (createErrors[field]) {
+      setCreateErrors((current) => ({ ...current, [field]: undefined }));
+    }
+  }
+
+  function blurCreateField(field: AdminFormField) {
+    const error = getCreateFieldError(form, field);
+    setCreateErrors((current) => ({ ...current, [field]: error }));
+  }
+
+  function changeEditField(field: EditField, value: string) {
+    const nextValue =
+      field === "cuit"
+        ? formatCuit(value)
+        : field === "dni"
+          ? onlyDigits(value).slice(0, 8)
+          : value;
+    setEditForm((current) => ({ ...current, [field]: nextValue }));
+    if (editErrors[field]) {
+      setEditErrors((current) => ({ ...current, [field]: undefined }));
+    }
+  }
+
+  function blurEditField(field: EditField) {
+    const error = getEditFieldError(editForm, field);
+    setEditErrors((current) => ({ ...current, [field]: error }));
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
-    setCreating(true);
+    if (creating) return;
+
+    const validationErrors = validateCreateForm(form);
+    setCreateErrors(validationErrors);
     setCreateMsg(null);
+    if (Object.keys(validationErrors).length > 0) {
+      const firstField = createValidatedFields.find(
+        (field) => validationErrors[field]
+      );
+      if (firstField) focusField(`create-${firstField}`);
+      return;
+    }
+
+    const payload = normalizeCreatePayload(form);
+    setCreating(true);
     try {
-      await api.createCliente({ ...form });
-      setCreateMsg({ type: "ok", text: `Usuario "${form.nombre}" creado exitosamente` });
+      await api.createCliente(payload);
+      setCreateMsg({ type: "ok", text: `Usuario "${payload.nombre}" creado correctamente` });
       setForm({ ...emptyForm });
+      setCreateErrors({});
+      setShowCreatePassword(false);
     } catch (err: any) {
-      setCreateMsg({ type: "err", text: err.message || "Error creando usuario" });
+      setCreateMsg({ type: "err", text: err.message || "Error al crear el usuario" });
     } finally {
       setCreating(false);
     }
@@ -172,6 +311,7 @@ export default function Admin() {
 
   function startEdit(user: User) {
     setEditingUser(user);
+    setEditErrors({});
     setEditForm({
       nombre: user.nombre || "",
       email: user.email || "",
@@ -186,30 +326,49 @@ export default function Admin() {
   }
 
   async function handleSaveEdit() {
-    if (!editingUser) return;
+    if (!editingUser || saving) return;
+    const validationErrors = validateEditForm(editForm);
+    setEditErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      const firstField = editFields.find(({ key }) => validationErrors[key])?.key;
+      if (firstField) focusField(`edit-${firstField}`);
+      return;
+    }
+
+    const payload = normalizeEditPayload(editForm);
     setSaving(true);
     try {
-      await api.updateUser(editingUser.id, editForm);
-      setFeedback({ type: "ok", text: `"${editForm.nombre}" actualizado` });
+      await api.updateUser(editingUser.id, payload);
+      setFeedback({ type: "ok", text: `"${payload.nombre}" actualizado` });
       setEditingUser(null);
+      setEditErrors({});
       loadUsers();
     } catch (err: any) {
-      setFeedback({ type: "err", text: err.message || "Error actualizando" });
+      setFeedback({ type: "err", text: err.message || "Error al actualizar el usuario" });
     } finally {
       setSaving(false);
     }
   }
 
   async function handleResetPassword() {
-    if (!resetModal || !newPassword) return;
+    if (!resetModal || resetting) return;
+    const validationError = validatePassword(newPassword);
+    setResetPasswordError(validationError);
+    if (validationError) {
+      focusField("reset-password");
+      return;
+    }
+
     setResetting(true);
     try {
       await api.resetPassword(resetModal.id, newPassword);
-      setFeedback({ type: "ok", text: `Contrasena de "${resetModal.nombre}" reseteada` });
+      setFeedback({ type: "ok", text: `Contraseña de "${resetModal.nombre}" restablecida` });
       setResetModal(null);
       setNewPassword("");
+      setResetPasswordError(undefined);
+      setShowResetPassword(false);
     } catch (err: any) {
-      setFeedback({ type: "err", text: err.message || "Error reseteando contrasena" });
+      setFeedback({ type: "err", text: err.message || "Error al restablecer la contraseña" });
     } finally {
       setResetting(false);
     }
@@ -224,7 +383,7 @@ export default function Admin() {
       setDeleteModal(null);
       loadUsers();
     } catch (err: any) {
-      setFeedback({ type: "err", text: err.message || "Error eliminando usuario" });
+      setFeedback({ type: "err", text: err.message || "Error al eliminar el usuario" });
     } finally {
       setDeleting(false);
     }
@@ -241,43 +400,104 @@ export default function Admin() {
     : allUsers;
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: "crear", label: "Crear Usuario", icon: <IconUserPlus className="w-4 h-4" /> },
-    { key: "gestion", label: "Gestion de Usuarios", icon: <IconUsers className="w-4 h-4" /> },
+    { key: "crear", label: "Crear usuario", icon: <IconUserPlus className="w-4 h-4" /> },
+    { key: "gestion", label: "Gestión de usuarios", icon: <IconUsers className="w-4 h-4" /> },
   ];
 
   const inputClass =
-    "w-full px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500 transition-colors";
+    "w-full px-3 py-2 text-sm rounded-lg bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 hover:border-zinc-400 dark:hover:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-colors";
+
+  const validatedInputClass = (error?: string) =>
+    `${inputClass} ${
+      error
+        ? "!border-red-500 focus:!border-red-500 focus:!ring-red-500/20"
+        : ""
+    }`;
 
   const labelClass = "block text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1";
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
+    <div className="min-h-screen fondo-home bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-5xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-         
-
-<button
-  type="button"
-  className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
-             flex items-center justify-center text-zinc-600 dark:text-zinc-400
-             hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
-             transition-colors"
-  onClick={() => window.history.back()}
->
-  <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
-</button>
-         
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">Gestion</h1>
-                <p className="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
-                  Administracion de usuarios
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/85 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 shadow-sm shadow-zinc-900/5">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="grid grid-cols-1 items-center gap-y-2 sm:flex sm:justify-between sm:gap-4">
+            <div className="flex w-full sm:w-auto min-w-0 items-center gap-2 sm:gap-4">
+              <button
+                type="button"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                           text-zinc-600 dark:text-zinc-400
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-white
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                           transition-colors"
+                onClick={() => window.history.back()}
+                title="Volver"
+                aria-label="Volver"
+              >
+                <IconArrowLeft className="w-5 h-5" />
+              </button>
+              <Link
+                to="/clientes"
+                title="Ir al inicio"
+                aria-label="Ir al inicio"
+                className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+              >
+                <img
+                  src="/images/brand/arttaius-logo.png"
+                  alt="Arttaius"
+                  className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+                />
+              </Link>
+              <div className="min-w-0 px-3 sm:px-4 py-2 sm:py-3 border-l-[3px] border-amber-500">
+                <h1 className="truncate text-sm sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-[1.5px] sm:tracking-[3px]">
+                  GESTIÓN
+                </h1>
+                <p className="hidden sm:block truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  Administración de usuarios
                 </p>
               </div>
             </div>
-            <ThemeToggle />
+            <nav
+              className="flex w-full sm:w-auto min-w-0 sm:shrink-0 items-center justify-end gap-1 sm:gap-2"
+              aria-label="Acciones principales"
+            >
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/80">
+                <IconUser className="w-4 h-4" />
+                <span>Admin</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigate("/monitoreo")}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                           text-zinc-600 dark:text-zinc-400
+                           hover:text-zinc-900 dark:hover:text-white
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                           transition-colors duration-200"
+                title="Monitoreo"
+                aria-label="Ir a monitoreo"
+              >
+                <IconActivity className="w-5 h-5" />
+              </button>
+              <ThemeToggle />
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem("token");
+                  navigate("/login", { replace: true });
+                }}
+                className="flex h-10 min-w-10 shrink-0 items-center justify-center gap-2 rounded-lg px-2 sm:px-3 text-sm font-medium
+                           text-zinc-600 dark:text-zinc-400
+                           hover:text-zinc-900 dark:hover:text-white
+                           hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                           transition-colors duration-200"
+                title="Salir"
+              >
+                <IconLogout className="w-5 h-5" />
+                <span className="hidden sm:inline">Salir</span>
+              </button>
+            </nav>
           </div>
 
           {/* Tabs */}
@@ -305,7 +525,7 @@ export default function Admin() {
         {/* Feedback toast */}
         {feedback && (
           <div
-            className={`mb-6 px-4 py-3 border text-sm flex items-center justify-between ${
+            className={`mb-6 px-4 py-3 rounded-lg border text-sm flex items-center justify-between ${
               feedback.type === "ok"
                 ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400"
                 : "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400"
@@ -320,14 +540,14 @@ export default function Admin() {
 
         {/* ======== CREAR USUARIO ======== */}
         {tab === "crear" && (
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800">
-            <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h2 className="text-lg font-bold">Crear Usuario</h2>
+          <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
+            <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60">
+              <h2 className="text-lg font-bold">Crear usuario</h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
                 Registrar un nuevo chofer o cliente en el sistema
               </p>
             </div>
-            <form onSubmit={handleCreate} className="p-6 space-y-6">
+            <form onSubmit={handleCreate} noValidate className="p-6 space-y-6">
               {/* Role selector */}
               <div>
                 <label className={labelClass}>Rol</label>
@@ -337,9 +557,9 @@ export default function Admin() {
                       key={r}
                       type="button"
                       onClick={() => setForm({ ...form, role: r })}
-                      className={`px-4 py-2 text-sm font-medium border transition-all ${
+                      className={`px-4 py-2 text-sm font-medium rounded-lg border transition-all ${
                         form.role === r
-                          ? "bg-amber-500 border-amber-500 text-white"
+                          ? "bg-amber-500 border-amber-500 text-zinc-950 font-semibold shadow-sm shadow-amber-500/20"
                           : "bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-amber-500"
                       }`}
                     >
@@ -352,67 +572,147 @@ export default function Admin() {
               {/* Required fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className={labelClass}>Nombre *</label>
+                  <label htmlFor="create-nombre" className={labelClass}>Nombre *</label>
                   <input
+                    id="create-nombre"
                     type="text"
                     required
                     value={form.nombre}
-                    onChange={(e) => setForm({ ...form, nombre: e.target.value })}
-                    className={inputClass}
+                    onChange={(e) => changeCreateField("nombre", e.target.value)}
+                    onBlur={() => blurCreateField("nombre")}
+                    className={validatedInputClass(createErrors.nombre)}
                     placeholder="Nombre completo"
+                    autoComplete="name"
+                    aria-invalid={!!createErrors.nombre}
+                    aria-describedby={createErrors.nombre ? "create-nombre-error" : undefined}
                   />
+                  {createErrors.nombre && (
+                    <p id="create-nombre-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.nombre}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelClass}>Email *</label>
+                  <label htmlFor="create-email" className={labelClass}>Email *</label>
                   <input
+                    id="create-email"
                     type="email"
                     required
                     value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className={inputClass}
+                    onChange={(e) => changeCreateField("email", e.target.value)}
+                    onBlur={() => blurCreateField("email")}
+                    className={validatedInputClass(createErrors.email)}
                     placeholder="usuario@email.com"
+                    autoComplete="email"
+                    inputMode="email"
+                    aria-invalid={!!createErrors.email}
+                    aria-describedby={createErrors.email ? "create-email-error" : undefined}
                   />
+                  {createErrors.email && (
+                    <p id="create-email-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.email}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelClass}>Contrasena *</label>
-                  <input
-                    type="password"
-                    required
-                    value={form.password}
-                    onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className={inputClass}
-                    placeholder="Contrasena inicial"
-                  />
+                  <label htmlFor="create-password" className={labelClass}>Contraseña *</label>
+                  <div className="relative">
+                    <input
+                      id="create-password"
+                      type={showCreatePassword ? "text" : "password"}
+                      required
+                      value={form.password}
+                      onChange={(e) => changeCreateField("password", e.target.value)}
+                      onBlur={() => blurCreateField("password")}
+                      className={`${validatedInputClass(createErrors.password)} !pr-11`}
+                      placeholder="Mínimo 8 caracteres"
+                      autoComplete="new-password"
+                      aria-invalid={!!createErrors.password}
+                      aria-describedby={createErrors.password ? "create-password-error" : undefined}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCreatePassword((visible) => !visible)}
+                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500/50 transition-colors"
+                      aria-label={showCreatePassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      aria-pressed={showCreatePassword}
+                      title={showCreatePassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      {showCreatePassword ? (
+                        <IconEyeOff className="w-5 h-5" />
+                      ) : (
+                        <IconEye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {createErrors.password && (
+                    <p id="create-password-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.password}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelClass}>Telefono</label>
+                  <label htmlFor="create-telefono" className={labelClass}>Teléfono</label>
                   <input
-                    type="text"
+                    id="create-telefono"
+                    type="tel"
                     value={form.telefono}
-                    onChange={(e) => setForm({ ...form, telefono: e.target.value })}
-                    className={inputClass}
+                    onChange={(e) => changeCreateField("telefono", e.target.value)}
+                    onBlur={() => blurCreateField("telefono")}
+                    className={validatedInputClass(createErrors.telefono)}
                     placeholder="+54 11 5555-0000"
+                    autoComplete="tel"
+                    inputMode="tel"
+                    aria-invalid={!!createErrors.telefono}
+                    aria-describedby={createErrors.telefono ? "create-telefono-error" : undefined}
                   />
+                  {createErrors.telefono && (
+                    <p id="create-telefono-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.telefono}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelClass}>DNI</label>
+                  <label htmlFor="create-dni" className={labelClass}>DNI</label>
                   <input
+                    id="create-dni"
                     type="text"
                     value={form.dni}
-                    onChange={(e) => setForm({ ...form, dni: e.target.value })}
-                    className={inputClass}
+                    onChange={(e) => changeCreateField("dni", e.target.value)}
+                    onBlur={() => blurCreateField("dni")}
+                    className={validatedInputClass(createErrors.dni)}
                     placeholder="12345678"
+                    inputMode="numeric"
+                    maxLength={8}
+                    aria-invalid={!!createErrors.dni}
+                    aria-describedby={createErrors.dni ? "create-dni-error" : undefined}
                   />
+                  {createErrors.dni && (
+                    <p id="create-dni-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.dni}
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <label className={labelClass}>CUIT</label>
+                  <label htmlFor="create-cuit" className={labelClass}>CUIT</label>
                   <input
+                    id="create-cuit"
                     type="text"
                     value={form.cuit}
-                    onChange={(e) => setForm({ ...form, cuit: e.target.value })}
-                    className={inputClass}
+                    onChange={(e) => changeCreateField("cuit", e.target.value)}
+                    onBlur={() => blurCreateField("cuit")}
+                    className={validatedInputClass(createErrors.cuit)}
                     placeholder="20-12345678-9"
+                    inputMode="numeric"
+                    maxLength={13}
+                    aria-invalid={!!createErrors.cuit}
+                    aria-describedby={createErrors.cuit ? "create-cuit-error" : undefined}
                   />
+                  {createErrors.cuit && (
+                    <p id="create-cuit-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.cuit}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -420,41 +720,53 @@ export default function Admin() {
               {form.role === "cliente" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-zinc-200 dark:border-zinc-800">
                   <div>
-                    <label className={labelClass}>Ubicacion</label>
+                    <label htmlFor="create-ubicacion" className={labelClass}>Ubicación</label>
                     <input
+                      id="create-ubicacion"
                       type="text"
                       value={form.ubicacion}
-                      onChange={(e) => setForm({ ...form, ubicacion: e.target.value })}
-                      className={inputClass}
+                      onChange={(e) => changeCreateField("ubicacion", e.target.value)}
+                      onBlur={() => blurCreateField("ubicacion")}
+                      className={validatedInputClass(createErrors.ubicacion)}
                       placeholder="-34.6037,-58.3816"
+                      aria-invalid={!!createErrors.ubicacion}
+                      aria-describedby={createErrors.ubicacion ? "create-ubicacion-error" : undefined}
                     />
+                    {createErrors.ubicacion && (
+                      <p id="create-ubicacion-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                        {createErrors.ubicacion}
+                      </p>
+                    )}
                   </div>
                   <div>
-                    <label className={labelClass}>Razon Social</label>
+                    <label htmlFor="create-razon-social" className={labelClass}>Razón social</label>
                     <input
+                      id="create-razon-social"
                       type="text"
                       value={form.razonSocial}
-                      onChange={(e) => setForm({ ...form, razonSocial: e.target.value })}
+                      onChange={(e) => changeCreateField("razonSocial", e.target.value)}
                       className={inputClass}
                       placeholder="Empresa SRL"
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Tipo de Comercio</label>
+                    <label htmlFor="create-tipo-comercio" className={labelClass}>Tipo de comercio</label>
                     <input
+                      id="create-tipo-comercio"
                       type="text"
                       value={form.tipoComercio}
-                      onChange={(e) => setForm({ ...form, tipoComercio: e.target.value })}
+                      onChange={(e) => changeCreateField("tipoComercio", e.target.value)}
                       className={inputClass}
-                      placeholder="Panaderia, Kiosco, etc."
+                      placeholder="Panadería, kiosco, etc."
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Notas</label>
+                    <label htmlFor="create-notas" className={labelClass}>Notas</label>
                     <input
+                      id="create-notas"
                       type="text"
                       value={form.notas}
-                      onChange={(e) => setForm({ ...form, notas: e.target.value })}
+                      onChange={(e) => changeCreateField("notas", e.target.value)}
                       className={inputClass}
                       placeholder="Observaciones"
                     />
@@ -465,7 +777,7 @@ export default function Admin() {
               {/* Create message */}
               {createMsg && (
                 <div
-                  className={`px-4 py-3 border text-sm ${
+                  className={`px-4 py-3 rounded-lg border text-sm ${
                     createMsg.type === "ok"
                       ? "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-700 text-emerald-700 dark:text-emerald-400"
                       : "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700 text-red-700 dark:text-red-400"
@@ -479,15 +791,15 @@ export default function Admin() {
               <button
                 type="submit"
                 disabled={creating}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold uppercase tracking-wider bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold uppercase tracking-wider rounded-lg bg-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed transition-all"
               >
-                {creating ? "Creando..." : "Crear Usuario"}
+                {creating ? "Creando..." : "Crear usuario"}
               </button>
             </form>
           </div>
         )}
 
-        {/* ======== GESTION DE USUARIOS ======== */}
+        {/* ======== GESTIÓN DE USUARIOS ======== */}
         {tab === "gestion" && (
           <div className="space-y-6">
             {/* Search */}
@@ -507,22 +819,23 @@ export default function Admin() {
             ) : filtered.length === 0 ? (
               <div className="text-center py-12 text-zinc-500">No se encontraron usuarios</div>
             ) : (
-              <div className="border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-800">
+              <div className="border border-zinc-200 dark:border-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                 {filtered.map((user) => (
                   <div
                     key={user.id}
-                    className="bg-white dark:bg-zinc-900 px-6 py-4 flex items-center justify-between gap-4"
+                    className="bg-white dark:bg-zinc-900/50 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors px-6 py-4 flex items-center justify-between gap-4"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold truncate">{user.nombre}</span>
                         <span
-                          className={`px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                          className={`inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide ${
                             user.role === "chofer"
                               ? "bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border border-blue-300 dark:border-blue-700"
                               : "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700"
                           }`}
                         >
+                          <span className={`w-1.5 h-1.5 rounded-full ${user.role === "chofer" ? "bg-blue-500" : "bg-amber-500"}`} />
                           {user.role}
                         </span>
                       </div>
@@ -533,7 +846,7 @@ export default function Admin() {
                     <div className="flex items-center gap-2 shrink-0">
                       <button
                         onClick={() => startEdit(user)}
-                        className="w-9 h-9 flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:text-amber-500 transition-all"
+                        className="w-9 h-9 rounded-lg flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:text-amber-500 transition-all"
                         title="Editar"
                       >
                         <IconEdit className="w-4 h-4" />
@@ -542,15 +855,17 @@ export default function Admin() {
                         onClick={() => {
                           setResetModal(user);
                           setNewPassword("");
+                          setResetPasswordError(undefined);
+                          setShowResetPassword(false);
                         }}
-                        className="w-9 h-9 flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:text-amber-500 transition-all"
-                        title="Resetear contrasena"
+                        className="w-9 h-9 rounded-lg flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-amber-500 hover:text-amber-500 transition-all"
+                        title="Restablecer contraseña"
                       >
                         <IconKey className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setDeleteModal(user)}
-                        className="w-9 h-9 flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-red-500 hover:text-red-500 transition-all"
+                        className="w-9 h-9 rounded-lg flex items-center justify-center border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:border-red-500 hover:text-red-500 transition-all"
                         title="Borrar usuario"
                       >
                         <IconTrash className="w-4 h-4" />
@@ -567,90 +882,191 @@ export default function Admin() {
       {/* ======== EDIT MODAL ======== */}
       {editingUser && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-lg font-bold">Editar Usuario</h3>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60">
+              <h3 className="text-lg font-bold">Editar usuario</h3>
               <button
-                onClick={() => setEditingUser(null)}
-                className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                type="button"
+                onClick={() => {
+                  setEditingUser(null);
+                  setEditErrors({});
+                }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <IconX className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              {Object.entries(editForm).map(([key, val]) => (
-                <div key={key}>
-                  <label className={labelClass}>{key}</label>
-                  <input
-                    type="text"
-                    value={val}
-                    onChange={(e) => setEditForm({ ...editForm, [key]: e.target.value })}
-                    className={inputClass}
-                  />
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
-              <button
-                onClick={() => setEditingUser(null)}
-                className="px-4 py-2 text-sm font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
-              >
-                <IconCheck className="w-4 h-4" />
-                {saving ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
+            <form
+              noValidate
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleSaveEdit();
+              }}
+            >
+              <div className="p-6 space-y-4">
+                {editFields.map(({ key, label, type = "text", inputMode, required }) => {
+                  const error = editErrors[key];
+                  const inputId = `edit-${key}`;
+                  const errorId = `${inputId}-error`;
+
+                  return (
+                    <div key={key}>
+                      <label htmlFor={inputId} className={labelClass}>
+                        {label}{required ? " *" : ""}
+                      </label>
+                      <input
+                        id={inputId}
+                        type={type}
+                        inputMode={inputMode}
+                        required={required}
+                        value={editForm[key]}
+                        onChange={(event) => changeEditField(key, event.target.value)}
+                        onBlur={() => blurEditField(key)}
+                        className={validatedInputClass(error)}
+                        autoComplete={
+                          key === "email"
+                            ? "email"
+                            : key === "telefono"
+                              ? "tel"
+                              : key === "nombre"
+                                ? "name"
+                                : undefined
+                        }
+                        maxLength={
+                          key === "cuit" ? 13 : key === "dni" ? 8 : undefined
+                        }
+                        aria-invalid={!!error}
+                        aria-describedby={error ? errorId : undefined}
+                      />
+                      {error && (
+                        <p id={errorId} className="mt-1 text-xs text-red-500 dark:text-red-400">
+                          {error}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingUser(null);
+                    setEditErrors({});
+                  }}
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                >
+                  <IconCheck className="w-4 h-4" />
+                  {saving ? "Guardando..." : "Guardar"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
 
-      {/* ======== RESET PASSWORD MODAL ======== */}
+      {/* ======== MODAL PARA RESTABLECER LA CONTRASEÑA ======== */}
       {resetModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 w-full max-w-sm">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-              <h3 className="text-lg font-bold">Resetear Contrasena</h3>
+          <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60">
+              <h3 className="text-lg font-bold">Restablecer contraseña</h3>
               <button
-                onClick={() => setResetModal(null)}
-                className="w-8 h-8 flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors"
+                type="button"
+                onClick={() => {
+                  setResetModal(null);
+                  setNewPassword("");
+                  setResetPasswordError(undefined);
+                  setShowResetPassword(false);
+                }}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <IconX className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6 space-y-4">
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Nueva contrasena para <span className="font-semibold text-zinc-900 dark:text-white">{resetModal.nombre}</span>
-              </p>
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Nueva contrasena"
-                className={inputClass}
-              />
-            </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
-              <button
-                onClick={() => setResetModal(null)}
-                className="px-4 py-2 text-sm font-medium border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleResetPassword}
-                disabled={resetting || !newPassword}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-bold bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-50 transition-colors"
-              >
-                <IconKey className="w-4 h-4" />
-                {resetting ? "Reseteando..." : "Resetear"}
-              </button>
-            </div>
+            <form
+              noValidate
+              onSubmit={(event) => {
+                event.preventDefault();
+                handleResetPassword();
+              }}
+            >
+              <div className="p-6 space-y-4">
+                <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  Nueva contraseña para <span className="font-semibold text-zinc-900 dark:text-white">{resetModal.nombre}</span>
+                </p>
+                <div>
+                  <label htmlFor="reset-password" className="sr-only">
+                    Nueva contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="reset-password"
+                      type={showResetPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(event) => {
+                        setNewPassword(event.target.value);
+                        if (resetPasswordError) setResetPasswordError(undefined);
+                      }}
+                      onBlur={() => setResetPasswordError(validatePassword(newPassword))}
+                      placeholder="Mínimo 8 caracteres"
+                      autoComplete="new-password"
+                      className={`${validatedInputClass(resetPasswordError)} !pr-11`}
+                      aria-invalid={!!resetPasswordError}
+                      aria-describedby={resetPasswordError ? "reset-password-error" : undefined}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowResetPassword((visible) => !visible)}
+                      className="absolute inset-y-0 right-0 flex w-11 items-center justify-center rounded-r-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500/50 transition-colors"
+                      aria-label={showResetPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                      aria-pressed={showResetPassword}
+                      title={showResetPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    >
+                      {showResetPassword ? (
+                        <IconEyeOff className="w-5 h-5" />
+                      ) : (
+                        <IconEye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                  {resetPasswordError && (
+                    <p id="reset-password-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {resetPasswordError}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-zinc-200 dark:border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetModal(null);
+                    setNewPassword("");
+                    setResetPasswordError(undefined);
+                    setShowResetPassword(false);
+                  }}
+                  className="px-4 py-2 text-sm font-medium rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetting}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20 hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed transition-all"
+                >
+                  <IconKey className="w-4 h-4" />
+                  {resetting ? "Restableciendo..." : "Restablecer"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
@@ -670,7 +1086,7 @@ export default function Admin() {
               <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">Borrar usuario</h3>
             </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-              ¿Estás seguro de borrar usuario <span className="font-semibold text-zinc-900 dark:text-white">{deleteModal.nombre}</span>? Esta acción no se puede deshacer.
+              ¿Estás seguro de que quieres borrar al usuario <span className="font-semibold text-zinc-900 dark:text-white">{deleteModal.nombre}</span>? Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-3 justify-end">
               <button

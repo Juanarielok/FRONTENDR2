@@ -1,14 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import { IconEye, IconEyeOff } from "../components/icons";
+import { validateEmail, validateRequired } from "../utils/validation";
+
+type LoginErrors = {
+  email?: string;
+  password?: string;
+};
 
 export default function Login() {
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<LoginErrors>({});
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
 
   const [mostrarSplash, setMostrarSplash] = useState(
   !sessionStorage.getItem("loginSplashMostrado")
@@ -39,49 +50,61 @@ useEffect(() => {
   };
 }, []);
 
-  async function onLogin() {
+  async function onLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (loading) return;
+
+    const passwordRequiredError = validateRequired(password, "Contraseña");
+    const nextErrors: LoginErrors = {
+      email: validateEmail(email),
+      password: passwordRequiredError ? "Contraseña requerida" : undefined,
+    };
+
+    setErrors(nextErrors);
+    if (nextErrors.email || nextErrors.password) {
+      if (nextErrors.email) emailRef.current?.focus();
+      else passwordRef.current?.focus();
+      return;
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    setEmail(normalizedEmail);
     setErr("");
     setLoading(true);
     try {
-      await api.login(email, password);
+      await api.login(normalizedEmail, password);
       nav("/clientes", { replace: true });
-    } catch (e: any) {
-      setErr(String(e?.message || "Error de conexión"));
+    } catch (error: unknown) {
+      setErr(error instanceof Error ? error.message : "Error de conexión");
     } finally {
       setLoading(false);
     }
   }
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Enter" && email && password) {
-      onLogin();
-    }
-  }
-
   return (
-    <div className="min-h-screen bg-white relative overflow-hidden">
+    <div className="min-h-screen fondo-home bg-white dark:bg-zinc-950 relative overflow-hidden">
       {/* Splash blanco */}
       <div
-        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white transition-opacity duration-700 ${
+        className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-zinc-950 transition-opacity duration-700 ${
           mostrarSplash ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
       >
         <img
-          src="/ARRTAIUS1.png"
+          src="/images/brand/arttaius-logo.png"
           alt="Arttaius"
           className="w-28 h-28 object-contain mb-5 animate-[fadeIn_0.8s_ease-out]"
         />
 
-        <div className="w-8 h-8 border-2 border-zinc-300 border-t-zinc-800 rounded-full animate-spin mb-3" />
+        <div className="w-8 h-8 border-2 border-zinc-300 dark:border-zinc-700 border-t-zinc-800 dark:border-t-zinc-200 rounded-full animate-spin mb-3" />
 
-        <p className="text-zinc-600 text-sm tracking-[0.18em] uppercase animate-pulse">
+        <p className="text-zinc-600 dark:text-zinc-400 text-sm tracking-[0.18em] uppercase animate-pulse">
           Cargando interfaz
         </p>
       </div>
 
       {/* Contenido principal */}
       <div className="min-h-screen flex items-center justify-start p-6 md:px-16 relative transition-colors duration-300">
-        {/* Theme Toggle */}
+        {/* Selector de tema */}
         <div
           className={`absolute top-6 right-6 z-20 transition-all duration-700 ${
             mostrarPanel ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
@@ -90,22 +113,22 @@ useEffect(() => {
           <ThemeToggle />
         </div>
 
-        {/* Fondo que aparece después */}
+        {/* Fondo que aparece después, con deriva lenta */}
         <div
-          className={`absolute inset-0 transition-opacity duration-[1800ms] ease-out ${
+          className={`absolute inset-0 overflow-hidden transition-opacity duration-[1800ms] ease-out ${
             mostrarFondo ? "opacity-100" : "opacity-0"
           }`}
         >
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 bg-login-drift"
             style={{
-              backgroundImage: "url('/bgu7.jpg')",
+              backgroundImage: "url('/images/login/background.jpg')",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           />
-          <div className="absolute inset-0 bg-white/70 " />
+          <div className="absolute inset-0 bg-white/60 dark:bg-zinc-950/60" />
         </div>
 
         {/* Luces decorativas */}
@@ -130,47 +153,72 @@ useEffect(() => {
             <div className="inline-flex items-center gap-3 mb-2">
               <div className="w-20 h-20 flex items-center justify-center">
                 <img
-                  src="/ARRTAIUS1.png"
+                  src="/images/brand/arttaius-logo.png"
                   alt="Arttaius"
                   className="w-50 h-50 object-contain"
                 />
               </div>
 
-              <span className="text-5xl font-bold text-zinc-900  tracking-tight">
+              <span className="text-5xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 ARTTAIUS
               </span>
             </div>
-            <p className="text-zinc-500 text-sm font-semibold tracking-wide">
-              Gestion y panel de control
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold tracking-wide">
+              Gestión y panel de control
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-white/80  backdrop-blur-sm border border-zinc-200  p-8 relative shadow-lg">
+          <div className="bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 p-8 relative rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
             <div className="mb-6">
-              <h1 className="text-xl font-semibold text-zinc-500  mb-1">
-                INICIAR SESION
+              <h1 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
+                INICIAR SESIÓN
               </h1>
             </div>
 
-            <div className="space-y-5">
+            <form className="space-y-5" onSubmit={onLogin} noValidate>
               <div>
-                <label className="block text-xs font-semibold text-zinc-500  uppercase tracking-wider mb-2">
+                <label
+                  htmlFor="login-email"
+                  className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2"
+                >
                   Email
                 </label>
                 <div className="relative">
                   <input
+                    ref={emailRef}
+                    id="login-email"
                     type="email"
-                    className="w-full bg-zinc-50 border border-zinc-300  
-                               text-zinc-900  px-4 py-3  font-semibold
+                    className={`w-full bg-zinc-50 dark:bg-zinc-800 border
+                               text-zinc-900 dark:text-zinc-100 px-4 py-3 font-semibold rounded-lg
                                outline-none transition-all duration-200
-                               focus:border-[#9e9e9e] 
-                               placeholder:text-zinc-400"
+                               hover:border-zinc-400 dark:hover:border-zinc-600
+                               placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+                               ${
+                                 errors.email
+                                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                                   : "border-zinc-300 dark:border-zinc-700 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                               }`}
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (err) setErr("");
+                      if (errors.email) {
+                        setErrors((current) => ({ ...current, email: undefined }));
+                      }
+                    }}
+                    onBlur={() =>
+                      setErrors((current) => ({
+                        ...current,
+                        email: validateEmail(email),
+                      }))
+                    }
                     placeholder="admin@empresa.com"
                     autoComplete="email"
+                    inputMode="email"
+                    required
+                    aria-invalid={Boolean(errors.email)}
+                    aria-describedby={errors.email ? "login-email-error" : undefined}
                   />
                   <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 ">
                     <svg
@@ -184,43 +232,94 @@ useEffect(() => {
                     </svg>
                   </div>
                 </div>
+                {errors.email && (
+                  <p
+                    id="login-email-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-500 dark:text-red-400"
+                  >
+                    {errors.email}
+                  </p>
+                )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2"
+                >
                   Contraseña
                 </label>
                 <div className="relative">
                   <input
-                    type="password"
-                    className="w-full bg-zinc-50 -950 border border-[#9e9e9e] 
-                               text-zinc-900  px-4 py-3 
+                    ref={passwordRef}
+                    id="login-password"
+                    type={showPassword ? "text" : "password"}
+                    className={`w-full bg-zinc-50 dark:bg-zinc-800 border
+                               text-zinc-900 dark:text-zinc-100 pl-4 pr-12 py-3 rounded-lg
                                outline-none transition-all duration-200
-                               focus:border-[#9e9e9e] 
-                               placeholder:text-zinc-400 "
+                               hover:border-zinc-400 dark:hover:border-zinc-600
+                               placeholder:text-zinc-400 dark:placeholder:text-zinc-500
+                               ${
+                                 errors.password
+                                   ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                                   : "border-zinc-300 dark:border-zinc-700 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                               }`}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onKeyDown={handleKeyDown}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (err) setErr("");
+                      if (errors.password) {
+                        setErrors((current) => ({ ...current, password: undefined }));
+                      }
+                    }}
+                    onBlur={() => {
+                      const requiredError = validateRequired(password, "Contraseña");
+                      setErrors((current) => ({
+                        ...current,
+                        password: requiredError ? "Contraseña requerida" : undefined,
+                      }));
+                    }}
                     placeholder="••••••••"
                     autoComplete="current-password"
+                    required
+                    aria-invalid={Boolean(errors.password)}
+                    aria-describedby={errors.password ? "login-password-error" : undefined}
                   />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 ">
-                    <svg
-                      viewBox="0 0 24 24"
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                    >
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                      <path d="M7 11V7a5 5 0 0110 0v4" />
-                    </svg>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowPassword((visible) => !visible);
+                      passwordRef.current?.focus();
+                    }}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 w-10 h-10 rounded-md flex items-center justify-center text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 transition-colors"
+                    aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                    aria-pressed={showPassword}
+                    title={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  >
+                    {showPassword ? (
+                      <IconEyeOff className="w-5 h-5" />
+                    ) : (
+                      <IconEye className="w-5 h-5" />
+                    )}
+                  </button>
                 </div>
+                {errors.password && (
+                  <p
+                    id="login-password-error"
+                    role="alert"
+                    className="mt-1.5 text-xs text-red-500 dark:text-red-400"
+                  >
+                    {errors.password}
+                  </p>
+                )}
               </div>
 
               {err && (
-                <div className="flex items-center gap-2 text-red-400 text-sm bg-red-500/10 border border-red-500/20 px-4 py-3">
+                <div
+                  role="alert"
+                  className="flex items-center gap-2 text-red-500 dark:text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3"
+                >
                   <svg
                     viewBox="0 0 24 24"
                     className="w-5 h-5 flex-shrink-0"
@@ -237,12 +336,12 @@ useEffect(() => {
               )}
 
               <button
-                onClick={onLogin}
-                disabled={loading || !email || !password}
-                className="w-full bg-[#ececec] text-zinc-950 font-semibold py-3 px-4
-                           transition-all duration-200 
-                           hover:bg-[#e0e0e0] hover:shadow-lg hover:shadow-[#979797]
-                           disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#e9e9e9] disabled:hover:shadow-none
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-amber-500 text-zinc-950 font-semibold py-3 px-4
+                           transition-all duration-200 shadow-sm shadow-amber-500/20
+                           hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25 active:scale-[0.99]
+                           disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-amber-500 disabled:hover:shadow-none
                            flex items-center justify-center gap-2"
               >
                 {loading ? (
@@ -283,11 +382,11 @@ useEffect(() => {
                   </>
                 )}
               </button>
-            </div>
+            </form>
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-zinc-400 text-xs">
+            <p className="text-zinc-400 dark:text-zinc-500 text-xs">
               juanarielok@gmail.com
             </p>
           </div>

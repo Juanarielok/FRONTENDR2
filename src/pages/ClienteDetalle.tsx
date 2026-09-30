@@ -1,80 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, Link } from "react-router-dom";
 import { api } from "../api";
 import type { Cliente, Remito } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
-
-const statusConfig = {
-  disponible: {
-    bg: "bg-emerald-100 dark:bg-emerald-500/20",
-    text: "text-emerald-700 dark:text-emerald-400",
-    border: "border-emerald-200 dark:border-emerald-500/30",
-    label: "Disponible",
-  },
-  asignado: {
-    bg: "bg-amber-100 dark:bg-amber-500/20",
-    text: "text-amber-700 dark:text-amber-400",
-    border: "border-amber-200 dark:border-amber-500/30",
-    label: "Asignado",
-  },
-  visitado: {
-    bg: "bg-blue-100 dark:bg-blue-500/20",
-    text: "text-blue-700 dark:text-blue-400",
-    border: "border-blue-200 dark:border-blue-500/30",
-    label: "Visitado",
-  },
-};
-
-function IconDownload({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-  );
-}
-
-function IconPencil({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-      <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
-    </svg>
-  );
-}
-
-function IconLogout({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line x1="21" y1="12" x2="9" y2="12" />
-    </svg>
-  );
-}
-
-function IconTrash({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6" />
-      <path d="M14 11v6" />
-      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-    </svg>
-  );
-}
-
-function IconFilter({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M3 5h18" />
-      <path d="M6 12h12" />
-      <path d="M10 19h4" />
-    </svg>
-  );
-}
+import { ClienteFicha } from "../components/ClienteFicha";
+import {
+  IconDownload,
+  IconLogout,
+  IconTrash,
+  IconFilter,
+  IconArrowLeft,
+  IconActivity,
+  IconSettings,
+  IconUser,
+} from "../components/icons";
 
 function formatDateTime(dateString: string) {
   const date = new Date(dateString);
@@ -92,11 +31,6 @@ function formatCurrency(amount: number) {
     style: "currency",
     currency: "ARS",
   }).format(amount);
-}
-
-function getStatusLabel(status?: string) {
-  if (!status) return "-";
-  return statusConfig[status as keyof typeof statusConfig]?.label || status;
 }
 
 function extractFromNotas(texto: string | undefined, etiquetas: string[]) {
@@ -150,6 +84,9 @@ function getPeriodoLabel(periodo: string) {
 
 export default function ClienteDetalle() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Con /clientes/<id>?edit=1 la ficha arranca directamente en modo edición
+  const empezarEditando = searchParams.get("edit") !== null;
   const nav = useNavigate();
 
   const [cliente, setCliente] = useState<Cliente | null>(null);
@@ -163,6 +100,7 @@ export default function ClienteDetalle() {
 
   useEffect(() => {
     if (!id) return;
+    const clienteId = id;
 
     async function loadData() {
       setLoading(true);
@@ -170,15 +108,15 @@ export default function ClienteDetalle() {
 
       try {
         const [clienteRes, remitosRes] = await Promise.all([
-          api.getCliente(id),
-          api.getRemitosByCliente(id),
+          api.getCliente(clienteId),
+          api.getRemitosByCliente(clienteId),
         ]);
 
         setCliente(clienteRes.user);
         setRemitos(remitosRes.remitos || []);
       } catch (e: any) {
         console.error(e);
-        setError(e?.message || "Error cargando datos");
+        setError(e?.message || "Error al cargar los datos");
       } finally {
         setLoading(false);
       }
@@ -199,7 +137,7 @@ export default function ClienteDetalle() {
       await api.deleteUser(id);
       nav("/clientes", { replace: true });
     } catch (e: any) {
-      console.error("Error al borrar cliente:", e);
+      console.error("Error al borrar al cliente:", e);
     } finally {
       setDeleting(false);
       setShowDeleteModal(false);
@@ -239,27 +177,6 @@ export default function ClienteDetalle() {
     }
   }
 
-  const status = cliente?.status || "disponible";
-  const statusStyle = statusConfig[status as keyof typeof statusConfig] || statusConfig.disponible;
-
-  const filasCliente = cliente
-    ? [
-        ["Nombre", cliente.nombre || "-"],
-        ["Razón social", cliente.razonSocial || "-"],
-        ["Estado", getStatusLabel(cliente.status)],
-        ["Email", cliente.email || "-"],
-        ["Teléfono", cliente.telefono || "-"],
-        ["DNI", cliente.dni || "-"],
-        ["CUIT/CUIL", cliente.cuit || "-"],
-        ["Localidad", (cliente as any).localidad || "-"],
-        ["Ubicación", cliente.ubicacion || "-"],
-        ["Tipo de comercio", cliente.tipoComercio || "-"],
-        ["Usuario", (cliente as any).usuario || "-"],
-        ["Código de área", (cliente as any).codigoArea || "-"],
-        ["Notas", cliente.notas || "-"],
-      ]
-    : [];
-
   const periodosDisponibles = useMemo(() => {
     const unicos = Array.from(new Set(remitos.map((remito) => getPeriodoKey(remito.fecha))));
     return unicos.sort((a, b) => b.localeCompare(a));
@@ -271,57 +188,100 @@ export default function ClienteDetalle() {
   }, [remitos, periodoSeleccionado]);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-zinc-100 dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
-      <div className="fixed inset-0 opacity-[1] dark:opacity-[0.02] pointer-events-none">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: "url('/bg078.jpg')",
-            backgroundRepeat: "no-repeat",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        />
-      </div>
-
-      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-200 dark:border-zinc-800">
-        <div className="max-w-[96vw] 2xl:max-w-[1800px] mx-auto px-4 xl:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+    <div className="min-h-screen overflow-x-hidden fondo-home bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
+      <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/85 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 shadow-sm shadow-zinc-900/5">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="grid grid-cols-1 items-center gap-y-2 sm:flex sm:justify-between sm:gap-4">
+            <div className="flex w-full sm:w-auto min-w-0 items-center gap-2 sm:gap-4">
               <Link
                 to="/clientes"
-                className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
-                         flex items-center justify-center text-zinc-600 dark:text-zinc-400
-                         hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                         text-zinc-600 dark:text-zinc-400
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-white
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
                          transition-colors"
+                title="Volver a clientes"
+                aria-label="Volver a clientes"
               >
-                <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
+                <IconArrowLeft className="w-5 h-5" />
               </Link>
-              <div>
-                <h1 className="text-lg font-semibold tracking-tight">Detalle del Cliente</h1>
-                <p className="text-xs text-zinc-500">Información completa y remitos</p>
+              <Link
+                to="/clientes"
+                title="Ir al inicio"
+                aria-label="Ir al inicio"
+                className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+              >
+                <img
+                  src="/images/brand/arttaius-logo.png"
+                  alt="Arttaius"
+                  className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+                />
+              </Link>
+              <div className="min-w-0 px-3 sm:px-4 py-2 sm:py-3 border-l-[3px] border-amber-500">
+                <h1 className="truncate text-sm sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-[1.5px] sm:tracking-[3px]">
+                  DETALLE DEL CLIENTE
+                </h1>
+                <p className="hidden sm:block truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  Información completa y remitos
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <nav
+              className="flex w-full sm:w-auto min-w-0 sm:shrink-0 items-center justify-end gap-1 sm:gap-2"
+              aria-label="Acciones principales"
+            >
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/80">
+                <IconUser className="w-4 h-4" />
+                <span>Admin</span>
+              </div>
+              <Link
+                to="/monitoreo"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                         text-zinc-600 dark:text-zinc-400
+                         hover:text-zinc-900 dark:hover:text-white
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                         transition-colors duration-200"
+                title="Monitoreo"
+                aria-label="Ir a monitoreo"
+              >
+                <IconActivity className="w-5 h-5" />
+              </Link>
+              <button
+                type="button"
+                onClick={() => nav("/admin")}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                         text-zinc-600 dark:text-zinc-400
+                         hover:text-zinc-900 dark:hover:text-white
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                         transition-colors duration-200"
+                title="Gestión"
+                aria-label="Ir a gestión"
+              >
+                <IconSettings className="w-5 h-5" />
+              </button>
               <ThemeToggle />
               <button
+                type="button"
                 onClick={logout}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-text-zinc-700 dark:text-zinc-300
-hover:text-zinc-900 dark:hover:text-white
-transition-all duration-200
-bg-transparent border-none shadow-none"
+                className="flex h-10 min-w-10 shrink-0 items-center justify-center gap-2 rounded-lg px-2 sm:px-3 text-sm font-medium
+                         text-zinc-600 dark:text-zinc-400
+                         hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                         transition-colors duration-200"
+                title="Salir"
               >
-               <img src="/gestion1.png" alt="icono" className="w-8 h-8 object-contain" />
+                <IconLogout className="w-5 h-5" />
                 <span className="hidden sm:inline">Salir</span>
               </button>
-            </div>
+            </nav>
           </div>
         </div>
       </header>
 
-      <main className="max-w-[96vw] 2xl:max-w-[1800px] mx-auto px-4 xl:px-6 py-8 overflow-x-hidden">
+      <main className="max-w-[96vw] 2xl:max-w-[1800px] mx-auto px-3 sm:px-6 py-4 sm:py-8 overflow-x-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <svg className="animate-spin h-10 w-10 text-amber-500" viewBox="0 0 24 24" fill="none">
@@ -334,7 +294,7 @@ bg-transparent border-none shadow-none"
             </svg>
           </div>
         ) : error ? (
-          <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 p-6 text-center">
+          <div className="rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 shadow-sm shadow-zinc-900/5 p-6 text-center">
             <p className="text-red-600 dark:text-red-400">{error}</p>
             <button onClick={() => nav("/clientes")} className="mt-4 text-sm text-red-700 dark:text-red-300 underline">
               Volver a clientes
@@ -343,104 +303,33 @@ bg-transparent border-none shadow-none"
         ) : cliente ? (
           <div className="grid grid-cols-1 lg:grid-cols-[0.9fr_1.7fr] gap-3 xl:gap-4">
             <div className="min-w-0 z-30">
-              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-                <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
-                  <div className="flex items-start gap-4">
-                    <div className="w-16 h-16 rounded-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-                      {(cliente as any).foto ? (
-                        <img src={(cliente as any).foto} alt={cliente.nombre} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xl font-bold text-zinc-400 dark:text-zinc-500">
-                          {cliente.nombre
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)
-                            .toUpperCase()}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h2 className="text-xl font-semibold truncate">{cliente.nombre}</h2>
-                      <p className="text-sm text-zinc-500 dark:text-zinc-400 truncate">{cliente.razonSocial}</p>
-                      <div className="mt-2">
-                        <span
-                          className={`inline-flex items-center px-2.5 py-1 text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
-                        >
-                          {statusStyle.label}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="p-4 xl:p-6">
-                  <div className="w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-                    <table
-                      className="w-full border-collapse table-fixed"
-                      style={{ fontSize: "10px", lineHeight: "14px" }}
-                    >
-                      <tbody>
-                        {filasCliente.map(([label, value], index) => {
-                          const rowColor =
-                            index % 2 === 0
-                              ? "bg-white dark:bg-zinc-950"
-                              : "bg-zinc-50 dark:bg-zinc-900";
-
-                          return (
-                            <tr key={label} className={`border-b border-zinc-200 dark:border-zinc-800 ${rowColor}`}>
-                              <td className="align-top h-6 px-2 py-1 w-[34%] border-r border-zinc-200 dark:border-zinc-800 font-semibold uppercase tracking-[0.08em] text-zinc-500 dark:text-zinc-400 whitespace-normal break-words">
-                                {label}
-                              </td>
-                              <td className="align-top h-6 px-2 py-1 w-[66%] text-zinc-900 dark:text-white whitespace-normal break-words">
-                                {value}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                <div className="p-6 border-t border-zinc-200 dark:border-zinc-800 flex gap-3">
-                  <Link
-                    to={`/clientes?edit=${cliente.id}`}
-                    className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4
-                             bg-amber-500 text-zinc-950 font-semibold
-                             hover:bg-amber-400 transition-colors"
-                  >
-                    <IconPencil className="w-4 h-4" />
-                    Editar Cliente
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setShowDeleteModal(true)}
-                    disabled={deleting}
-                    className="flex items-center justify-center gap-2 py-2.5 px-4 font-semibold transition-colors
-                             bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400
-                             hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-500/10 dark:hover:text-red-400
-                             disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <IconTrash className="w-4 h-4" />
-                    {deleting ? "Borrando..." : "Borrar"}
-                  </button>
-                </div>
-              </div>
+              <ClienteFicha
+                cliente={cliente}
+                startInEdit={empezarEditando}
+                onSaved={(c) => {
+                  setCliente(c);
+                  if (empezarEditando) setSearchParams({}, { replace: true });
+                }}
+                onCancelEdit={() => {
+                  if (empezarEditando) setSearchParams({}, { replace: true });
+                }}
+                onDelete={() => setShowDeleteModal(true)}
+                deleting={deleting}
+              />
             </div>
 
             <div className="min-w-0 z-30">
-              <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm dark:shadow-none">
-                <div className="px-4 xl:px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+              <div className="rounded-xl overflow-hidden bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 shadow-sm shadow-zinc-900/5">
+                <div className="px-4 sm:px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50/60 dark:bg-zinc-900/60">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
-                        <img src="/pep.png" alt="pep" className="w-8 h-8 object-contain" />
+                        <img src="/images/cliente-detalle/package.png" alt="Paquete" className="w-8 h-8 object-contain" />
                       </div>
 
                       <div className="min-w-0">
                         <h2 className="font-semibold">Remitos</h2>
-                        <p className="text-xs text-zinc-500">
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
                           {remitosFiltrados.length} documento{remitosFiltrados.length !== 1 ? "s" : ""}
                         </p>
                       </div>
@@ -449,7 +338,7 @@ bg-transparent border-none shadow-none"
                     <div className="relative flex-shrink-0">
                       <button
                         onClick={() => setMostrarFiltroPeriodos((prev) => !prev)}
-                        className="flex items-center gap-2 px-3 py-2 text-xs font-medium
+                        className="min-h-10 flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg
                                  bg-zinc-100 dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700
                                  text-zinc-700 dark:text-zinc-300
                                  hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
@@ -461,13 +350,13 @@ bg-transparent border-none shadow-none"
                       </button>
 
                       {mostrarFiltroPeriodos && (
-                        <div className="absolute right-0 top-full mt-2 w-52 bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-lg z-40">
+                        <div className="absolute right-0 top-full mt-2 w-[min(13rem,calc(100vw-1.5rem))] rounded-lg overflow-hidden bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 shadow-lg shadow-zinc-900/10 z-40">
                           <button
                             onClick={() => {
                               setPeriodoSeleccionado("todos");
                               setMostrarFiltroPeriodos(false);
                             }}
-                            className={`w-full text-left px-3 py-2 text-xs border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
+                            className={`min-h-10 w-full text-left px-3 py-2 text-xs border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
                               periodoSeleccionado === "todos"
                                 ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white"
                                 : "text-zinc-600 dark:text-zinc-300"
@@ -483,7 +372,7 @@ bg-transparent border-none shadow-none"
                                 setPeriodoSeleccionado(periodo);
                                 setMostrarFiltroPeriodos(false);
                               }}
-                              className={`w-full text-left px-3 py-2 text-xs border-b last:border-b-0 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
+                              className={`min-h-10 w-full text-left px-3 py-2 text-xs border-b last:border-b-0 border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors ${
                                 periodoSeleccionado === periodo
                                   ? "bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-white"
                                   : "text-zinc-600 dark:text-zinc-300"
@@ -498,24 +387,24 @@ bg-transparent border-none shadow-none"
                   </div>
                 </div>
 
-                <div className="p-4 xl:p-6">
-                  <div className="w-full overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+                <div className="p-4 sm:p-6">
+                  <div className="w-full overflow-x-auto overscroll-x-contain rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
                     <table
-                      className="w-full border-collapse table-fixed"
-                      style={{ fontSize: "10px", lineHeight: "14px" }}
+                      className="w-full min-w-[800px] border-collapse table-fixed"
+                      style={{ fontSize: "12px", lineHeight: "14px" }}
                     >
-                      <thead>
-                        <tr className="bg-zinc-100 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-700 uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
-                          <th className="align-top px-1 py-1 w-[8%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Remito</th>
-                          <th className="align-top px-1 py-1 w-[13%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Fecha</th>
-                          <th className="align-top px-1 py-1 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Chofer</th>
-                          <th className="align-top px-1 py-1 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cargo</th>
-                          <th className="align-top px-1 py-1 w-[19%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Detalle</th>
-                          <th className="align-top px-1 py-1 w-[7%] text-center border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cantidad</th>
-                          <th className="align-top px-1 py-1 w-[11%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Subtotal</th>
-                          <th className="align-top px-1 py-1 w-[7%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">IVA</th>
-                          <th className="align-top px-1 py-1 w-[10%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Total</th>
-                          <th className="align-top px-1 py-1 w-[5%] text-center whitespace-normal break-words">PDF</th>
+                      <thead className="sticky top-0 z-10">
+                        <tr className="h-9 bg-zinc-100 dark:bg-zinc-800 border-b border-zinc-200 dark:border-zinc-700 uppercase tracking-[0.06em] text-zinc-500 dark:text-zinc-400">
+                          <th className="align-middle px-2 py-0 w-[8%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Remito</th>
+                          <th className="align-middle px-2 py-0 w-[13%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Fecha</th>
+                          <th className="align-middle px-2 py-0 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Chofer</th>
+                          <th className="align-middle px-2 py-0 w-[10%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cargo</th>
+                          <th className="align-middle px-2 py-0 w-[19%] text-left border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Detalle</th>
+                          <th className="align-middle px-2 py-0 w-[7%] text-center border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Cantidad</th>
+                          <th className="align-middle px-2 py-0 w-[11%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Subtotal</th>
+                          <th className="align-middle px-2 py-0 w-[7%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">IVA</th>
+                          <th className="align-middle px-2 py-0 w-[10%] text-right border-r border-zinc-200 dark:border-zinc-700 whitespace-normal break-words">Total</th>
+                          <th className="align-middle px-2 py-0 w-[5%] text-center whitespace-normal break-words">PDF</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -529,51 +418,51 @@ bg-transparent border-none shadow-none"
                           remitosFiltrados.map((remito, index) => {
                             const rowColor =
                               index % 2 === 0
-                                ? "bg-white dark:bg-zinc-950"
-                                : "bg-zinc-50 dark:bg-zinc-900";
+                                ? "bg-white dark:bg-zinc-900/30"
+                                : "bg-zinc-50/70 dark:bg-zinc-900/50";
 
                             return (
-                              <tr key={remito.id} className={`border-b border-zinc-200 dark:border-zinc-800 ${rowColor}`}>
-                                <td className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-medium whitespace-normal break-words">
+                              <tr key={remito.id} className={`h-11 sm:h-9 border-b border-zinc-200 dark:border-zinc-800 ${rowColor}`}>
+                                <td className="align-middle px-2 py-0 border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-medium whitespace-normal break-words">
                                   #{remito.id.slice(-8).toUpperCase()}
                                 </td>
-                                <td className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                <td className="align-middle px-2 py-0 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
                                   {formatDateTime(remito.fecha)}
                                 </td>
                                 <td
-                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  className="align-middle px-2 py-0 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
                                   title={remito.chofer?.nombre || "-"}
                                 >
                                   {remito.chofer?.nombre || "-"}
                                 </td>
                                 <td
-                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  className="align-middle px-2 py-0 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
                                   title={getCargoRemito(remito)}
                                 >
                                   {getCargoRemito(remito)}
                                 </td>
                                 <td
-                                  className="align-top px-1 py-1 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
+                                  className="align-middle px-2 py-0 border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words"
                                   title={getDetalleRemito(remito)}
                                 >
                                   {getDetalleRemito(remito)}
                                 </td>
-                                <td className="align-top px-1 py-1 text-center border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                <td className="align-middle px-2 py-0 text-center border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
                                   {getCantidadItems(remito)}
                                 </td>
-                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                <td className="align-middle px-2 py-0 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
                                   {formatCurrency(remito.subtotal)}
                                 </td>
-                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
+                                <td className="align-middle px-2 py-0 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 whitespace-normal break-words">
                                   {formatCurrency(remito.iva)}
                                 </td>
-                                <td className="align-top px-1 py-1 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-semibold whitespace-normal break-words">
+                                <td className="align-middle px-2 py-0 text-right border-r border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-semibold whitespace-normal break-words">
                                   {formatCurrency(remito.total)}
                                 </td>
-                                <td className="align-top px-1 py-1 text-center">
+                                <td className="align-middle px-2 py-0 text-center">
                                   <button
                                     onClick={() => downloadPDF(remito.id)}
-                                    className="inline-flex items-center justify-center w-5 h-5 border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
+                                    className="inline-flex items-center justify-center w-9 h-9 sm:w-7 sm:h-7 rounded-md border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
                                     title="Descargar PDF"
                                   >
                                     <IconDownload className="w-3 h-3" />
@@ -608,7 +497,7 @@ bg-transparent border-none shadow-none"
             </div>
 
             <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
-              ¿Estás seguro de borrar cliente{" "}
+              ¿Estás seguro de que quieres borrar al cliente{" "}
               <span className="font-semibold text-zinc-900 dark:text-white">{cliente?.nombre}</span>? Esta acción no se puede deshacer.
             </p>
 
@@ -617,7 +506,7 @@ bg-transparent border-none shadow-none"
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={deleting}
-                className="px-4 py-2 text-sm font-medium rounded-lg
+                className="min-h-10 px-4 py-2 text-sm font-medium rounded-lg
                          bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300
                          hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors
                          disabled:opacity-50"
@@ -628,7 +517,7 @@ bg-transparent border-none shadow-none"
                 type="button"
                 onClick={confirmDelete}
                 disabled={deleting}
-                className="px-4 py-2 text-sm font-medium rounded-lg
+                className="min-h-10 px-4 py-2 text-sm font-medium rounded-lg
                          bg-red-600 text-white hover:bg-red-700 transition-colors
                          disabled:opacity-50 disabled:cursor-not-allowed"
               >

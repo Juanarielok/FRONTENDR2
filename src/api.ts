@@ -21,7 +21,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
       },
     });
   } catch {
-    throw new Error("CORS o backend caído");
+    throw new Error("No se pudo conectar con el servidor");
   }
 
   if (!res.ok) {

@@ -179,7 +179,7 @@ export function LiveTrackingView({ clientes = [] }: Props) {
       setLocations(res.locations);
       setError("");
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Error al cargar ubicaciones");
+      setError(e instanceof Error ? e.message : "Error al cargar las ubicaciones");
     } finally {
       setLoading(false);
     }
@@ -213,7 +213,7 @@ export function LiveTrackingView({ clientes = [] }: Props) {
           <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">${loc.chofer.nombre}</div>
           <div style="color: #71717a;">Velocidad: <strong style="color: #18181b;">${loc.speed != null ? loc.speed + " km/h" : "—"}</strong></div>
           <div style="color: #71717a;">Actualizado: <strong style="color: #18181b;">${new Date(loc.timestamp).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}</strong></div>
-          ${loc.stale ? '<div style="color: #ef4444; margin-top: 4px; font-weight: 500;">Sin señal</div>' : '<div style="color: #10b981; margin-top: 4px; font-weight: 500;">En linea</div>'}
+          ${loc.stale ? '<div style="color: #ef4444; margin-top: 4px; font-weight: 500;">Sin señal</div>' : '<div style="color: #10b981; margin-top: 4px; font-weight: 500;">En línea</div>'}
         </div>
       `;
 
@@ -335,7 +335,7 @@ export function LiveTrackingView({ clientes = [] }: Props) {
                     <button
                       key={loc.choferId}
                       onClick={() => zoomToChofer(loc.choferId)}
-                      className="flex items-center gap-1.5 px-2 py-1 rounded hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      className="flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors"
                     >
                       <span
                         className="w-3 h-3 rounded-sm"
@@ -362,17 +362,17 @@ export function LiveTrackingView({ clientes = [] }: Props) {
                   mapRef.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 14, animate: true });
                 }
               }}
-              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-colors"
             >
               <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
               </svg>
-              Vista entera
+              Vista completa
             </button>
             {clientes.length > 0 && (
               <button
                 onClick={() => setShowClients((v) => !v)}
-                className={`flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border transition-colors ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
                   showClients
                     ? "text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-200 dark:border-purple-500/30"
                     : "text-zinc-400 bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
@@ -386,7 +386,7 @@ export function LiveTrackingView({ clientes = [] }: Props) {
               </button>
             )}
             <span className="text-[10px] text-zinc-400">
-              {POLL_INTERVAL / 1000}s
+              {POLL_INTERVAL / 1000} s
             </span>
           </div>
         </div>

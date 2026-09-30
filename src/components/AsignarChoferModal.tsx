@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Modal } from "./Modal.tsx";
+import { IconTruck, IconUser, IconPhone, IconMapPin, IconCheck } from "./icons";
 
 type Chofer = {
   id: string;
@@ -16,81 +17,6 @@ type AsignarChoferModalProps = {
   clientIds: string[];
   onSuccess: () => void;
 };
-
-function IconTruck({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <rect x="1" y="3" width="15" height="13" />
-      <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-      <circle cx="5.5" cy="18.5" r="2.5" />
-      <circle cx="18.5" cy="18.5" r="2.5" />
-    </svg>
-  );
-}
-
-function IconUser({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
-    </svg>
-  );
-}
-
-function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-      <circle cx="12" cy="10" r="3" />
-    </svg>
-  );
-}
-
-function IconCheck({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-    >
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}
 
 export function AsignarChoferModal({
   isOpen,
@@ -121,14 +47,14 @@ export function AsignarChoferModal({
       setChoferes(res.users || []);
     } catch (e: any) {
       console.error(e);
-      setError("Error cargando choferes");
+      setError("Error al cargar los choferes");
     } finally {
       setLoading(false);
     }
   }
 
   async function handleAssign() {
-    if (!selectedChofer) return;
+    if (!selectedChofer || clientIds.length === 0) return;
 
     setSubmitting(true);
     setError(null);
@@ -137,7 +63,7 @@ export function AsignarChoferModal({
       await api.assignClients(selectedChofer, clientIds);
       setSuccess(true);
       
-      // Wait a moment to show success, then close
+      // Esperar un momento para mostrar la confirmación antes de cerrar
       setTimeout(() => {
         onSuccess();
         onClose();
@@ -151,9 +77,9 @@ export function AsignarChoferModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Asignar a Chofer" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="Asignar a un chofer" size="md">
       {/* Info badge */}
-      <div className="mb-4 p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+      <div className="mb-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
         <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
           <IconTruck className="w-5 h-5" />
           <span className="font-medium">
@@ -162,23 +88,25 @@ export function AsignarChoferModal({
           </span>
         </div>
         <p className="mt-1 text-sm text-amber-600 dark:text-amber-500">
-          Seleccioná un chofer para asignar los clientes
+          Seleccioná un chofer para completar la asignación
         </p>
       </div>
 
       {/* Error message */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+        <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
       {/* Success message */}
       {success && (
-        <div className="mb-4 p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+        <div className="mb-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
           <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
             <IconCheck className="w-5 h-5" />
-            <span className="font-medium">¡Clientes asignados correctamente!</span>
+            <span className="font-medium">
+              ¡{clientIds.length === 1 ? "Cliente asignado" : "Clientes asignados"} correctamente!
+            </span>
           </div>
         </div>
       )}
@@ -228,16 +156,16 @@ export function AsignarChoferModal({
                 key={chofer.id}
                 onClick={() => setSelectedChofer(chofer.id)}
                 disabled={success}
-                className={`w-full p-4 text-left transition-all duration-200 border ${
+                className={`w-full p-4 text-left rounded-lg transition-all duration-200 border ${
                   isSelected
-                    ? "bg-amber-50 dark:bg-amber-500/10 border-amber-500"
-                    : "bg-white dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500"
+                    ? "bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40"
+                    : "bg-white dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60"
                 } ${success ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <div className="flex items-start gap-4">
                   {/* Selection indicator */}
                   <div
-                    className={`w-5 h-5 mt-0.5 border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
+                    className={`w-5 h-5 mt-0.5 rounded-full border flex-shrink-0 flex items-center justify-center transition-all duration-200 ${
                       isSelected
                         ? "bg-amber-500 border-amber-500"
                         : "border-zinc-400 dark:border-zinc-600"
@@ -247,7 +175,7 @@ export function AsignarChoferModal({
                   </div>
 
                   {/* Avatar */}
-                  <div className="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-700 border border-zinc-200 dark:border-zinc-600 flex items-center justify-center flex-shrink-0">
                     <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
                       {chofer.nombre
                         .split(" ")
@@ -290,10 +218,10 @@ export function AsignarChoferModal({
         <button
           onClick={onClose}
           disabled={submitting}
-          className="px-4 py-2 text-sm font-medium
-                   bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 
+          className="px-4 py-2 text-sm font-medium rounded-lg
+                   bg-zinc-100 dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700
                    text-zinc-700 dark:text-zinc-300
-                   hover:bg-zinc-200 dark:hover:bg-zinc-700 
+                   hover:bg-zinc-200 dark:hover:bg-zinc-700
                    disabled:opacity-50 disabled:cursor-not-allowed
                    transition-colors"
         >
@@ -301,11 +229,12 @@ export function AsignarChoferModal({
         </button>
         <button
           onClick={handleAssign}
-          disabled={!selectedChofer || submitting || success}
-          className="px-4 py-2 text-sm font-semibold
-                   bg-amber-500 text-zinc-950
-                   hover:bg-amber-400 
-                   disabled:opacity-50 disabled:cursor-not-allowed
+          disabled={clientIds.length === 0 || !selectedChofer || submitting || success}
+          className="px-4 py-2 text-sm font-semibold rounded-lg
+                   bg-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20
+                   hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25
+                   active:scale-[0.99]
+                   disabled:opacity-70 disabled:cursor-not-allowed
                    transition-colors flex items-center gap-2"
         >
           {submitting ? (

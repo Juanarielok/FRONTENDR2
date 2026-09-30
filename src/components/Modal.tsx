@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { IconX } from "./icons";
 
 type ModalProps = {
   isOpen: boolean;
@@ -7,21 +8,6 @@ type ModalProps = {
   children: React.ReactNode;
   size?: "sm" | "md" | "lg";
 };
-
-function IconX({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
 
 export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -74,7 +60,7 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
     >
       <div
         ref={modalRef}
-        className={`w-full ${sizeClasses[size]} bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl animate-slide-up`}
+        className={`w-full ${sizeClasses[size]} rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-2xl shadow-zinc-900/10 dark:shadow-black/40 animate-slide-up`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
@@ -83,8 +69,10 @@ export function Modal({ isOpen, onClose, title, children, size = "md" }: ModalPr
           </h2>
           <button
             onClick={onClose}
-            className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white 
+            className="p-2 rounded-lg text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white
                      hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            aria-label="Cerrar"
+            title="Cerrar"
           >
             <IconX className="w-5 h-5" />
           </button>

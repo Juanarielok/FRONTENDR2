@@ -4,6 +4,27 @@ import { api } from "../api";
 import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { LiveTrackingView } from "../components/LiveTrackingView";
+import {
+  IconActivity,
+  IconTruck,
+  IconUser,
+  IconUsers,
+  IconClock,
+  IconMapPin,
+  IconNavigation,
+  IconPhone,
+  IconMail,
+  IconCalendar,
+  IconCheckCircle,
+  IconRefresh,
+  IconChevronDown,
+  IconTrendingUp,
+  IconAlertCircle,
+  IconTarget,
+  IconArrowLeft,
+  IconLogout,
+  IconSettings,
+} from "../components/icons";
 
 type ChoferActivo = {
   id: string;
@@ -48,120 +69,18 @@ type ChoferHistorial = {
   jornadas: HistorialJornada[];
 };
 
-// ============ ICONS ============
+type ActivityRange = "1h" | "6h" | "10h" | "today";
 
-function IconActivity({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <img src="/lupit1.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
-function IconTruck({ className = "w-11 h-11" }: { className?: string }) {
-  return (
-    <img src="/camioncito.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
-function IconUser({ className = "w-9 h-9" }: { className?: string }) {
-  return (
-    <img src="/mancliente.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
-function IconUsers({ className = "w-9 h-9" }: { className?: string }) {
-  return (
-    <img src="/mancliente3.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
-function IconClock({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <img src="/clock.png" alt="icono" className={`${className} object-contain`} />
-  );
-}
-
-function IconMapPin({ className = "w-5 h-5" }: { className?: string }) {
-  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
-}
-
-function IconNavigation({ className = "w-11 h-11" }: { className?: string }) {
-  return <img src="/trackeo1.png" alt="icono" className={`${className} object-contain`} />;
-}
-
-function IconPhone({ className = "w-5 h-5" }: { className?: string }) {
-  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
-}
-
-function IconMail({ className = "w-5 h-5" }: { className?: string }) {
-  return <img src="/monitor1.png" alt="icono" className={`${className} object-contain`} />;
-}
-
-function IconCalendar({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-      <line x1="16" y1="2" x2="16" y2="6" />
-      <line x1="8" y1="2" x2="8" y2="6" />
-      <line x1="3" y1="10" x2="21" y2="10" />
-    </svg>
-  );
-}
-
-function IconCheckCircle({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
-
-function IconRefresh({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="23 4 23 10 17 10" />
-      <polyline points="1 20 1 14 7 14" />
-      <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-    </svg>
-  );
-}
-
-function IconChevronDown({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="6 9 12 15 18 9" />
-    </svg>
-  );
-}
-
-function IconTrendingUp({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
-  );
-}
-
-function IconAlertCircle({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  );
-}
-
-function IconTarget({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
-    </svg>
-  );
-}
+const ACTIVITY_RANGE_OPTIONS: {
+  value: ActivityRange;
+  label: string;
+  ariaLabel: string;
+}[] = [
+  { value: "1h", label: "1 h", ariaLabel: "Última hora, limitada al día de hoy" },
+  { value: "6h", label: "6 h", ariaLabel: "Últimas 6 horas, limitadas al día de hoy" },
+  { value: "10h", label: "10 h", ariaLabel: "Últimas 10 horas, limitadas al día de hoy" },
+  { value: "today", label: "Hoy", ariaLabel: "Desde el inicio de hoy" },
+];
 
 // ============ HELPERS ============
 
@@ -184,6 +103,21 @@ function formatTime(dateString: string) {
   });
 }
 
+function formatMinutes(totalMinutes: number) {
+  const minutes = Math.max(0, Math.round(totalMinutes));
+  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+}
+
+function getActivityRangeStart(range: ActivityRange, end: Date) {
+  const startOfToday = new Date(end);
+  startOfToday.setHours(0, 0, 0, 0);
+
+  if (range === "today") return startOfToday.getTime();
+
+  const hours = range === "1h" ? 1 : range === "6h" ? 6 : 10;
+  return Math.max(startOfToday.getTime(), end.getTime() - hours * 60 * 60 * 1000);
+}
+
 // ============ COMPONENTS ============
 
 function StatCard({
@@ -193,6 +127,8 @@ function StatCard({
   subValue,
   color: _color,
   trend,
+  scope,
+  scopeTone = "neutral",
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
@@ -200,44 +136,48 @@ function StatCard({
   subValue?: string;
   color: "amber" | "emerald" | "blue" | "purple" | "red" | "cyan";
   trend?: "up" | "down" | "neutral";
+  scope?: string;
+  scopeTone?: "neutral" | "accent";
 }) {
   void _color;
 
-  const cardShape = {
-    clipPath: "polygon(0 0, 100% 0, 100% 100%, 18% 100%, 0 62%)",
-  } as const;
-
   return (
     <div
-      className="group p-[3px] bg-[#f7f6f6] transition-all duration-500 hover:bg-black"
-      style={cardShape}
+      className="group p-[3px] rounded-xl transition-all duration-500"
     >
       <div
-        className="bg-[#f7f6f6] backdrop-blur-md border border-[#ff000000] p-4 transition-all duration-500 group-hover:bg-black"
-        style={cardShape}
+        className="rounded-xl bg-white dark:bg-zinc-900/50 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 shadow-sm shadow-zinc-900/5 overflow-hidden p-4 transition-all duration-500 group-hover:border-amber-300 dark:group-hover:border-amber-500/40"
       >
         <div className="flex items-start justify-between">
-          <div className="w-12 h-12 flex items-center justify-center text-[#3a3a3a] transition-colors duration-300 group-hover:text-white">
-            <Icon className="w-8 h-8 object-contain transition-all duration-300 group-hover:brightness-0 group-hover:invert" />
+          <div className="w-12 h-12 flex items-center justify-center text-zinc-700 dark:text-zinc-300 transition-colors duration-300">
+            <Icon className="w-6 h-6 transition-all duration-300" />
           </div>
 
-          {trend && (
-            <div className="text-s font-medium text-zinc-500 transition-colors duration-300 group-hover:text-white">
+          {scope ? (
+            <span className={`rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide ${
+              scopeTone === "accent"
+                ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
+                : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
+            }`}>
+              {scope}
+            </span>
+          ) : trend ? (
+            <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400 transition-colors duration-300">
               {trend === "up" && "↑"}
               {trend === "down" && "↓"}
             </div>
-          )}
+          ) : null}
         </div>
 
         <div className="mt-4 px-2 text-center">
-          <p className="text-2xl font-bold text-zinc-900 dark:text-white transition-colors duration-300 group-hover:text-white">
+          <p className="text-2xl font-bold text-zinc-900 dark:text-white transition-colors duration-300">
             {value}
           </p>
-          <p className="text-s font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-[3px] mt-1 transition-colors duration-300 group-hover:text-white">
+          <p className="text-xs font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-[3px] mt-1 transition-colors duration-300">
             {label}
           </p>
           {subValue && (
-            <p className="text-s font-bold text-zinc-400 dark:text-zinc-500 mt-1 transition-colors duration-300 group-hover:text-zinc-200">
+            <p className="text-xs font-bold text-zinc-400 dark:text-zinc-500 mt-1 transition-colors duration-300">
               {subValue}
             </p>
           )}
@@ -262,12 +202,12 @@ function SectionHeader({
   return (
     <div className="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 border flex items-center justify-center ${color}`}>
+        <div className={`w-8 h-8 rounded-lg border flex items-center justify-center ${color}`}>
           <Icon className="w-4 h-4" />
         </div>
         <div>
           <h2 className="font-semibold">{title}</h2>
-          {subtitle && <p className="text-s text-zinc-500">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-zinc-500">{subtitle}</p>}
         </div>
       </div>
       {action}
@@ -292,8 +232,9 @@ export default function Monitoreo() {
   const [historial, setHistorial] = useState<ChoferHistorial | null>(null);
   const [loadingHistorial, setLoadingHistorial] = useState(false);
 
-  // Tab activa
+  // Pestaña activa
   const [activeTab, setActiveTab] = useState<"overview" | "choferes" | "clientes" | "rastreo">("overview");
+  const [activityRange, setActivityRange] = useState<ActivityRange>("today");
 
   async function loadData() {
     try {
@@ -324,7 +265,7 @@ export default function Monitoreo() {
   useEffect(() => {
     loadData();
 
-    // Auto-refresh cada 30 segundos
+    // Actualización automática cada 30 segundos
     const interval = setInterval(() => {
       loadData();
     }, 30000);
@@ -370,10 +311,6 @@ export default function Monitoreo() {
     const clientesDisponibles = clientes.filter((c) => c.status === "disponible" || !c.status).length;
 
     const choferesInactivos = todosChoferes.length - choferesActivos.length;
-    const tasaActividad = todosChoferes.length > 0
-      ? Math.round((choferesActivos.length / todosChoferes.length) * 100)
-      : 0;
-
     const tasaCobertura = clientes.length > 0
       ? Math.round(((clientesVisitados + clientesAsignados) / clientes.length) * 100)
       : 0;
@@ -382,26 +319,42 @@ export default function Monitoreo() {
       ? Math.round((clientesVisitados / clientes.length) * 100)
       : 0;
 
-    // Tiempo promedio activo
-    const tiempoTotalActivo = choferesActivos.reduce((sum, a) => sum + a.tiempoTranscurrido.minutos, 0);
-    const tiempoPromedioActivo = choferesActivos.length > 0
-      ? Math.round(tiempoTotalActivo / choferesActivos.length)
-      : 0;
-
     return {
       clientesAsignados,
       clientesVisitados,
       clientesDisponibles,
       choferesInactivos,
-      tasaActividad,
       tasaCobertura,
       tasaVisitas,
-      tiempoPromedioActivo,
-      tiempoTotalActivo,
     };
   }, [clientes, todosChoferes, choferesActivos]);
 
-  // Agrupar clientes por status
+  const selectedActivityRange = ACTIVITY_RANGE_OPTIONS.find(
+    (option) => option.value === activityRange
+  ) ?? ACTIVITY_RANGE_OPTIONS[3];
+
+  const rangedActivity = useMemo(() => {
+    const end = lastUpdate.getTime();
+    const start = getActivityRangeStart(activityRange, lastUpdate);
+
+    const activeDurations = choferesActivos.flatMap((active) => {
+      const checkIn = Date.parse(active.checkIn);
+      if (!Number.isFinite(checkIn) || checkIn > end) return [];
+
+      return [Math.max(0, end - Math.max(checkIn, start))];
+    });
+
+    const totalMilliseconds = activeDurations.reduce((sum, duration) => sum + duration, 0);
+
+    return {
+      totalMinutes: Math.floor(totalMilliseconds / 60000),
+      averageMinutes: activeDurations.length > 0
+        ? Math.round(totalMilliseconds / activeDurations.length / 60000)
+        : 0,
+    };
+  }, [activityRange, choferesActivos, lastUpdate]);
+
+  // Agrupar clientes por estado
   const clientesPorStatus = useMemo(() => {
     return {
       disponibles: clientes.filter((c) => c.status === "disponible" || !c.status),
@@ -418,7 +371,7 @@ export default function Monitoreo() {
   }, [choferesActivos]);
 
   return (
-    <div className="min-h-screen fondo-ondulado bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen fondo-home bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white transition-colors duration-300">
       {/* Background pattern */}
       <div className="fixed inset-0 opacity-[0] dark:opacity-[0.02] pointer-events-none">
         <div
@@ -428,48 +381,59 @@ export default function Monitoreo() {
       </div>
 
       {/* Header */}
-     <header className="sticky top-0 z-50 bg-[#ffffff] dark:bg-[#0F172A]/90 backdrop-blur-sm ">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-               <Link
-                            to="/clientes"
-                            className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 
-                                     flex items-center justify-center text-zinc-600 dark:text-zinc-400
-                                     hover:bg-zinc-200 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-white
-                                     transition-colors"
-                          >
-                            <img src="/volvere.png" alt="Volver" className="w-5 h-5" />
-                          </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#00000000] flex items-center justify-center">
-                        <img src="/monitor11.png" alt="icono" className="w-11 h-11 object-contain" />
-                </div>
-                <div
-  className="px-4 py-3"
-  style={{
-    background: "#D9D9D980",
-    clipPath: "polygon(0 0,100% 0,100% 100%,8% 100%,0 62%)",
-  }}
->
-  <h1 className="text-lg font-semibold text-[#5a5a5a] tracking-[3px]">
-    PANEL DE MONITOREO
-  </h1>
-  <p className="text-m text-[#5a5a5a]">
-    Última actualización: {formatTime(lastUpdate.toISOString())}
-  </p>
-</div>
+     <header className="sticky top-0 z-50 bg-white/90 dark:bg-zinc-950/85 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 shadow-sm shadow-zinc-900/5">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+          <div className="grid grid-cols-1 items-center gap-y-2 sm:flex sm:justify-between sm:gap-4">
+            <div className="flex w-full sm:w-auto min-w-0 items-center gap-2 sm:gap-4">
+              <Link
+                to="/clientes"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg
+                         text-zinc-600 dark:text-zinc-400
+                         hover:bg-zinc-100 dark:hover:bg-zinc-800/70 hover:text-zinc-900 dark:hover:text-white
+                         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+                         transition-colors"
+                title="Volver a clientes"
+                aria-label="Volver a clientes"
+              >
+                <IconArrowLeft className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/clientes"
+                title="Ir al inicio"
+                aria-label="Ir al inicio"
+                className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50"
+              >
+                <img
+                  src="/images/brand/arttaius-logo-compact.png"
+                  alt="Arttaius"
+                  className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+                />
+              </Link>
+              <div className="min-w-0 px-3 sm:px-4 py-2 sm:py-3 border-l-[3px] border-amber-500">
+                <h1 className="truncate text-sm sm:text-lg font-semibold text-zinc-800 dark:text-zinc-100 tracking-[1.5px] sm:tracking-[3px]">
+                  PANEL DE MONITOREO
+                </h1>
+                <p className="hidden sm:block truncate text-xs text-zinc-500 dark:text-zinc-400">
+                  Última actualización: {formatTime(lastUpdate.toISOString())}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <nav
+              className="flex w-full sm:w-auto min-w-0 sm:shrink-0 items-center justify-end gap-1 sm:gap-2"
+              aria-label="Acciones principales"
+            >
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-zinc-600 dark:text-zinc-300 px-3 py-1.5 rounded-full bg-zinc-100/80 dark:bg-zinc-800/70 border border-zinc-200 dark:border-zinc-700/80">
+                <IconUser className="w-4 h-4" />
+                <span>Admin</span>
+              </div>
         <button
   onClick={handleRefresh}
   disabled={refreshing}
   className="flex items-center gap-2 px-3 py-2 text-sm font-medium
-             bg-transparent border-0 shadow-none
-             text-[#000000] dark:text-zinc-300
-             hover:bg-transparent dark:hover:bg-transparent
+             rounded-lg bg-transparent border-0 shadow-none
+             text-zinc-700 dark:text-zinc-300
+             hover:bg-zinc-100 dark:hover:bg-zinc-800/70
              focus:outline-none focus:ring-0
              disabled:opacity-50
              transition-all duration-200"
@@ -477,35 +441,33 @@ export default function Monitoreo() {
   <IconRefresh className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
   <span className="hidden sm:inline">Actualizar</span>
 </button>
-              <ThemeToggle />
         <button
   onClick={() => nav("/admin")}
   className="w-10 h-10 flex items-center justify-center
-             bg-transparent border-0 shadow-none
-             text-[#000000] dark:text-zinc-400
-             hover:bg-transparent dark:hover:bg-transparent
+             rounded-lg bg-transparent border-0 shadow-none
+             text-zinc-700 dark:text-zinc-400
+             hover:bg-zinc-100 dark:hover:bg-zinc-800/70
              hover:text-zinc-900 dark:hover:text-white
              focus:outline-none focus:ring-0
              transition-all duration-200"
-  title="Gestion"
+  title="Gestión"
 >
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-  </svg>
-</button><button
+  <IconSettings className="w-5 h-5" />
+</button>
+              <ThemeToggle />
+<button
   onClick={logout}
   className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-             bg-transparent border-0 shadow-none
-             text-[#000000] dark:text-zinc-300
-             hover:bg-transparent dark:hover:bg-transparent
+             rounded-lg bg-transparent border-0 shadow-none
+             text-zinc-700 dark:text-zinc-300
+             hover:bg-zinc-100 dark:hover:bg-zinc-800/70
              focus:outline-none focus:ring-0
              transition-all duration-200"
 >
-  <img src="/gestion1.png" alt="icono" className="w-8 h-8 object-contain" />
+  <IconLogout className="w-5 h-5" />
   <span className="hidden sm:inline">Salir</span>
 </button>
-            </div>
+            </nav>
           </div>
 
           {/* Tabs */}
@@ -519,10 +481,10 @@ export default function Monitoreo() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`flex items-center gap-2 px-4 py-3 font-semibold text-lg font-medium border-b-2 transition-colors ${
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-semibold rounded-t-lg border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? "border-[#ffd900] text-[#ffbb00] dark:text-amber-400"
-                    : "border-transparent text-[#000000] hover:text-[#585c5c] "
+                    ? "border-amber-500 text-amber-600 dark:text-amber-400"
+                    : "border-transparent text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200"
                 }`}
               >
                 <tab.icon className="w-4 h-4" />
@@ -534,7 +496,7 @@ export default function Monitoreo() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 py-4 sm:px-6 sm:py-8">
         {loading ? (
           <div className="flex items-center justify-center py-20">
             <svg
@@ -551,81 +513,110 @@ export default function Monitoreo() {
             {/* ============ OVERVIEW TAB ============ */}
             {activeTab === "overview" && (
               <div className="space-y-6">
-                {/* Stats Grid - Row 1 */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <IconClock className="h-4 w-4 text-zinc-500" />
+                      <h2 className="text-sm font-semibold text-zinc-900 dark:text-white">
+                        Tiempo de jornadas activas
+                      </h2>
+                    </div>
+                    <p id="activity-range-help" className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+                      Los rangos se limitan al día de hoy y solo incluyen las jornadas que siguen activas. «Actual» no aplica ningún filtro temporal.
+                    </p>
+                  </div>
+
+                  <fieldset className="w-full sm:w-auto" aria-describedby="activity-range-help">
+                    <legend className="sr-only">Período de actividad</legend>
+                    <div className="grid w-full grid-cols-4 rounded-lg border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-700 dark:bg-zinc-900 sm:w-auto">
+                      {ACTIVITY_RANGE_OPTIONS.map((option) => (
+                        <label key={option.value} className="cursor-pointer">
+                          <input
+                            type="radio"
+                            name="activity-range"
+                            value={option.value}
+                            checked={activityRange === option.value}
+                            onChange={() => setActivityRange(option.value)}
+                            className="peer sr-only"
+                            aria-label={option.ariaLabel}
+                          />
+                          <span className="flex min-h-10 items-center justify-center whitespace-nowrap rounded-md px-2.5 text-xs font-semibold text-zinc-600 transition-colors hover:text-zinc-900 peer-checked:bg-white peer-checked:text-amber-700 peer-checked:shadow-sm peer-focus-visible:ring-2 peer-focus-visible:ring-amber-500/50 dark:text-zinc-400 dark:hover:text-white dark:peer-checked:bg-zinc-800 dark:peer-checked:text-amber-400 sm:px-3">
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                  <p className="sr-only" aria-live="polite">
+                    Período seleccionado: {selectedActivityRange.ariaLabel}. Tiempo promedio: {formatMinutes(rangedActivity.averageMinutes)}. Tiempo activo: {formatMinutes(rangedActivity.totalMinutes)}.
+                  </p>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <StatCard
                     icon={IconTruck}
-                    label="Choferes Activos"
+                    label="Choferes activos"
                     value={choferesActivos.length}
-                    subValue={`de ${todosChoferes.length} totales`}
+                    subValue={`de ${todosChoferes.length} en total`}
                     color="emerald"
-                  />
-                  <StatCard
-                    icon={IconTarget}
-                    label="Tasa de Actividad"
-                    value={`${stats.tasaActividad}%`}
-                    subValue="choferes trabajando"
-                    color="blue"
+                    scope="Actual"
                   />
                   <StatCard
                     icon={IconCheckCircle}
-                    label="Clientes Visitados"
+                    label="Clientes visitados"
                     value={stats.clientesVisitados}
                     subValue={`${stats.tasaVisitas}% del total`}
                     color="purple"
+                    scope="Actual"
                   />
                   <StatCard
                     icon={IconClock}
-                    label="Tiempo Promedio"
-                    value={`${Math.floor(stats.tiempoPromedioActivo / 60)}h ${stats.tiempoPromedioActivo % 60}m`}
-                    subValue="por chofer activo"
+                    label="Tiempo promedio"
+                    value={formatMinutes(rangedActivity.averageMinutes)}
+                    subValue="por jornada actualmente activa"
                     color="cyan"
+                    scope={selectedActivityRange.label}
+                    scopeTone="accent"
                   />
-                </div>
-
-                {/* Stats Grid - Row 2 */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <StatCard
                     icon={IconUser}
-                    label="Clientes Asignados"
+                    label="Clientes asignados"
                     value={stats.clientesAsignados}
                     subValue="pendientes de visita"
                     color="amber"
+                    scope="Actual"
                   />
                   <StatCard
                     icon={IconUsers}
-                    label="Clientes Disponibles"
+                    label="Clientes disponibles"
                     value={stats.clientesDisponibles}
                     subValue="sin asignar"
                     color="red"
-                  />
-                  <StatCard
-                    icon={IconTrendingUp}
-                    label="Cobertura Total"
-                    value={`${stats.tasaCobertura}%`}
-                    subValue="asignados + visitados"
-                    color="emerald"
+                    scope="Actual"
                   />
                   <StatCard
                     icon={IconActivity}
-                    label="Tiempo Total Hoy"
-                    value={`${Math.floor(stats.tiempoTotalActivo / 60)}h ${stats.tiempoTotalActivo % 60}m`}
-                    subValue="todos los choferes"
+                    label="Tiempo activo"
+                    value={formatMinutes(rangedActivity.totalMinutes)}
+                    subValue="solo jornadas actualmente activas"
                     color="blue"
+                    scope={selectedActivityRange.label}
+                    scopeTone="accent"
                   />
                 </div>
 
                 {/* Main Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Choferes Activos - Live */}
-                  <div className="lg:col-span-2 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  {/* Choferes activos en vivo */}
+                  <div className="lg:col-span-2 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                     <SectionHeader
                       icon={IconActivity}
-                      title="Actividad en Tiempo Real"
-                      subtitle={`${choferesActivos.length} choferes trabajando ahora`}
+                      title="Actividad en tiempo real"
+                      subtitle={`${choferesActivos.length} ${choferesActivos.length === 1 ? "chofer" : "choferes"} trabajando ahora`}
                       color="bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                       action={
-                        <div className="flex items-center gap-2 text-s text-emerald-600 dark:text-emerald-400">
+                        <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400">
                           <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
                           En vivo
                         </div>
@@ -642,21 +633,21 @@ export default function Monitoreo() {
                             No hay choferes activos
                           </p>
                           <p className="text-sm text-zinc-500 mt-1">
-                            Ningún chofer ha iniciado jornada hoy
+                            Ningún chofer ha iniciado una jornada hoy
                           </p>
                         </div>
                       ) : (
                         choferesActivos.map((activo, index) => (
-                          <div key={activo.id} className="px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                          <div key={activo.id} className="px-6 py-4 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors">
                             <div className="flex items-start justify-between gap-4">
                               <div className="flex items-start gap-3">
                                 <div className="relative">
-                                  <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
+                                  <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-200 dark:border-emerald-500/30 flex items-center justify-center">
                                     <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                                       {activo.chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                                     </span>
                                   </div>
-                                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-zinc-950 text-s font-bold flex items-center justify-center">
+                                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-amber-500 text-zinc-950 text-xs font-bold flex items-center justify-center">
                                     {index + 1}
                                   </span>
                                 </div>
@@ -664,10 +655,10 @@ export default function Monitoreo() {
                                   <h3 className="font-medium text-zinc-900 dark:text-white">
                                     {activo.chofer.nombre}
                                   </h3>
-                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-s text-zinc-500">
+                                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-zinc-500">
                                     <div className="flex items-center gap-1">
                                       <IconClock className="w-3 h-3" />
-                                      <span>Check-in: {formatTime(activo.checkIn)}</span>
+                                      <span>Inicio: {formatTime(activo.checkIn)}</span>
                                     </div>
                                     {activo.chofer.telefono && (
                                       <div className="flex items-center gap-1">
@@ -685,11 +676,11 @@ export default function Monitoreo() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <div className="inline-flex items-center gap-1 px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-sm font-semibold">
+                                <div className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                                   <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                   {activo.tiempoTranscurrido.formato}
                                 </div>
-                                <p className="text-s text-zinc-500 mt-1">
+                                <p className="text-xs text-zinc-500 mt-1">
                                   {activo.tiempoTranscurrido.minutos} min
                                 </p>
                               </div>
@@ -701,11 +692,11 @@ export default function Monitoreo() {
                   </div>
 
                   {/* Estado de Clientes */}
-                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                     <SectionHeader
                       icon={IconUsers}
-                      title="Estado de Clientes"
-                      subtitle={`${clientes.length} totales`}
+                      title="Estado de clientes"
+                      subtitle={`${clientes.length} en total`}
                       color="bg-purple-100 dark:bg-purple-500/20 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-400"
                     />
 
@@ -734,14 +725,14 @@ export default function Monitoreo() {
                           </svg>
                           <div className="absolute inset-0 flex flex-col items-center justify-center">
                             <p className="text-3xl font-bold text-zinc-900 dark:text-white">{stats.tasaCobertura}%</p>
-                            <p className="text-s text-zinc-500">cobertura</p>
+                            <p className="text-xs text-zinc-500">cobertura</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Legend with details */}
                       <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-emerald-500" />
                             <span className="text-sm text-zinc-700 dark:text-zinc-300">Visitados</span>
@@ -749,7 +740,7 @@ export default function Monitoreo() {
                           <span className="font-semibold text-emerald-600 dark:text-emerald-400">{stats.clientesVisitados}</span>
                         </div>
                         
-                        <div className="flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-amber-500" />
                             <span className="text-sm text-zinc-700 dark:text-zinc-300">Asignados</span>
@@ -757,7 +748,7 @@ export default function Monitoreo() {
                           <span className="font-semibold text-amber-600 dark:text-amber-400">{stats.clientesAsignados}</span>
                         </div>
                         
-                        <div className="flex items-center justify-between p-3 bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-100 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700">
                           <div className="flex items-center gap-2">
                             <div className="w-3 h-3 bg-zinc-400 dark:bg-zinc-600" />
                             <span className="text-sm text-zinc-700 dark:text-zinc-300">Disponibles</span>
@@ -768,10 +759,10 @@ export default function Monitoreo() {
 
                       {/* Alert if too many disponibles */}
                       {stats.clientesDisponibles > stats.clientesAsignados + stats.clientesVisitados && (
-                        <div className="p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
+                        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 flex items-start gap-2">
                           <IconAlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
-                          <p className="text-s text-red-600 dark:text-red-400">
-                            Hay clientes sin asignar!
+                          <p className="text-xs text-red-600 dark:text-red-400">
+                            ¡Hay clientes sin asignar!
                           </p>
                         </div>
                       )}
@@ -779,35 +770,6 @@ export default function Monitoreo() {
                   </div>
                 </div>
 
-                {/* Progress bar full width */}
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Progreso del Día</h3>
-                    <span className="text-sm text-zinc-500">
-                      {stats.clientesVisitados} de {clientes.length} clientes atendidos
-                    </span>
-                  </div>
-                  <div className="h-6 bg-zinc-200 dark:bg-zinc-800 overflow-hidden flex">
-                    <div
-                      className="h-full bg-emerald-500 transition-all duration-500 flex items-center justify-center"
-                      style={{ width: `${stats.tasaVisitas}%` }}
-                    >
-                      {stats.tasaVisitas > 10 && (
-                        <span className="text-s font-medium text-white">{stats.tasaVisitas}%</span>
-                      )}
-                    </div>
-                    <div
-                      className="h-full bg-amber-500 transition-all duration-500 flex items-center justify-center"
-                      style={{ width: `${(stats.clientesAsignados / clientes.length) * 100}%` }}
-                    >
-                      {(stats.clientesAsignados / clientes.length) * 100 > 10 && (
-                        <span className="text-s font-medium text-zinc-900">
-                          {Math.round((stats.clientesAsignados / clientes.length) * 100)}%
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
@@ -815,11 +777,11 @@ export default function Monitoreo() {
             {activeTab === "choferes" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Lista de todos los choferes */}
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                   <SectionHeader
                     icon={IconUsers}
-                    title="Todos los Choferes"
-                    subtitle={`${todosChoferes.length} registrados`}
+                    title="Todos los choferes"
+                    subtitle={`${todosChoferes.length} ${todosChoferes.length === 1 ? "registrado" : "registrados"}`}
                     color="bg-blue-100 dark:bg-blue-500/20 border-blue-200 dark:border-blue-500/30 text-blue-600 dark:text-blue-400"
                   />
 
@@ -838,11 +800,11 @@ export default function Monitoreo() {
                           <div key={chofer.id}>
                             <button
                               onClick={() => loadHistorial(chofer.id)}
-                              className="w-full px-6 py-4 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                              className="w-full px-6 py-4 text-left hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors"
                             >
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-12 h-12 border flex items-center justify-center flex-shrink-0 ${
+                                  <div className={`w-12 h-12 rounded-lg border flex items-center justify-center flex-shrink-0 ${
                                     isActive
                                       ? "bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30"
                                       : "bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700"
@@ -859,21 +821,21 @@ export default function Monitoreo() {
                                         {chofer.nombre}
                                       </h3>
                                       {isActive && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-s font-medium">
+                                        <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                                           <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
                                           Activo
                                         </span>
                                       )}
                                     </div>
-                                    <div className="flex items-center gap-3 mt-1 text-s text-zinc-500">
+                                    <div className="flex items-center gap-3 mt-1 text-xs text-zinc-500">
                                       <div className="flex items-center gap-1">
                                         <IconMail className="w-3 h-3" />
                                         <span>{chofer.email}</span>
                                       </div>
                                     </div>
                                     {isActive && activoData && (
-                                      <p className="text-s text-emerald-600 dark:text-emerald-400 mt-1">
-                                        Trabajando hace {activoData.tiempoTranscurrido.formato}
+                                      <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                        Trabajando desde hace {activoData.tiempoTranscurrido.formato}
                                       </p>
                                     )}
                                   </div>
@@ -900,29 +862,29 @@ export default function Monitoreo() {
                                   <div className="space-y-4 pt-2">
                                     {/* Resumen del chofer */}
                                     <div className="grid grid-cols-3 gap-2">
-                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                      <div className="p-3 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
                                         <p className="text-xl font-bold text-zinc-900 dark:text-white">
                                           {historial.resumen.totalJornadas}
                                         </p>
-                                        <p className="text-s text-zinc-500">Jornadas</p>
+                                        <p className="text-xs text-zinc-500">Jornadas</p>
                                       </div>
-                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                      <div className="p-3 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
                                         <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
                                           {historial.resumen.jornadasCompletadas}
                                         </p>
-                                        <p className="text-s text-zinc-500">Completadas</p>
+                                        <p className="text-xs text-zinc-500">Completadas</p>
                                       </div>
-                                      <div className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
+                                      <div className="p-3 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700 text-center">
                                         <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
                                           {historial.resumen.tiempoTotal.formato}
                                         </p>
-                                        <p className="text-s text-zinc-500">Total</p>
+                                        <p className="text-xs text-zinc-500">Total</p>
                                       </div>
                                     </div>
 
                                     {/* Lista de jornadas */}
                                     <div>
-                                      <p className="text-s text-zinc-500 uppercase tracking-wider mb-2">
+                                      <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
                                         Últimas jornadas
                                       </p>
                                       <div className="space-y-2 max-h-60 overflow-y-auto">
@@ -932,7 +894,7 @@ export default function Monitoreo() {
                                           historial.jornadas.map((jornada) => (
                                             <div
                                               key={jornada.id}
-                                              className="p-3 bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700"
+                                              className="p-3 rounded-lg bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-700"
                                             >
                                               <div className="flex items-center justify-between">
                                                 <div>
@@ -943,24 +905,25 @@ export default function Monitoreo() {
                                                     </span>
                                                   </div>
                                                   {jornada.ubicacionCheckIn && (
-                                                    <div className="flex items-center gap-1 mt-1 text-s text-zinc-500">
+                                                    <div className="flex items-center gap-1 mt-1 text-xs text-zinc-500">
                                                       <IconMapPin className="w-3 h-3" />
                                                       <span>{jornada.ubicacionCheckIn}</span>
                                                     </div>
                                                   )}
                                                   {jornada.notas && (
-                                                    <p className="mt-1 text-s text-zinc-500 italic">
+                                                    <p className="mt-1 text-xs text-zinc-500 italic">
                                                       "{jornada.notas}"
                                                     </p>
                                                   )}
                                                 </div>
                                                 <div className="text-right">
                                                   {jornada.checkOut ? (
-                                                    <span className="inline-flex items-center px-2 py-1 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-s font-medium">
+                                                    <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400">
+                                                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                                                       {jornada.duracion?.formato}
                                                     </span>
                                                   ) : (
-                                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400 text-s font-medium">
+                                                    <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400">
                                                       <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
                                                       En curso
                                                     </span>
@@ -985,10 +948,10 @@ export default function Monitoreo() {
 
                 {/* Ranking de choferes activos */}
                 <div className="space-y-6">
-                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                     <SectionHeader
                       icon={IconTrendingUp}
-                      title="Ranking de Actividad"
+                      title="Ranking de actividad"
                       subtitle="Por tiempo trabajado hoy"
                       color="bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400"
                     />
@@ -1004,10 +967,10 @@ export default function Monitoreo() {
                             <div
                               key={activo.id}
                               className={`flex items-center gap-4 p-3 ${
-                                index === 0 ? "bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20" : ""
+                                index === 0 ? "rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20" : ""
                               }`}
                             >
-                              <div className={`w-8 h-8 flex items-center justify-center font-bold ${
+                              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold ${
                                 index === 0 ? "bg-amber-500 text-zinc-950" :
                                 index === 1 ? "bg-zinc-300 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-200" :
                                 index === 2 ? "bg-amber-700 text-white" :
@@ -1019,15 +982,15 @@ export default function Monitoreo() {
                                 <p className="font-medium text-zinc-900 dark:text-white">
                                   {activo.chofer.nombre}
                                 </p>
-                                <p className="text-s text-zinc-500">
-                                  Check-in: {formatTime(activo.checkIn)}
+                                <p className="text-xs text-zinc-500">
+                                  Inicio: {formatTime(activo.checkIn)}
                                 </p>
                               </div>
                               <div className="text-right">
                                 <p className="font-semibold text-zinc-900 dark:text-white">
                                   {activo.tiempoTranscurrido.formato}
                                 </p>
-                                <p className="text-s text-zinc-500">
+                                <p className="text-xs text-zinc-500">
                                   {activo.tiempoTranscurrido.minutos} min
                                 </p>
                               </div>
@@ -1039,10 +1002,10 @@ export default function Monitoreo() {
                   </div>
 
                   {/* Choferes inactivos */}
-                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                  <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                     <SectionHeader
                       icon={IconAlertCircle}
-                      title="Choferes Inactivos"
+                      title="Choferes inactivos"
                       subtitle={`${stats.choferesInactivos} sin jornada activa`}
                       color="bg-red-100 dark:bg-red-500/20 border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400"
                     />
@@ -1060,8 +1023,8 @@ export default function Monitoreo() {
                             .filter((c) => !choferesActivos.some((a) => a.chofer.id === c.id))
                             .map((chofer) => (
                               <div key={chofer.id} className="flex items-center gap-3 p-2">
-                                <div className="w-8 h-8 bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
-                                  <span className="text-s font-semibold text-zinc-500">
+                                <div className="w-8 h-8 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center">
+                                  <span className="text-xs font-semibold text-zinc-500">
                                     {chofer.nombre.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
                                   </span>
                                 </div>
@@ -1070,7 +1033,10 @@ export default function Monitoreo() {
                                     {chofer.nombre}
                                   </p>
                                 </div>
-                                <span className="text-s text-red-500">Sin actividad</span>
+                                <span className="inline-flex items-center gap-1 rounded-full px-1.5 py-px text-[10px] font-semibold uppercase tracking-wide bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-400">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                  Sin actividad
+                                </span>
                               </div>
                             ))}
                         </div>
@@ -1085,7 +1051,7 @@ export default function Monitoreo() {
             {activeTab === "clientes" && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Clientes Disponibles */}
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                   <SectionHeader
                     icon={IconUser}
                     title="Disponibles"
@@ -1104,12 +1070,12 @@ export default function Monitoreo() {
                         <Link
                           key={cliente.id}
                           to={`/clientes/${cliente.id}`}
-                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                          className="block px-6 py-3 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors"
                         >
                           <p className="font-medium text-zinc-900 dark:text-white text-sm">
                             {cliente.nombre}
                           </p>
-                          <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
+                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
                         </Link>
                       ))
                     )}
@@ -1117,11 +1083,11 @@ export default function Monitoreo() {
                 </div>
 
                 {/* Clientes Asignados */}
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                   <SectionHeader
                     icon={IconTarget}
                     title="Asignados"
-                    subtitle={`${clientesPorStatus.asignados.length} pendientes`}
+                    subtitle={`${clientesPorStatus.asignados.length} ${clientesPorStatus.asignados.length === 1 ? "pendiente" : "pendientes"}`}
                     color="bg-amber-100 dark:bg-amber-500/20 border-amber-200 dark:border-amber-500/30 text-amber-600 dark:text-amber-400"
                   />
                   <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
@@ -1134,12 +1100,12 @@ export default function Monitoreo() {
                         <Link
                           key={cliente.id}
                           to={`/clientes/${cliente.id}`}
-                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                          className="block px-6 py-3 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors"
                         >
                           <p className="font-medium text-zinc-900 dark:text-white text-sm">
                             {cliente.nombre}
                           </p>
-                          <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
+                          <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
                         </Link>
                       ))
                     )}
@@ -1147,11 +1113,11 @@ export default function Monitoreo() {
                 </div>
 
                 {/* Clientes Visitados */}
-                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800">
+                <div className="bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
                   <SectionHeader
                     icon={IconCheckCircle}
                     title="Visitados"
-                    subtitle={`${clientesPorStatus.visitados.length} completados`}
+                    subtitle={`${clientesPorStatus.visitados.length} ${clientesPorStatus.visitados.length === 1 ? "completado" : "completados"}`}
                     color="bg-emerald-100 dark:bg-emerald-500/20 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
                   />
                   <div className="divide-y divide-zinc-200 dark:divide-zinc-800/50 max-h-96 overflow-y-auto">
@@ -1164,14 +1130,14 @@ export default function Monitoreo() {
                         <Link
                           key={cliente.id}
                           to={`/clientes/${cliente.id}`}
-                          className="block px-6 py-3 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors"
+                          className="block px-6 py-3 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 transition-colors"
                         >
                           <div className="flex items-center justify-between">
                             <div>
                               <p className="font-medium text-zinc-900 dark:text-white text-sm">
                                 {cliente.nombre}
                               </p>
-                              <p className="text-s text-zinc-500 truncate">{cliente.ubicacion}</p>
+                              <p className="text-xs text-zinc-500 truncate">{cliente.ubicacion}</p>
                             </div>
                             <IconCheckCircle className="w-4 h-4 text-emerald-500" />
                           </div>

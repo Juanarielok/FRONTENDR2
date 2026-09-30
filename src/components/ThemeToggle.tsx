@@ -5,14 +5,14 @@ export function ThemeToggle() {
 
   return (
    <button
+  type="button"
   onClick={toggleTheme}
-  className="relative w-10 h-10 flex items-center justify-center
-             bg-transparent border-0 shadow-none
+  className="relative w-10 h-10 shrink-0 flex items-center justify-center rounded-lg
              text-zinc-600 dark:text-zinc-400
-             hover:bg-transparent dark:hover:bg-transparent
              hover:text-zinc-900 dark:hover:text-white
-             focus:outline-none focus:ring-0
-             transition-all duration-200"
+             hover:bg-zinc-100 dark:hover:bg-zinc-800/70
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50
+             transition-colors duration-200"
   title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
   aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
 >
