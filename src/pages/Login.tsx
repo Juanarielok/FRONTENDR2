@@ -82,7 +82,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen fondo-home bg-white dark:bg-zinc-950 relative overflow-hidden">
+    <div className="h-[100dvh] md:h-auto md:min-h-screen fondo-home bg-white dark:bg-zinc-950 relative overflow-hidden">
       {/* Splash blanco */}
       <div
         className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-white dark:bg-zinc-950 transition-opacity duration-700 ${
@@ -103,7 +103,7 @@ useEffect(() => {
       </div>
 
       {/* Contenido principal */}
-      <div className="min-h-screen flex items-center justify-start p-6 md:px-16 relative transition-colors duration-300">
+      <div className="h-full md:h-auto md:min-h-screen flex items-center justify-center md:justify-start p-4 md:p-6 md:px-16 relative transition-colors duration-300">
         {/* Selector de tema */}
         <div
           className={`absolute top-6 right-6 z-20 transition-all duration-700 ${
@@ -149,9 +149,9 @@ useEffect(() => {
           }`}
         >
           {/* Logo/Brand */}
-          <div className="mb-8 text-center">
+          <div className="mb-4 md:mb-8 text-center">
             <div className="inline-flex items-center gap-3 mb-2">
-              <div className="w-20 h-20 flex items-center justify-center">
+              <div className="w-24 h-24 md:w-20 md:h-20 flex items-center justify-center">
                 <img
                   src="/images/brand/arttaius-logo.png"
                   alt="Arttaius"
@@ -159,24 +159,24 @@ useEffect(() => {
                 />
               </div>
 
-              <span className="text-5xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+              <span className="hidden md:inline text-5xl font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                 ARTTAIUS
               </span>
             </div>
-            <p className="text-zinc-500 dark:text-zinc-400 text-sm font-semibold tracking-wide">
+            <p className="hidden md:block text-zinc-500 dark:text-zinc-400 text-sm font-semibold tracking-wide">
               Gestión y panel de control
             </p>
           </div>
 
           {/* Card */}
-          <div className="bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 p-8 relative rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
+          <div className="bg-white/80 dark:bg-zinc-900/50 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800 p-5 md:p-8 relative rounded-xl shadow-sm shadow-zinc-900/5 overflow-hidden">
             <div className="mb-6">
               <h1 className="text-xl font-semibold text-zinc-800 dark:text-zinc-100 mb-1">
                 INICIAR SESIÓN
               </h1>
             </div>
 
-            <form className="space-y-5" onSubmit={onLogin} noValidate>
+            <form className="space-y-4 md:space-y-5" onSubmit={onLogin} noValidate>
               <div>
                 <label
                   htmlFor="login-email"
@@ -385,7 +385,7 @@ useEffect(() => {
             </form>
           </div>
 
-          <div className="mt-6 text-center">
+          <div className="hidden md:block mt-6 text-center">
             <p className="text-zinc-400 dark:text-zinc-500 text-xs">
               juanarielok@gmail.com
             </p>
