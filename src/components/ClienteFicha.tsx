@@ -80,6 +80,7 @@ export function ClienteFicha({
       ubicacion: c.ubicacion || "",
       tipoComercio: c.tipoComercio || "",
       notas: c.notas || "",
+      status: c.status || "disponible",
     };
   }
 
@@ -143,6 +144,7 @@ export function ClienteFicha({
       for (const [key, value] of Object.entries(formEdit)) {
         payload[key] = value.trim();
       }
+      if (payload.status === (cliente.status || "disponible")) delete payload.status;
       const updated: any = await api.updateUser(cliente.id, payload);
       const user = (updated.user ?? updated) as Cliente;
       setEditando(false);
@@ -163,7 +165,7 @@ export function ClienteFicha({
   const filasCliente: [string, string, string | null][] = [
     ["Nombre", cliente.nombre || "-", "nombre"],
     ["Razón social", cliente.razonSocial || "-", "razonSocial"],
-    ["Estado", getStatusLabel(cliente.status), null],
+    ["Estado", getStatusLabel(cliente.status), "status"],
     ["Email", cliente.email || "-", "email"],
     ["Teléfono", cliente.telefono || "-", "telefono"],
     ["DNI", cliente.dni || "-", "dni"],
@@ -253,6 +255,17 @@ export function ClienteFicha({
                             rows={2}
                             className={`${inputClass} resize-none`}
                           />
+                        ) : fieldKey === "status" ? (
+                          <select
+                            value={formEdit.status ?? "disponible"}
+                            onChange={(e) => setEditField("status", e.target.value)}
+                            className={inputClass}
+                          >
+                            <option value="disponible">Disponible</option>
+                            {/* "Asignado" solo se obtiene asignando un chofer */}
+                            {status === "asignado" && <option value="asignado">Asignado</option>}
+                            <option value="visitado">Visitado</option>
+                          </select>
                         ) : (
                           <input
                             type={fieldKey === "email" ? "email" : "text"}
