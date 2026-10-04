@@ -3,6 +3,33 @@ import { mockApi } from "./mocks/mockData";
 const DEV_BYPASS = import.meta.env.VITE_DEV_BYPASS === "true";
 const API_URL = "https://backend-redaceite-digitalocean-9nmhi.ondigitalocean.app";
 
+// Error de la API con el mensaje en español y, si aplica, el campo del formulario que lo causó
+export class ApiError extends Error {
+  status: number;
+  field?: string;
+
+  constructor(message: string, status: number, field?: string) {
+    super(message);
+    this.status = status;
+    this.field = field;
+  }
+}
+
+const serverErrors: { match: string; text: string; field?: string }[] = [
+  { match: "email already exists", text: "Ya existe un usuario con este email", field: "email" },
+  { match: "DNI already exists", text: "Ya existe un usuario con este DNI", field: "dni" },
+  { match: "CUIT already exists", text: "Ya existe un usuario con este CUIT", field: "cuit" },
+  { match: "Invalid email format", text: "Email inválido", field: "email" },
+  { match: "Invalid CUIT format", text: "CUIT inválido. Formato: XX-XXXXXXXX-X", field: "cuit" },
+  { match: "Password must be at least", text: "La contraseña es demasiado corta", field: "password" },
+  { match: "Invalid email or password", text: "Email o contraseña incorrectos" },
+  { match: "Email and password are required", text: "Ingresá email y contraseña" },
+  { match: "User not found", text: "Usuario no encontrado" },
+  { match: "Invalid or expired token", text: "La sesión expiró. Volvé a iniciar sesión" },
+  { match: "Insufficient permissions", text: "No tenés permisos para realizar esta acción" },
+  { match: "Internal server error", text: "Error interno del servidor. Intentá de nuevo" },
+];
+
 function getToken() {
   return localStorage.getItem("token");
 }
@@ -33,7 +60,11 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
     } catch {
       // respuesta no JSON: se usa el texto tal cual
     }
-    throw new Error(message || `HTTP ${res.status}`);
+    if (res.status === 413) {
+      throw new ApiError("Los datos enviados son demasiado pesados", 413);
+    }
+    const known = serverErrors.find(({ match }) => message.includes(match));
+    throw new ApiError(known?.text || message || `HTTP ${res.status}`, res.status, known?.field);
   }
 
   return await res.json();

@@ -3,6 +3,16 @@ import { useState } from "react";
 import { api } from "../api";
 import type { Cliente } from "../api";
 import { IconPencil, IconTrash, IconCheck, IconX } from "./icons";
+import {
+  formatCuit,
+  onlyDigits,
+  validateCuit,
+  validateDni,
+  validateEmail,
+  validateLocation,
+  validatePhone,
+  validateRequired,
+} from "../utils/validation";
 
 const statusConfig = {
   disponible: {
@@ -86,16 +96,43 @@ export function ClienteFicha({
   }
 
   function setEditField(key: string, value: string) {
-    setFormEdit((prev) => ({ ...prev, [key]: value }));
+    const nextValue =
+      key === "cuit"
+        ? formatCuit(value)
+        : key === "dni"
+          ? onlyDigits(value).slice(0, 8)
+          : value;
+    setFormEdit((prev) => ({ ...prev, [key]: nextValue }));
+  }
+
+  // Solo se validan los campos modificados, para no bloquear fichas con datos antiguos
+  function validateEdit(): string | undefined {
+    const original = buildForm(cliente);
+    const validators: Record<string, (value: string) => string | undefined> = {
+      nombre: (v) => validateRequired(v, "Nombre"),
+      email: (v) => validateEmail(v),
+      telefono: (v) => validatePhone(v),
+      dni: (v) => validateDni(v),
+      cuit: (v) => {
+        const error = validateCuit(v);
+        return error?.startsWith("Formato") ? `CUIT inválido. ${error}` : error;
+      },
+      ubicacion: (v) => validateLocation(v),
+      localidad: (v) => validateRequired(v, "Localidad"),
+    };
+    for (const [key, validator] of Object.entries(validators)) {
+      const value = formEdit[key] ?? "";
+      if (value.trim() === original[key].trim()) continue;
+      const error = validator(value);
+      if (error) return error;
+    }
+    return undefined;
   }
 
   async function saveEdit() {
-    if (!formEdit.nombre?.trim()) {
-      setEditError("El nombre es obligatorio");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEdit.email?.trim() || "")) {
-      setEditError("El correo electrónico no es válido");
+    const validationError = validateEdit();
+    if (validationError) {
+      setEditError(validationError);
       return;
     }
 

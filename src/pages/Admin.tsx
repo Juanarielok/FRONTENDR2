@@ -81,14 +81,6 @@ const createValidatedFields: AdminFormField[] = [
   "localidad",
 ];
 
-// Errores que devuelve el backend al crear, asociados al campo que los causa
-const createServerErrors: { match: string; field: AdminFormField; text: string }[] = [
-  { match: "email already exists", field: "email", text: "Ya existe un usuario con este email" },
-  { match: "DNI already exists", field: "dni", text: "Ya existe un usuario con este DNI" },
-  { match: "CUIT already exists", field: "cuit", text: "Ya existe un usuario con este CUIT" },
-  { match: "Invalid email format", field: "email", text: "Email inválido" },
-  { match: "Invalid CUIT format", field: "cuit", text: "Formato: XX-XXXXXXXX-X" },
-];
 
 const editFields: {
   key: EditField;
@@ -99,10 +91,10 @@ const editFields: {
 }[] = [
   { key: "nombre", label: "Nombre", required: true },
   { key: "email", label: "Email", type: "email", inputMode: "email", required: true },
-  { key: "telefono", label: "Teléfono", type: "tel", inputMode: "tel" },
-  { key: "dni", label: "DNI", inputMode: "numeric" },
-  { key: "cuit", label: "CUIT/CUIL", inputMode: "numeric" },
-  { key: "ubicacion", label: "Ubicación" },
+  { key: "telefono", label: "Teléfono", type: "tel", inputMode: "tel", required: true },
+  { key: "dni", label: "DNI", inputMode: "numeric", required: true },
+  { key: "cuit", label: "CUIT/CUIL", inputMode: "numeric", required: true },
+  { key: "ubicacion", label: "Ubicación", required: true },
   { key: "razonSocial", label: "Razón social" },
   { key: "tipoComercio", label: "Tipo de comercio" },
   { key: "notas", label: "Notas" },
@@ -148,13 +140,13 @@ function getEditFieldError(values: EditForm, field: EditField) {
     case "email":
       return validateEmail(values.email);
     case "telefono":
-      return validatePhone(values.telefono, false);
+      return validatePhone(values.telefono);
     case "dni":
-      return validateDni(values.dni, false);
+      return validateDni(values.dni);
     case "cuit":
-      return validateCuit(values.cuit, false);
+      return validateCuit(values.cuit);
     case "ubicacion":
-      return validateLocation(values.ubicacion, false);
+      return validateLocation(values.ubicacion);
     default:
       return undefined;
   }
@@ -313,13 +305,12 @@ export default function Admin() {
       setCreateErrors({});
       setShowCreatePassword(false);
     } catch (err: any) {
-      const message: string = err.message || "";
-      const known = createServerErrors.find(({ match }) => message.includes(match));
-      if (known) {
-        setCreateErrors((current) => ({ ...current, [known.field]: known.text }));
-        focusField(`create-${known.field}`);
+      const field = err.field as AdminFormField | undefined;
+      if (field && createValidatedFields.includes(field)) {
+        setCreateErrors((current) => ({ ...current, [field]: err.message }));
+        focusField(`create-${field}`);
       }
-      setCreateMsg({ type: "err", text: known?.text || message || "Error al crear el usuario" });
+      setCreateMsg({ type: "err", text: err.message || "Error al crear el usuario" });
     } finally {
       setCreating(false);
     }
@@ -360,6 +351,11 @@ export default function Admin() {
       setEditErrors({});
       loadUsers();
     } catch (err: any) {
+      const field = editFields.find(({ key }) => key === err.field)?.key;
+      if (field) {
+        setEditErrors((current) => ({ ...current, [field]: err.message }));
+        focusField(`edit-${field}`);
+      }
       setFeedback({ type: "err", text: err.message || "Error al actualizar el usuario" });
     } finally {
       setSaving(false);

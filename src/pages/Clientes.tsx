@@ -57,12 +57,31 @@ type ColumnaIdentificador = "dni" | "cuit" | "email";
 type ColumnaTelefono = "telefono" | "localidad";
 type ColumnaExtra = "proxima_visita" | "opcion_2" | "opcion_3";
 
+const FOTO_MAX_LADO = 800;
+
+// Reduce la foto antes de enviarla: viaja como data URL dentro del JSON
 function readFileAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result));
-    r.onerror = () => reject(new Error("No se pudo leer el archivo"));
-    r.readAsDataURL(file);
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const escala = Math.min(1, FOTO_MAX_LADO / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return reject(new Error("No se pudo procesar la imagen"));
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", 0.8));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("No se pudo leer el archivo"));
+    };
+    img.src = url;
   });
 }
 
@@ -633,7 +652,6 @@ export default function Clientes() {
 
       const payload: any = {
         email: form.email.trim().toLowerCase(),
-        password: form.password,
         role: "cliente",
         nombre: form.nombre.trim(),
         dni: onlyDigits(form.dni),
@@ -648,15 +666,15 @@ export default function Clientes() {
       };
 
       if (editingId) {
-        if (!form.password) delete payload.password;
         const updated = await api.updateUser(editingId, payload);
+        if (form.password) await api.resetPassword(editingId, form.password);
         const user = (updated.user ?? updated) as Cliente;
         setClientes((prev) => prev.map((c) => (c.id === editingId ? user : c)));
         cancelarEdicion();
         return;
       }
 
-      const res = await api.createCliente(payload);
+      const res = await api.createCliente({ ...payload, password: form.password });
       const creado = res.user as Cliente;
       setClientes((prev) => [creado, ...prev]);
       setForm(emptyForm);
@@ -665,6 +683,12 @@ export default function Clientes() {
       resetSelectorLocalidad();
     } catch (e: any) {
       console.error("ERROR BACKEND:", e);
+      const field = e?.field as keyof FormState | undefined;
+      if (field && field in form) {
+        const fieldErrors: FormErrors = { [field]: e.message };
+        setErrors((prev) => ({ ...prev, ...fieldErrors }));
+        focusFirstInvalid(fieldErrors);
+      }
       setSubmitError(e?.message || "No se pudo guardar el cliente");
     } finally {
       setSubmitting(false);
