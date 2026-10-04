@@ -4,6 +4,7 @@ import { api } from "../api";
 import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { AsignarChoferModal } from "../components/AsignarChoferModal";
+import { useToast } from "../hooks/useToast";
 import {
   IconPencil,
   IconActivity,
@@ -307,6 +308,7 @@ export default function Clientes() {
 
   const [form, setForm] = useState<FormState>(emptyForm);
   const [errors, setErrors] = useState<FormErrors>({});
+  const toast = useToast();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showFormPanel, setShowFormPanel] = useState(false);
@@ -671,6 +673,7 @@ export default function Clientes() {
         const user = (updated.user ?? updated) as Cliente;
         setClientes((prev) => prev.map((c) => (c.id === editingId ? user : c)));
         cancelarEdicion();
+        toast.success(`"${payload.nombre}" actualizado`);
         return;
       }
 
@@ -681,6 +684,7 @@ export default function Clientes() {
       setShowPassword(false);
       setErrors({});
       resetSelectorLocalidad();
+      toast.success(`Cliente "${payload.nombre}" creado correctamente`);
     } catch (e: any) {
       console.error("ERROR BACKEND:", e);
       const field = e?.field as keyof FormState | undefined;

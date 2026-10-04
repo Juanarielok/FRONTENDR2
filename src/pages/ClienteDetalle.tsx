@@ -4,6 +4,7 @@ import { api } from "../api";
 import type { Cliente, Remito } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
 import { ClienteFicha } from "../components/ClienteFicha";
+import { useToast } from "../hooks/useToast";
 import {
   IconDownload,
   IconLogout,
@@ -88,6 +89,7 @@ export default function ClienteDetalle() {
   // Con /clientes/<id>?edit=1 la ficha arranca directamente en modo edición
   const empezarEditando = searchParams.get("edit") !== null;
   const nav = useNavigate();
+  const toast = useToast();
 
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [remitos, setRemitos] = useState<Remito[]>([]);
@@ -135,6 +137,7 @@ export default function ClienteDetalle() {
     setDeleting(true);
     try {
       await api.deleteUser(id);
+      toast.success(cliente?.nombre ? `"${cliente.nombre}" eliminado` : "Cliente eliminado");
       nav("/clientes", { replace: true });
     } catch (e: any) {
       console.error("Error al borrar al cliente:", e);

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api";
 import { Modal } from "./Modal.tsx";
+import { useToast } from "../hooks/useToast";
 import { IconTruck, IconUser, IconPhone, IconMapPin, IconCheck } from "./icons";
 
 type Chofer = {
@@ -29,14 +30,13 @@ export function AsignarChoferModal({
   const [submitting, setSubmitting] = useState(false);
   const [selectedChofer, setSelectedChofer] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const toast = useToast();
 
   useEffect(() => {
     if (isOpen) {
       loadChoferes();
       setSelectedChofer(null);
       setError(null);
-      setSuccess(false);
     }
   }, [isOpen]);
 
@@ -61,13 +61,11 @@ export function AsignarChoferModal({
 
     try {
       await api.assignClients(selectedChofer, clientIds);
-      setSuccess(true);
-      
-      // Esperar un momento para mostrar la confirmación antes de cerrar
-      setTimeout(() => {
-        onSuccess();
-        onClose();
-      }, 1500);
+      toast.success(
+        `${clientIds.length === 1 ? "Cliente asignado" : "Clientes asignados"} correctamente`
+      );
+      onSuccess();
+      onClose();
     } catch (e: any) {
       console.error(e);
       setError(e?.message || "Error al asignar clientes");
@@ -96,18 +94,6 @@ export function AsignarChoferModal({
       {error && (
         <div className="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      )}
-
-      {/* Success message */}
-      {success && (
-        <div className="mb-4 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20">
-          <div className="flex items-center gap-2 text-emerald-700 dark:text-emerald-400">
-            <IconCheck className="w-5 h-5" />
-            <span className="font-medium">
-              ¡{clientIds.length === 1 ? "Cliente asignado" : "Clientes asignados"} correctamente!
-            </span>
-          </div>
         </div>
       )}
 
@@ -155,12 +141,11 @@ export function AsignarChoferModal({
               <button
                 key={chofer.id}
                 onClick={() => setSelectedChofer(chofer.id)}
-                disabled={success}
                 className={`w-full p-4 text-left rounded-lg transition-all duration-200 border ${
                   isSelected
                     ? "bg-amber-50 dark:bg-amber-500/10 border-amber-300 dark:border-amber-500/40"
                     : "bg-white dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60"
-                } ${success ? "opacity-50 cursor-not-allowed" : ""}`}
+                }`}
               >
                 <div className="flex items-start gap-4">
                   {/* Selection indicator */}
@@ -229,7 +214,7 @@ export function AsignarChoferModal({
         </button>
         <button
           onClick={handleAssign}
-          disabled={clientIds.length === 0 || !selectedChofer || submitting || success}
+          disabled={clientIds.length === 0 || !selectedChofer || submitting}
           className="px-4 py-2 text-sm font-semibold rounded-lg
                    bg-amber-500 text-zinc-950 shadow-sm shadow-amber-500/20
                    hover:bg-amber-400 hover:shadow-lg hover:shadow-amber-500/25

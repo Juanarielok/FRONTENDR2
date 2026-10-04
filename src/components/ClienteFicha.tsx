@@ -3,6 +3,7 @@ import { useState } from "react";
 import { api } from "../api";
 import type { Cliente } from "../api";
 import { IconPencil, IconTrash, IconCheck, IconX } from "./icons";
+import { useToast } from "../hooks/useToast";
 import {
   formatCuit,
   onlyDigits,
@@ -66,6 +67,7 @@ export function ClienteFicha({
     startInEdit ? buildForm(cliente) : {}
   );
   const [savingEdit, setSavingEdit] = useState(false);
+  const toast = useToast();
   const [editError, setEditError] = useState<string | null>(null);
 
   function buildForm(c: Cliente): Record<string, string> {
@@ -149,6 +151,7 @@ export function ClienteFicha({
       const user = (updated.user ?? updated) as Cliente;
       setEditando(false);
       onSaved?.(user);
+      toast.success("Cambios guardados");
     } catch (e: any) {
       console.error("Error al guardar el cliente:", e);
       setEditError(e?.message || "Error al guardar los cambios");

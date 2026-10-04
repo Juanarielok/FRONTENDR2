@@ -306,6 +306,22 @@ input[type="number"] {
   }
 }
 
+/* ===== TOAST ===== */
+/* Tira inferior que se consume; pasar el mouse por encima la pausa. */
+.toast-strip {
+  transform-origin: left;
+  animation: toastStrip linear forwards;
+}
+
+.toast:hover .toast-strip {
+  animation-play-state: paused;
+}
+
+@keyframes toastStrip {
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
+}
+
 /* ===== FONDO LOGIN ===== */
 /* Deriva lenta tipo Ken Burns sobre la imagen de fondo del login.
    Escala base 1.08 para que los bordes nunca queden a la vista. */

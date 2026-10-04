@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 import type { Cliente } from "../api";
 import { ThemeToggle } from "../components/ThemeToggle";
+import { useToast } from "../hooks/useToast";
 import {
   IconArrowLeft,
   IconActivity,
@@ -222,6 +223,7 @@ export default function Admin() {
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const toast = useToast();
   const [deleteModal, setDeleteModal] = useState<User | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -300,7 +302,7 @@ export default function Admin() {
     setCreating(true);
     try {
       await api.createCliente(payload);
-      setCreateMsg({ type: "ok", text: `Usuario "${payload.nombre}" creado correctamente` });
+      toast.success(`Usuario "${payload.nombre}" creado correctamente`);
       setForm({ ...emptyForm });
       setCreateErrors({});
       setShowCreatePassword(false);
@@ -346,7 +348,8 @@ export default function Admin() {
     setSaving(true);
     try {
       await api.updateUser(editingUser.id, payload);
-      setFeedback({ type: "ok", text: `"${payload.nombre}" actualizado` });
+      setFeedback(null);
+      toast.success(`"${payload.nombre}" actualizado`);
       setEditingUser(null);
       setEditErrors({});
       loadUsers();
@@ -374,7 +377,8 @@ export default function Admin() {
     setResetting(true);
     try {
       await api.resetPassword(resetModal.id, newPassword);
-      setFeedback({ type: "ok", text: `Contraseña de "${resetModal.nombre}" restablecida` });
+      setFeedback(null);
+      toast.success(`Contraseña de "${resetModal.nombre}" restablecida`);
       setResetModal(null);
       setNewPassword("");
       setResetPasswordError(undefined);
@@ -391,7 +395,8 @@ export default function Admin() {
     setDeleting(true);
     try {
       await api.deleteUser(deleteModal.id);
-      setFeedback({ type: "ok", text: `"${deleteModal.nombre}" eliminado` });
+      setFeedback(null);
+      toast.success(`"${deleteModal.nombre}" eliminado`);
       setDeleteModal(null);
       loadUsers();
     } catch (err: any) {
