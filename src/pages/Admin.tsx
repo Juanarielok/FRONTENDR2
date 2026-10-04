@@ -46,6 +46,7 @@ const emptyForm = {
   cuit: "",
   telefono: "",
   ubicacion: "",
+  localidad: "",
   razonSocial: "",
   tipoComercio: "",
   notas: "",
@@ -54,7 +55,7 @@ const emptyForm = {
 type AdminForm = typeof emptyForm;
 type AdminFormField = Exclude<keyof AdminForm, "role">;
 type AdminFormErrors = Partial<Record<AdminFormField, string>>;
-type EditField = Exclude<AdminFormField, "password">;
+type EditField = Exclude<AdminFormField, "password" | "localidad">;
 type EditForm = Record<EditField, string>;
 
 const emptyEditForm: EditForm = {
@@ -77,6 +78,16 @@ const createValidatedFields: AdminFormField[] = [
   "dni",
   "cuit",
   "ubicacion",
+  "localidad",
+];
+
+// Errores que devuelve el backend al crear, asociados al campo que los causa
+const createServerErrors: { match: string; field: AdminFormField; text: string }[] = [
+  { match: "email already exists", field: "email", text: "Ya existe un usuario con este email" },
+  { match: "DNI already exists", field: "dni", text: "Ya existe un usuario con este DNI" },
+  { match: "CUIT already exists", field: "cuit", text: "Ya existe un usuario con este CUIT" },
+  { match: "Invalid email format", field: "email", text: "Email inválido" },
+  { match: "Invalid CUIT format", field: "cuit", text: "Formato: XX-XXXXXXXX-X" },
 ];
 
 const editFields: {
@@ -106,13 +117,15 @@ function getCreateFieldError(values: AdminForm, field: AdminFormField) {
     case "password":
       return validatePassword(values.password);
     case "telefono":
-      return validatePhone(values.telefono, false);
+      return validatePhone(values.telefono);
     case "dni":
-      return validateDni(values.dni, false);
+      return validateDni(values.dni);
     case "cuit":
-      return validateCuit(values.cuit, false);
+      return validateCuit(values.cuit);
     case "ubicacion":
-      return validateLocation(values.ubicacion, false);
+      return validateLocation(values.ubicacion);
+    case "localidad":
+      return validateRequired(values.localidad, "Localidad");
     default:
       return undefined;
   }
@@ -120,12 +133,8 @@ function getCreateFieldError(values: AdminForm, field: AdminFormField) {
 
 function validateCreateForm(values: AdminForm) {
   const errors: AdminFormErrors = {};
-  const visibleFields =
-    values.role === "cliente"
-      ? createValidatedFields
-      : createValidatedFields.filter((field) => field !== "ubicacion");
 
-  visibleFields.forEach((field) => {
+  createValidatedFields.forEach((field) => {
     const error = getCreateFieldError(values, field);
     if (error) errors[field] = error;
   });
@@ -169,6 +178,7 @@ function normalizeCreatePayload(values: AdminForm): AdminForm {
     cuit: formatCuit(values.cuit.trim()),
     telefono: values.telefono.trim(),
     ubicacion: values.ubicacion.trim(),
+    localidad: values.localidad.trim(),
     razonSocial: values.razonSocial.trim(),
     tipoComercio: values.tipoComercio.trim(),
     notas: values.notas.trim(),
@@ -303,7 +313,13 @@ export default function Admin() {
       setCreateErrors({});
       setShowCreatePassword(false);
     } catch (err: any) {
-      setCreateMsg({ type: "err", text: err.message || "Error al crear el usuario" });
+      const message: string = err.message || "";
+      const known = createServerErrors.find(({ match }) => message.includes(match));
+      if (known) {
+        setCreateErrors((current) => ({ ...current, [known.field]: known.text }));
+        focusField(`create-${known.field}`);
+      }
+      setCreateMsg({ type: "err", text: known?.text || message || "Error al crear el usuario" });
     } finally {
       setCreating(false);
     }
@@ -652,10 +668,11 @@ export default function Admin() {
                   )}
                 </div>
                 <div>
-                  <label htmlFor="create-telefono" className={labelClass}>Teléfono</label>
+                  <label htmlFor="create-telefono" className={labelClass}>Teléfono *</label>
                   <input
                     id="create-telefono"
                     type="tel"
+                    required
                     value={form.telefono}
                     onChange={(e) => changeCreateField("telefono", e.target.value)}
                     onBlur={() => blurCreateField("telefono")}
@@ -673,10 +690,11 @@ export default function Admin() {
                   )}
                 </div>
                 <div>
-                  <label htmlFor="create-dni" className={labelClass}>DNI</label>
+                  <label htmlFor="create-dni" className={labelClass}>DNI *</label>
                   <input
                     id="create-dni"
                     type="text"
+                    required
                     value={form.dni}
                     onChange={(e) => changeCreateField("dni", e.target.value)}
                     onBlur={() => blurCreateField("dni")}
@@ -694,10 +712,11 @@ export default function Admin() {
                   )}
                 </div>
                 <div>
-                  <label htmlFor="create-cuit" className={labelClass}>CUIT</label>
+                  <label htmlFor="create-cuit" className={labelClass}>CUIT *</label>
                   <input
                     id="create-cuit"
                     type="text"
+                    required
                     value={form.cuit}
                     onChange={(e) => changeCreateField("cuit", e.target.value)}
                     onBlur={() => blurCreateField("cuit")}
@@ -714,30 +733,51 @@ export default function Admin() {
                     </p>
                   )}
                 </div>
+                <div>
+                  <label htmlFor="create-ubicacion" className={labelClass}>Ubicación *</label>
+                  <input
+                    id="create-ubicacion"
+                    type="text"
+                    required
+                    value={form.ubicacion}
+                    onChange={(e) => changeCreateField("ubicacion", e.target.value)}
+                    onBlur={() => blurCreateField("ubicacion")}
+                    className={validatedInputClass(createErrors.ubicacion)}
+                    placeholder={form.role === "chofer" ? "Domicilio" : "-34.6037,-58.3816"}
+                    aria-invalid={!!createErrors.ubicacion}
+                    aria-describedby={createErrors.ubicacion ? "create-ubicacion-error" : undefined}
+                  />
+                  {createErrors.ubicacion && (
+                    <p id="create-ubicacion-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.ubicacion}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="create-localidad" className={labelClass}>Localidad *</label>
+                  <input
+                    id="create-localidad"
+                    type="text"
+                    required
+                    value={form.localidad}
+                    onChange={(e) => changeCreateField("localidad", e.target.value)}
+                    onBlur={() => blurCreateField("localidad")}
+                    className={validatedInputClass(createErrors.localidad)}
+                    placeholder="Ciudad o localidad"
+                    aria-invalid={!!createErrors.localidad}
+                    aria-describedby={createErrors.localidad ? "create-localidad-error" : undefined}
+                  />
+                  {createErrors.localidad && (
+                    <p id="create-localidad-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
+                      {createErrors.localidad}
+                    </p>
+                  )}
+                </div>
               </div>
 
               {/* Client-specific fields */}
               {form.role === "cliente" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-zinc-200 dark:border-zinc-800">
-                  <div>
-                    <label htmlFor="create-ubicacion" className={labelClass}>Ubicación</label>
-                    <input
-                      id="create-ubicacion"
-                      type="text"
-                      value={form.ubicacion}
-                      onChange={(e) => changeCreateField("ubicacion", e.target.value)}
-                      onBlur={() => blurCreateField("ubicacion")}
-                      className={validatedInputClass(createErrors.ubicacion)}
-                      placeholder="-34.6037,-58.3816"
-                      aria-invalid={!!createErrors.ubicacion}
-                      aria-describedby={createErrors.ubicacion ? "create-ubicacion-error" : undefined}
-                    />
-                    {createErrors.ubicacion && (
-                      <p id="create-ubicacion-error" className="mt-1 text-xs text-red-500 dark:text-red-400">
-                        {createErrors.ubicacion}
-                      </p>
-                    )}
-                  </div>
                   <div>
                     <label htmlFor="create-razon-social" className={labelClass}>Razón social</label>
                     <input
